@@ -20,34 +20,20 @@ function campo(page: Page) {
   return busca(page).getByRole('combobox', { name: 'Buscar processos, empresas e credores' })
 }
 
-/**
- * Esc e espera o evento `close` do `<dialog>`: ele chega numa tarefa depois do fechamento, e uma
- * reabertura antes dele seria fechada de novo pelo `onClose` do Dialogo.
- */
-async function fecharComEsc(page: Page): Promise<void> {
-  const dialogo = page.locator('dialog', {
-    has: page.getByRole('heading', { name: 'Busca global' }),
-  })
-  await dialogo.evaluate((elemento) => {
-    elemento.dataset.fechou = 'nao'
-    elemento.addEventListener('close', () => (elemento.dataset.fechou = 'sim'), { once: true })
-  })
-  await page.keyboard.press('Escape')
-  await expect(page.locator('dialog[data-fechou="sim"]')).toHaveCount(1)
-  await expect(busca(page)).toBeHidden()
-}
-
 test('BUS-01 · Ctrl+K, ⌘K e o ícone do topo abrem a busca com foco no campo', async ({ page }) => {
   await entrarComo(page, /Entrar como Analista/)
 
   await page.keyboard.press('Control+k')
   await expect(busca(page)).toBeVisible()
   await expect(campo(page)).toBeFocused()
-  await fecharComEsc(page)
-
+  // Reabrir logo depois do Esc, antes do evento `close` do <dialog>, não pode fechar a busca (AJ-02).
+  await page.keyboard.press('Escape')
   await page.keyboard.press('Meta+k')
+  // Duas voltas do laço de eventos: o `close` atrasado já chegou e a busca continua aberta.
+  await page.evaluate(() => new Promise((pronto) => setTimeout(() => setTimeout(pronto))))
   await expect(campo(page)).toBeFocused()
-  await fecharComEsc(page)
+  await page.keyboard.press('Escape')
+  await expect(busca(page)).toBeHidden()
 
   await page.getByRole('button', { name: 'Buscar', exact: true }).click()
   await expect(campo(page)).toBeFocused()
