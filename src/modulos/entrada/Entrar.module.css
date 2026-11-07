@@ -439,27 +439,8 @@
     padding: 28px 0;
   }
 
+  /* No celular o painel decorativo sai, como no guia: os cartões são o que importa. */
   .painel {
-    min-height: 0;
-    padding: 40px 0 0 24px;
-  }
-
-  .chamada {
-    padding-right: 24px;
-  }
-
-  .tituloPainel {
-    font-size: 30px;
-  }
-
-  .previa {
-    min-height: 320px;
-    margin-top: 32px;
-  }
-
-  .flutuante {
-    left: 12px;
-    top: auto;
-    bottom: 24px;
+    display: none;
   }
 }
