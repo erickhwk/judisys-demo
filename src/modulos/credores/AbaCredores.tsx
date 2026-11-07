@@ -29,14 +29,10 @@ import { DialogoCredor } from './DialogoCredor'
 import { DialogoPedido } from './DialogoPedido'
 import { classesDoTipo } from './formularios'
 import { ListaPedidos } from './ListaPedidos'
+import { valorOuTraco } from './moeda'
 import { QuadroResumo } from './QuadroResumo'
 
 type Credor = Tipos['credores']
-
-/** Valor de uma relação, ou `—` quando ela ainda não tem o credor (RF-27). */
-export function valorOuTraco(valor: number | null | undefined): string {
-  return valor === null || valor === undefined ? '—' : formatarMoeda(valor)
-}
 
 export function AbaCredores({ processoId }: { processoId: string }) {
   const processo = useProcesso(processoId)

@@ -2,7 +2,7 @@
 // subtotais e total geral pelo valor vigente (T-26), em centavos (INV-03). Extraconcursais à
 // parte, fora do total; não sujeitos não entram no QGC (RF-26).
 import type { Tipos } from '../../dados/schemas'
-import { CLASSES_A_PARTE, type Classe, resumoPorClasse, valorVigente } from '../../regras/qgc'
+import { type Classe, type ResumoQgc, resumoPorClasse, valorVigente } from '../../regras/qgc'
 
 type Credor = Tipos['credores']
 
@@ -18,6 +18,8 @@ export interface Qgc {
   total: { quantidade: number; valor: number }
   extraconcursais: GrupoQgc | null
   naoSujeitos: number
+  /** O quadro-resumo de onde saem as classes, para a tela não recalcular. */
+  resumo: ResumoQgc
 }
 
 const COLADOR = new Intl.Collator('pt-BR', { sensitivity: 'base' })
@@ -35,8 +37,8 @@ function grupo(classe: Classe, credores: readonly Credor[]): GrupoQgc {
 
 /** Monta o QGC na ordem das classes do quadro-resumo. */
 export function montarQgc(credores: readonly Credor[]): Qgc {
-  const { linhas } = resumoPorClasse(credores)
-  const grupos = linhas.map((linha) => grupo(linha.classe, credores))
+  const resumo = resumoPorClasse(credores)
+  const grupos = resumo.linhas.map((linha) => grupo(linha.classe, credores))
   const extra = grupo('extraconcursal', credores)
   return {
     grupos,
@@ -45,8 +47,7 @@ export function montarQgc(credores: readonly Credor[]): Qgc {
       valor: grupos.reduce((soma, g) => soma + g.subtotal, 0),
     },
     extraconcursais: extra.credores.length > 0 ? extra : null,
-    naoSujeitos: credores.filter(
-      (credor) => CLASSES_A_PARTE.includes(credor.classe) && credor.classe !== 'extraconcursal',
-    ).length,
+    naoSujeitos: resumo.aParte.find((linha) => linha.classe === 'nao-sujeito')?.quantidade ?? 0,
+    resumo,
   }
 }

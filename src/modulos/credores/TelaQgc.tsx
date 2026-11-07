@@ -7,7 +7,7 @@ import type { Tipos } from '../../dados/schemas'
 import { formatarData, formatarMoeda } from '../../regras/datas'
 import { formatarCnj, formatarDocumento } from '../../regras/documentos'
 import { ROTULOS_FASE } from '../../regras/fases'
-import { resumoPorClasse, rotuloClasse, valorVigente } from '../../regras/qgc'
+import { rotuloClasse, valorVigente } from '../../regras/qgc'
 import { hoje } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
@@ -115,7 +115,7 @@ export function ConteudoQgc({ processo, credores }: { processo: Processo; credor
       )}
 
       <div className="quebra-antes">
-        <QuadroResumo resumo={resumoPorClasse(credores)} tipo={processo.tipo} />
+        <QuadroResumo resumo={qgc.resumo} tipo={processo.tipo} />
       </div>
     </main>
   )

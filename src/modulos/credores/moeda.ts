@@ -1,5 +1,5 @@
 // Valor em reais digitado no formulário ↔ centavos inteiros (INV-03), sem ponto flutuante.
-import { formatarCentavos } from '../../regras/datas'
+import { formatarCentavos, formatarMoeda } from '../../regras/datas'
 
 const FORMATO = /^(\d{1,3}(\.\d{3})+|\d+)(,\d{1,2})?$/
 
@@ -21,4 +21,9 @@ export function lerMoeda(texto: string): number | null | undefined {
 /** Centavos → texto do campo (`1.234,56`); `null`/`undefined` → vazio. */
 export function moedaParaCampo(centavos: number | null | undefined): string {
   return centavos === null || centavos === undefined ? '' : formatarCentavos(centavos)
+}
+
+/** Valor de uma relação, ou `—` quando ela ainda não tem o credor (RF-27). */
+export function valorOuTraco(valor: number | null | undefined): string {
+  return valor === null || valor === undefined ? '—' : formatarMoeda(valor)
 }
