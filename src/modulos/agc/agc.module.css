@@ -151,6 +151,20 @@
 
 /* --- Lista de presença -------------------------------------------------------------------- */
 
+/* Alvo de 44px em volta da caixa (RNF-01; DMO-23): o rótulo vazio também marca. */
+.alvoCaixa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--alvo-minimo);
+  height: var(--alvo-minimo);
+  cursor: pointer;
+}
+
+.alvoCaixa:has(.caixa:disabled) {
+  cursor: not-allowed;
+}
+
 .caixa {
   width: 20px;
   height: 20px;
