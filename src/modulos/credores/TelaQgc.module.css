@@ -138,8 +138,9 @@
     padding: 8px 6px;
   }
 
+  /* Cabe o CNPJ formatado inteiro (18 caracteres a 13px), sem invadir a coluna do valor. */
   .tabelaQgc thead th:nth-child(2) {
-    width: 118px;
+    width: 142px;
   }
 
   .tabelaQgc thead th:nth-child(3) {
