@@ -439,6 +439,19 @@ describe('cenario (RF-34, T-29)', () => {
     expect(resultado.situacao).toBe('rejeitado')
   })
 
+  it('"Classe III rejeita" descarta sorteio em que outra classe também rejeita', () => {
+    const presentes = presencasVitrine()
+    // RNG sempre abaixo de 0,15: todos os sorteios dão "não" nas outras classes.
+    const r = cenario('classe-iii-rejeita', presentes, () => 0.1)
+    if (!r.possivel) throw new Error(r.mensagem)
+    expect(aplicar(presentes, r.votos).classes.map((c) => c.situacao)).toEqual([
+      'aprovada',
+      'aprovada',
+      'rejeitada',
+      'aprovada',
+    ])
+  })
+
   it('"Classe III rejeita" sem a classe III presente é impossível', () => {
     expect(cenario('classe-iii-rejeita', votantes('trabalhista', 100), criarRng(1)).possivel).toBe(
       false,

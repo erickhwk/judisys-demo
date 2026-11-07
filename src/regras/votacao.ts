@@ -396,7 +396,7 @@ export function cenario(
       return primeiroQueSatisfaz(
         presentes,
         candidatosFolgados(presentes, rng, 'quirografario'),
-        (r) => r.situacao === 'rejeitado' && classeDe(r, 'quirografario').situacao === 'rejeitada',
+        (r) => r.situacao === 'rejeitado' && soQuirografarioRejeita(r),
       )
     case 'cram-down':
       return primeiroQueSatisfaz(
@@ -415,8 +415,11 @@ function votoDe(votante: Votante, voto: OpcaoVoto): VotoLancado {
   return { credorId: votante.credorId, voto }
 }
 
-function classeDe(resultado: ResultadoAgc, classe: ClasseVotante): ResultadoClasse {
-  return resultado.classes.find((c) => c.classe === classe) as ResultadoClasse
+/** A classe III rejeita e nenhuma outra (as demais aprovam ou não votaram). */
+function soQuirografarioRejeita(resultado: ResultadoAgc): boolean {
+  return resultado.classes.every(
+    (c) => (c.situacao === 'rejeitada') === (c.classe === 'quirografario'),
+  )
 }
 
 function sorteioAleatorio(rng: Rng): OpcaoVoto {
