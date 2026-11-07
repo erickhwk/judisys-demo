@@ -74,7 +74,7 @@ Nenhuma bloqueia a implementação.
 | T-12 | Repositórios genéricos com log automático na mesma transação; **serviços** para operações em várias coleções, cada um numa transação. |
 | T-13 | `pode(papel, acao, modulo)` puro, aplicado na tela, na rota e no repositório/serviço. |
 | T-14 | Filtro, busca e paginação em memória, dentro do repositório, com `normalizar()` compartilhado. Índice da busca global em memória, invalidado a cada gravação. |
-| T-15 | CI com `actions/upload-pages-artifact` e `actions/deploy-pages`; Vite com `base: '/judisys-demo/'`. Playwright só com Chromium no CI. |
+| T-15 | CI com `actions/upload-pages-artifact` e `actions/deploy-pages`; Vite com `base: '/'`, servido no domínio próprio `judisys-demo.draft.dev.br` (CNAME no registro.br, domínio configurado no Pages; AJ-10). Até a AJ-10, a base era `/judisys-demo/`. Playwright só com Chromium no CI. |
 | T-16 | PDFs genéricos gerados por `scripts/gerar-pdfs.ts` (`pdf-lib`) e **commitados** em `public/anexos/`. |
 | T-17 | Vitest em regras, repositórios e serviços (`fake-indexeddb`). Playwright: roteiro, analista e reset. Sem testes isolados de componentes. |
 | T-18 | Versão gravada no navegador = `VERSAO_SCHEMA` + hash do seed. Qualquer diferença reseta. Sem migrações. |
@@ -118,9 +118,10 @@ judisys-demo/
   .nvmrc                      22
   biome.json
   index.html                  meta robots noindex, fontes
-  vite.config.ts              base '/judisys-demo/'
+  vite.config.ts              base '/'
   playwright.config.ts
   public/
+    CNAME                       judisys-demo.draft.dev.br (AJ-10)
     robots.txt                Disallow: /
     anexos/*.pdf              T-16, commitados
     seed.json                 gerado no build, no .gitignore
