@@ -1,7 +1,7 @@
 // Números e listas do dashboard (RF-07 a RF-10, SDD §7.7). Funções puras: "hoje" vem por
 // parâmetro (T-19); a tela só busca as coleções e desenha.
 import type { Tipos } from '../../dados/schemas'
-import { type DataIso, somarDias } from '../../regras/datas'
+import type { DataIso } from '../../regras/datas'
 import {
   ehFaseFinal,
   type Fase,
@@ -10,6 +10,7 @@ import {
   type TipoProcesso,
 } from '../../regras/fases'
 import { CLASSES_RJ, type ClasseRj, rotuloClasse } from '../../regras/qgc'
+import { compararPrazos, noPeriodo } from '../prazos/regras'
 
 type Processo = Tipos['processos']
 type Credor = Tipos['credores']
@@ -23,9 +24,6 @@ export const LIMITE_PRAZOS = 8
 export const LIMITE_AGCS = 5
 export const LIMITE_INFORMES = 5
 export const LIMITE_ATIVIDADE = 8
-
-/** Janela de "vencem em 7 dias": de hoje a D+7, inclusive, como o filtro da agenda (PRZ-08). */
-const DIAS_PROXIMOS = 7
 
 /** Processo ativo: fora das fases finais (DSH-05, T-27). */
 export function ehAtivo(processo: Pick<Processo, 'faseAtual'>): boolean {
@@ -55,8 +53,6 @@ export function numerosDoTopo(
 ): NumerosDoTopo {
   const ativos = dados.processos.filter(ehAtivo)
   const idsAtivos = new Set(ativos.map((p) => p.id))
-  const limite = somarDias(hoje, DIAS_PROXIMOS)
-  const abertos = dados.prazos.filter((p) => p.status === 'aberto')
   return {
     ativosRj: ativos.filter((p) => p.tipo === 'rj').length,
     ativosFalencia: ativos.filter((p) => p.tipo === 'falencia').length,
@@ -64,8 +60,9 @@ export function numerosDoTopo(
       .filter((c) => idsAtivos.has(c.processoId))
       .reduce((soma, c) => soma + (c.valorAj ?? 0), 0),
     credores: dados.credores.length,
-    prazosVencidos: abertos.filter((p) => p.vencimento < hoje).length,
-    prazosProximos: abertos.filter((p) => p.vencimento >= hoje && p.vencimento <= limite).length,
+    // Os mesmos períodos da agenda (PRZ-08), para onde os números levam: "7 dias" vai de hoje a D+7.
+    prazosVencidos: dados.prazos.filter((p) => noPeriodo(p, 'vencidos', hoje)).length,
+    prazosProximos: dados.prazos.filter((p) => noPeriodo(p, '7-dias', hoje)).length,
   }
 }
 
@@ -121,11 +118,9 @@ export function passivoPorClasse(
 
 /** Os 8 prazos em aberto mais próximos: vencidos primeiro, depois por data (DSH-03). */
 export function proximosPrazos(prazos: readonly Prazo[], hoje: DataIso): Prazo[] {
-  const porData = (a: Prazo, b: Prazo) =>
-    a.vencimento.localeCompare(b.vencimento) || a.titulo.localeCompare(b.titulo, 'pt-BR')
   const abertos = prazos.filter((p) => p.status === 'aberto')
-  const vencidos = abertos.filter((p) => p.vencimento < hoje).sort(porData)
-  const aVencer = abertos.filter((p) => p.vencimento >= hoje).sort(porData)
+  const vencidos = abertos.filter((p) => p.vencimento < hoje).sort(compararPrazos)
+  const aVencer = abertos.filter((p) => p.vencimento >= hoje).sort(compararPrazos)
   return [...vencidos, ...aVencer].slice(0, LIMITE_PRAZOS)
 }
 
