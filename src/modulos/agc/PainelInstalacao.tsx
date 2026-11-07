@@ -6,7 +6,7 @@ import { useId, useState } from 'react'
 import { useServico } from '../../dados/contexto'
 import { instalarAgc, marcarClasse, motivoSemInstalacao } from '../../dados/servicos/agc'
 import { formatarData, formatarMoeda } from '../../regras/datas'
-import { formatarCentesimos, rotuloClasse } from '../../regras/qgc'
+import { rotuloClasse } from '../../regras/qgc'
 import {
   type Convocacao,
   type InstalacaoClasse,
@@ -22,6 +22,7 @@ import { mensagemDeErro } from '../credores/erros'
 import { plural } from '../processos/rotulos'
 import type { Agc } from './agc'
 import estilos from './agc.module.css'
+import { percentualDe } from './mesa'
 
 const SITUACOES: Record<SituacaoInstalacaoClasse, { rotulo: string; tom: TomSelo }> = {
   atinge: { rotulo: 'Acima de 50%', tom: 'sucesso' },
@@ -31,10 +32,7 @@ const SITUACOES: Record<SituacaoInstalacaoClasse, { rotulo: string; tom: TomSelo
 
 /** Percentual do valor votante presente, truncado em centésimos (50,004% não vira 50,01%). */
 function percentual(classe: InstalacaoClasse): string {
-  if (classe.valorTotal === 0) return '—'
-  // Em BigInt: centavos × 10.000 passa do inteiro seguro em classes de bilhões.
-  const centesimos = (BigInt(classe.valorPresente) * BigInt(10000)) / BigInt(classe.valorTotal)
-  return `${formatarCentesimos(Number(centesimos))}%`
+  return percentualDe(classe.valorPresente, classe.valorTotal)
 }
 
 export function PainelInstalacao({
