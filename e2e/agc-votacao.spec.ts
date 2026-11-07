@@ -1,7 +1,14 @@
 // AGC: votação, painel do art. 45, cram down e registro do resultado (SDD §7.6; DMO-17) com o seed
 // da demo. O processo vitrine (prc-001) tem uma AGC agendada para daqui a 6 dias (SED-04).
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, abrirAgcDoVitrine, entrarComo, instalar, todosDaClasse } from './apoio'
+import {
+  AGORA,
+  abrirAgcDoVitrine,
+  CLASSES_DO_VITRINE,
+  entrarComo,
+  instalar,
+  todosDaClasse,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -14,14 +21,7 @@ test('AGC-19, AGC-21, AGC-22 · roteiro: cram down na tela, registrar cria a ata
 }) => {
   await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
-  for (const classe of [
-    'I · Trabalhista',
-    'II · Garantia real',
-    'III · Quirografário',
-    'IV · ME/EPP',
-  ]) {
-    await todosDaClasse(page, classe)
-  }
+  for (const classe of CLASSES_DO_VITRINE) await todosDaClasse(page, classe)
   await instalar(page, 1)
 
   // T-33: sem votos, o registro fica bloqueado com o aviso no painel.
