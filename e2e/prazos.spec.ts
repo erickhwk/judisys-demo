@@ -29,24 +29,32 @@ async function vencimentos(lista: Locator): Promise<string[]> {
   return (await lista.locator('tbody tr td:first-child').allTextContents()).map(iso)
 }
 
+/**
+ * Os vencimentos da lista depois que o filtro aplicou: espera ter linhas e todas passarem em `ok`.
+ * Ler logo depois de trocar o filtro pega a lista vazia ou a do filtro anterior (AJ-06).
+ */
+async function vencimentosFiltrados(lista: Locator, ok: (data: string) => boolean) {
+  await expect
+    .poll(async () => {
+      const datas = await vencimentos(lista)
+      return datas.length > 0 && datas.every(ok)
+    })
+    .toBe(true)
+  return vencimentos(lista)
+}
+
 test('PRZ-08 · filtros "7 dias" e "vencidos" da agenda', async ({ page }) => {
   await entrarComo(page, /Entrar como Analista/)
   const lista = await abrirAgenda(page)
 
   await page.getByLabel('Período').selectOption({ label: 'Próximos 7 dias' })
   await expect(page).toHaveURL(/periodo=7-dias/)
-  const proximos = await vencimentos(lista)
-  expect(proximos.length).toBeGreaterThan(0)
-  for (const data of proximos) {
-    expect(data >= '2026-11-07' && data <= '2026-11-14', data).toBe(true)
-  }
+  await vencimentosFiltrados(lista, (data) => data >= '2026-11-07' && data <= '2026-11-14')
   await expect(lista.getByText('Cumprido', { exact: true })).toHaveCount(0)
 
   await page.getByLabel('Período').selectOption({ label: 'Vencidos' })
   await expect(page).toHaveURL(/periodo=vencidos/)
-  const vencidos = await vencimentos(lista)
-  expect(vencidos.length).toBeGreaterThan(0)
-  for (const data of vencidos) expect(data < '2026-11-07', data).toBe(true)
+  const vencidos = await vencimentosFiltrados(lista, (data) => data < '2026-11-07')
   // PRZ-06: todo vencido aberto aparece com o selo "Vencido".
   await expect(lista.getByText('Vencido', { exact: true })).toHaveCount(vencidos.length)
 
