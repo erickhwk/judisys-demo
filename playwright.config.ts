@@ -13,7 +13,10 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: `pnpm build && pnpm preview --port ${porta} --strictPort`,
+    // No CI o build já rodou num passo anterior; localmente o e2e gera o dist/ antes
+    command: process.env.CI
+      ? `pnpm preview --port ${porta} --strictPort`
+      : `pnpm build && pnpm preview --port ${porta} --strictPort`,
     url: `http://localhost:${porta}/judisys-demo/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
