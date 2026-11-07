@@ -41,7 +41,8 @@ export function TelaAgc() {
   // Processo de falência não tem AGC (a aba é só da RJ).
   const doProcesso = processo.data?.tipo === 'rj' && agc.data?.processoId === processo.data.id
   if (!doProcesso || !processo.data || !agc.data) return <NaoEncontrada />
-  return <ConteudoAgc processo={processo.data} agc={agc.data} />
+  // A chave zera convocação, filtros e página ao trocar de AGC sem sair da rota.
+  return <ConteudoAgc key={agc.data.id} processo={processo.data} agc={agc.data} />
 }
 
 function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
