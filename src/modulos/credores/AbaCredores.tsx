@@ -85,6 +85,7 @@ function ConteudoAba({ processo }: { processo: Processo }) {
   )
 
   function limpar() {
+    // Zera o campo também quando o texto ainda não chegou à URL (busca vazia, gravação pendente).
     setTextoBusca('')
     mudar({ busca: '', classe: '', pagina: '' })
   }

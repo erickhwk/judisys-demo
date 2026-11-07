@@ -8,8 +8,8 @@ export const ATRASO_BUSCA_MS = 250
 
 /**
  * Devolve o texto do campo e o seu setter. `valor` é a busca que está na URL; `gravar` a põe lá.
- * Mudança na URL que não veio daqui (voltar, "Limpar busca") volta para o campo; o eco da
- * própria gravação não, para não apagar o que se digitou enquanto ela chegava.
+ * Mudança na URL que não veio daqui (voltar, "Limpar busca") volta para o campo; o eco das
+ * próprias gravações não, para não apagar o que se digitou enquanto elas chegavam.
  */
 export function useBuscaAdiada(
   valor: string,
@@ -18,25 +18,30 @@ export function useBuscaAdiada(
 ): [string, (texto: string) => void] {
   const [texto, setTexto] = useState(valor)
   const [valorVisto, setValorVisto] = useState(valor)
-  const gravado = useRef(valor)
+  // Textos já mandados para a URL que ela ainda não devolveu, na ordem. Só os efeitos e o timer
+  // escrevem aqui: o render só lê, e um render descartado pelo React não deixa rastro.
+  const emVoo = useRef<string[]>([])
   const gravarAtual = useEffectEvent(gravar)
 
   if (valor !== valorVisto) {
     setValorVisto(valor)
-    if (valor !== gravado.current) {
-      gravado.current = valor
-      setTexto(valor)
-    }
+    if (!emVoo.current.includes(valor)) setTexto(valor)
   }
 
   useEffect(() => {
-    if (texto === gravado.current) return
+    // Eco recebido: ele e os anteriores saíram de voo. Mudança de fora: nenhum eco vale mais.
+    const eco = emVoo.current.indexOf(valor)
+    emVoo.current = eco >= 0 ? emVoo.current.slice(eco + 1) : []
+  }, [valor])
+
+  useEffect(() => {
+    if (texto === valor || texto === emVoo.current.at(-1)) return
     const espera = setTimeout(() => {
-      gravado.current = texto
+      emVoo.current.push(texto)
       gravarAtual(texto)
     }, atrasoMs)
     return () => clearTimeout(espera)
-  }, [texto, atrasoMs])
+  }, [texto, valor, atrasoMs])
 
   return [texto, setTexto]
 }
