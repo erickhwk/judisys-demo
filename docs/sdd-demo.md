@@ -335,7 +335,7 @@ Rota sem sessão → `#/entrar`. Rota sem permissão → "Seu papel não permite
 | PRC-01 | F | RJ em "processamento deferido" | avançar para "edital de credores publicado" em D | Marco gravado; fase atual muda; prazos de habilitações (D+15) e relação do AJ (D+60) criados. |
 | PRC-02 | F | RJ em "pedido" | avançar para "processamento deferido" em D | Stay (D+180), plano (D+60), AGC (D+150) e RMA (próximo dia 15 depois de D) criados. |
 | PRC-03 | F | RJ com relação do AJ em D1 e plano em D2 > D1 | avançar para "plano apresentado" em D2 | Objeções em D2+30. |
-| PRC-04 | B | plano em D1, relação do AJ publicada depois em D2 | avançar para "relação do AJ publicada" | Objeções em D2+30, criado pelo marco da relação. |
+| PRC-04 | B | plano em D1, relação do AJ publicada depois em D2 | avançar para "relação do AJ publicada" | Objeções em D2+30, criado pelo marco da relação. Vale só para a regra pura (`prazosDoMarco`): pela T-27 a relação nunca vem depois do plano, então a tela não gera este caso (decidido com o usuário em 2026-11-07, DMO-04). |
 | PRC-05 | F | falência "decretada" em D | criar | Habilitações D+15, relatório do AJ D+40, plano de realização dos ativos D+60 (C-02). |
 | PRC-06 | F | falência em "arrecadação" em D | avançar | Realização dos ativos D+180 (C-02). |
 | PRC-07 | B | RJ em "processamento deferido" | avançar direto para "plano apresentado" | Só os prazos de "plano apresentado" são criados (T-28). |
