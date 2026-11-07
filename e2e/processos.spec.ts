@@ -131,7 +131,9 @@ test('PRC-15 · RJ nova começa em "Pedido", com as empresas e o histórico', as
     .getByRole('link', { name: 'Histórico' })
     .click()
   const historico = page.getByRole('region', { name: 'Histórico do processo' })
-  await expect(historico.getByText('Criou processo')).toBeVisible()
+  // Dados e empresas da criação aparecem como 'Criou processo', sem edição que o usuário não fez.
+  await expect(historico.getByText('Criou processo')).toHaveCount(2)
+  await expect(historico.getByText('Editou processo')).toHaveCount(0)
   await expect(historico.getByText('Criou marco de fase')).toBeVisible()
   await expect(historico.getByText('Tatu-Bola Mineração Ltda.')).toBeVisible()
 })
