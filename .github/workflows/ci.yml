@@ -43,14 +43,9 @@ jobs:
       - name: Vitest
         run: pnpm test
 
-      # Até a DMO-07 o script é um placeholder; se sumir, o passo não quebra o CI
+      # Até a DMO-07 scripts/gerar-seed.ts é um placeholder que só registra no log
       - name: Gerar seed
-        run: |
-          if [ -f scripts/gerar-seed.ts ]; then
-            pnpm seed
-          else
-            echo "scripts/gerar-seed.ts ausente: seed pulado"
-          fi
+        run: pnpm seed
 
       - name: Build
         run: pnpm build
