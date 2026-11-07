@@ -15,8 +15,9 @@ import type {
 } from '../../regras/votacao'
 import { Selo, type TomSelo } from '../../ui/Selo'
 import { plural } from '../processos/rotulos'
+import { centesimosDe, percentualDe } from './agc'
 import estilos from './agc.module.css'
-import { centesimosDe, percentualDe, presentesSemVoto } from './mesa'
+import { presentesSemVoto } from './mesa'
 
 const SITUACOES_CLASSE: Record<SituacaoClasse, { rotulo: string; tom: TomSelo }> = {
   aprovada: { rotulo: 'Aprovada', tom: 'sucesso' },

@@ -4,7 +4,7 @@ import { z } from 'zod'
 import type { Tipos } from '../../dados/schemas'
 import { type DataIso, ehDataIso } from '../../regras/datas'
 import { normalizar } from '../../regras/normalizar'
-import { CLASSES_VOTANTES, type Classe, valorVigente } from '../../regras/qgc'
+import { CLASSES_VOTANTES, type Classe, formatarCentesimos, valorVigente } from '../../regras/qgc'
 import { type Convocacao, motivoSemVoto } from '../../regras/votacao'
 import type { TomSelo } from '../../ui/Selo'
 
@@ -77,15 +77,35 @@ export function filtrarPresenca(
   linhas: readonly LinhaPresenca[],
   { busca, classe }: { busca: string; classe: FiltroClasse },
 ): LinhaPresenca[] {
-  const palavras = normalizar(busca).split(/\s+/).filter(Boolean)
+  const casa = casaBusca(busca)
   return linhas.filter((linha) => {
     if (classe === 'sem-voto' && !linha.motivo) return false
     if (classe && classe !== 'sem-voto' && (linha.motivo || linha.credor.classe !== classe)) {
       return false
     }
-    const alvo = normalizar(`${linha.credor.nome} ${linha.credor.documento}`)
-    return palavras.every((palavra) => alvo.includes(palavra))
+    return casa(linha.credor)
   })
+}
+
+/** Predicado da busca por nome ou CPF/CNPJ (todas as palavras), usado na presença e na mesa. */
+export function casaBusca(busca: string): (credor: Pick<Credor, 'nome' | 'documento'>) => boolean {
+  const palavras = normalizar(busca).split(/\s+/).filter(Boolean)
+  return (credor) => {
+    const alvo = normalizar(`${credor.nome} ${credor.documento}`)
+    return palavras.every((palavra) => alvo.includes(palavra))
+  }
+}
+
+/** Parte da base em centésimos de ponto percentual, truncado (50,004% não vira 50,01%). */
+export function centesimosDe(parte: number, base: number): number {
+  if (base <= 0) return 0
+  // Em BigInt: centavos × 10.000 passa do inteiro seguro em classes de bilhões.
+  return Number((BigInt(parte) * BigInt(10000)) / BigInt(base))
+}
+
+/** `33,33%`, truncado; `—` sem base. */
+export function percentualDe(parte: number, base: number): string {
+  return base > 0 ? `${formatarCentesimos(centesimosDe(parte, base))}%` : '—'
 }
 
 // ---------------------------------------------------------------------------------------------

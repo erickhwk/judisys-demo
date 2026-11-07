@@ -14,8 +14,9 @@ import {
   filtrarPresenca,
   linhasDePresenca,
   MENSAGEM_SIMULACAO,
+  percentualDe,
 } from './agc'
-import { filtrarMesa, linhasDaMesa, motivoSemRegistro, percentualDe } from './mesa'
+import { filtrarMesa, linhasDaMesa, motivoSemRegistro } from './mesa'
 import { registro } from './rotas'
 import { TelaAgc } from './TelaAgc'
 

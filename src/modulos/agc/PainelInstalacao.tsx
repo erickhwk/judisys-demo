@@ -20,19 +20,13 @@ import { Selo, type TomSelo } from '../../ui/Selo'
 import { Tabela } from '../../ui/Tabela'
 import { mensagemDeErro } from '../credores/erros'
 import { plural } from '../processos/rotulos'
-import type { Agc } from './agc'
+import { type Agc, percentualDe } from './agc'
 import estilos from './agc.module.css'
-import { percentualDe } from './mesa'
 
 const SITUACOES: Record<SituacaoInstalacaoClasse, { rotulo: string; tom: TomSelo }> = {
   atinge: { rotulo: 'Acima de 50%', tom: 'sucesso' },
   'nao-atinge': { rotulo: 'Não passa de 50%', tom: 'alerta' },
   'sem-credores': { rotulo: 'Sem credores', tom: 'neutro' },
-}
-
-/** Percentual do valor votante presente, truncado em centésimos (50,004% não vira 50,01%). */
-function percentual(classe: InstalacaoClasse): string {
-  return percentualDe(classe.valorPresente, classe.valorTotal)
 }
 
 export function PainelInstalacao({
@@ -155,7 +149,8 @@ export function PainelInstalacao({
             largura: '150px',
             alinhar: 'direita',
             numerica: true,
-            celula: percentual,
+            // Truncado em centésimos (50,004% não vira 50,01%).
+            celula: (linha) => percentualDe(linha.valorPresente, linha.valorTotal),
           },
           {
             chave: 'situacao',

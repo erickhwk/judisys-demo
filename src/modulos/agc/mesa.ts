@@ -1,12 +1,11 @@
 // Peças puras da mesa de votação e do painel do art. 45 (RF-34 a RF-37, T-33; DMO-17). Resultado,
 // cram down e cenários vêm de `regras/votacao.ts` (DMO-05); aqui ficam as linhas da mesa, os
-// filtros, o percentual das barras e o motivo de não poder registrar.
+// filtros e o motivo de não poder registrar.
 import type { Tipos } from '../../dados/schemas'
-import { normalizar } from '../../regras/normalizar'
-import { CLASSES_VOTANTES, type ClasseVotante, formatarCentesimos } from '../../regras/qgc'
+import { CLASSES_VOTANTES, type ClasseVotante } from '../../regras/qgc'
 import type { OpcaoVoto, ResultadoAgc, Votante, VotoLancado } from '../../regras/votacao'
 import { plural } from '../processos/rotulos'
-import type { Agc } from './agc'
+import { type Agc, casaBusca } from './agc'
 
 type Credor = Tipos['credores']
 
@@ -58,12 +57,11 @@ export function filtrarMesa(
   votos: MapaVotos,
   { busca, filtro }: { busca: string; filtro: FiltroMesa },
 ): LinhaMesa[] {
-  const palavras = normalizar(busca).split(/\s+/).filter(Boolean)
+  const casa = casaBusca(busca)
   return linhas.filter((linha) => {
     if (filtro === 'sem-voto' && votos.has(linha.credor.id)) return false
     if (filtro && filtro !== 'sem-voto' && linha.classe !== filtro) return false
-    const alvo = normalizar(`${linha.credor.nome} ${linha.credor.documento}`)
-    return palavras.every((palavra) => alvo.includes(palavra))
+    return casa(linha.credor)
   })
 }
 
@@ -102,15 +100,4 @@ export function motivoSemRegistro(
     return `Falta o voto de ${plural(faltam, 'presente', 'presentes')}: lance todos os votos para registrar o resultado.`
   }
   return null
-}
-
-/** Parte da base em centésimos de ponto percentual, truncado (50,004% não vira 50,01%). */
-export function centesimosDe(parte: number, base: number): number {
-  if (base <= 0) return 0
-  // Em BigInt: centavos × 10.000 passa do inteiro seguro em classes de bilhões.
-  return Number((BigInt(parte) * BigInt(10000)) / BigInt(base))
-}
-
-export function percentualDe(parte: number, base: number): string {
-  return base > 0 ? `${formatarCentesimos(centesimosDe(parte, base))}%` : '—'
 }
