@@ -3,6 +3,7 @@
 // Busca e página ficam na URL, para o "voltar" do navegador e do formulário manterem a lista.
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useRepo } from '../../dados/contexto'
 import { type Filtro, POR_PAGINA } from '../../dados/repositorio'
@@ -56,9 +57,20 @@ export function ListaEmpresas() {
     setParametros(proximos, { replace: true })
   }
 
+  const [exportando, setExportando] = useState(false)
+  const [erroExportar, setErroExportar] = useState(false)
+
   async function exportar() {
-    const todas = await repo.todos({ busca, ordem: ORDEM })
-    baixarArquivo(nomeArquivoCsv('empresas', hoje()), gerarCsv(COLUNAS_CSV_EMPRESAS, todas))
+    setExportando(true)
+    setErroExportar(false)
+    try {
+      const todas = await repo.todos({ busca, ordem: ORDEM })
+      baixarArquivo(nomeArquivoCsv('empresas', hoje()), gerarCsv(COLUNAS_CSV_EMPRESAS, todas))
+    } catch {
+      setErroExportar(true)
+    } finally {
+      setExportando(false)
+    }
   }
 
   const colunas: ColunaTabela<Empresa>[] = [
@@ -120,7 +132,7 @@ export function ListaEmpresas() {
 
   const dados = consulta.data
   const apoio =
-    dados && !busca
+    dados && !busca && !consulta.isPlaceholderData
       ? `${dados.total} ${dados.total === 1 ? 'empresa cadastrada' : 'empresas cadastradas'}`
       : undefined
 
@@ -131,7 +143,7 @@ export function ListaEmpresas() {
         apoio={apoio}
         acoes={
           <>
-            <Botao icone={<Download size={18} />} onClick={exportar}>
+            <Botao icone={<Download size={18} />} onClick={exportar} disabled={exportando}>
               Exportar CSV
             </Botao>
             {podeEditar && (
@@ -146,6 +158,7 @@ export function ListaEmpresas() {
           </>
         }
       />
+      {erroExportar && <Erro mensagem="Não foi possível exportar o CSV." />}
       <Filtros aoLimpar={busca ? () => mudar({ busca: '' }) : undefined}>
         <CampoBusca
           rotulo="Buscar por razão social, nome fantasia ou CNPJ"

@@ -112,6 +112,27 @@ test('CNPJ inválido recusado; empresa válida criada e excluída', async ({ pag
   await expect(page.getByText('Nenhuma empresa encontrada')).toBeVisible()
 })
 
+test('T-23 · empresa sem processo excluída pelo formulário volta à lista', async ({ page }) => {
+  await entrarComo(page, /Entrar como Administrador/)
+  await page.goto('./#/empresas/novo')
+  await page.getByLabel('Razão social').fill('Tucano Bico Verde Ltda.')
+  await page.getByLabel('CNPJ').fill('11222333000181')
+  await page.getByLabel('Cidade').fill('Sorocaba')
+  await page.getByLabel('UF').selectOption('SP')
+  await page.getByRole('button', { name: 'Salvar' }).click()
+  await expect(page).toHaveURL(/#\/empresas$/)
+
+  await page.getByRole('link', { name: 'Tucano Bico Verde Ltda.' }).click()
+  await expect(page.getByText('A empresa não aparece em nenhum processo.')).toBeVisible()
+  await page.getByRole('button', { name: 'Excluir' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Excluir empresa' })
+    .getByRole('button', { name: 'Excluir' })
+    .click()
+  await expect(page).toHaveURL(/#\/empresas$/)
+  await expect(page.getByText('40 empresas cadastradas')).toBeVisible()
+})
+
 test('T-23 · exclusão de empresa vinculada recusada, com os processos na mensagem', async ({
   page,
 }) => {
