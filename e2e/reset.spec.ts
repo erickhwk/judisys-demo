@@ -2,31 +2,17 @@
 // CAR-05) veio com a DMO-10. Cada teste começa com o armazenamento limpo (contexto novo do
 // Playwright).
 import { expect, type Page, test } from '@playwright/test'
+import {
+  AGORA,
+  acolherImpugnacao,
+  CREDOR_IMPUGNACAO,
+  entrarComo,
+  type Linha,
+  lerTabela,
+  pedidosDeIsadora,
+} from './apoio'
 
 const CHAVE_VERSAO = 'judisys:versao'
-
-type Linha = Record<string, unknown> & { id: string }
-
-/** Lê uma tabela do IndexedDB da demo direto pela API do navegador. */
-function lerTabela(page: Page, tabela: string): Promise<Linha[]> {
-  return page.evaluate(
-    (nome) =>
-      new Promise<Linha[]>((resolver, rejeitar) => {
-        const abertura = indexedDB.open('judisys')
-        abertura.onerror = () => rejeitar(abertura.error)
-        abertura.onsuccess = () => {
-          const db = abertura.result
-          const pedido = db.transaction(nome).objectStore(nome).getAll()
-          pedido.onsuccess = () => {
-            db.close()
-            resolver(pedido.result as Linha[])
-          }
-          pedido.onerror = () => rejeitar(pedido.error)
-        }
-      }),
-    tabela,
-  )
-}
 
 function gravarLinha(page: Page, tabela: string, linha: Linha): Promise<void> {
   return page.evaluate(
@@ -64,7 +50,7 @@ async function abrirDemo(page: Page): Promise<void> {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
 
 test('CAR-01 · primeira visita mostra o carregamento, baixa o seed e grava a versão', async ({
@@ -199,9 +185,8 @@ async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknow
   return { id: processo.id, apelido: processo.apelido }
 }
 
-test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
-  const processo = await entrarEAlterar(page)
-  await page.goto('./#/logs')
+/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
+async function resetarPelaFaixa(page: Page): Promise<void> {
   await page
     .getByRole('region', { name: 'Demonstração' })
     .getByRole('button', { name: 'Resetar demo' })
@@ -209,8 +194,13 @@ test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async 
   const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
   await expect(confirmacao).toBeVisible()
   await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-
   await expect(confirmacao).toBeHidden()
+}
+
+test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
+  const processo = await entrarEAlterar(page)
+  await page.goto('./#/logs')
+  await resetarPelaFaixa(page)
   await expect(page).toHaveURL(/#\/$/)
   await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
   const depois = await lerTabela(page, 'processos')
@@ -231,4 +221,27 @@ test('CAR-05 · Resetar demo → cancelar não muda nada', async ({ page }) => {
   await expect(confirmacao).toBeHidden()
   const depois = await lerTabela(page, 'processos')
   expect(depois.find((p) => p.id === processo.id)?.apelido).toBe('Alterado na demo')
+})
+
+test('CAR-04 · alteração feita pela tela (acolher a impugnação) é desfeita ao resetar', async ({
+  page,
+}) => {
+  await entrarComo(page, 'aj')
+  const logsAntes = (await lerTabela(page, 'logs')).length
+
+  await page.goto(CREDOR_IMPUGNACAO.rota)
+  await acolherImpugnacao(page)
+  expect((await lerTabela(page, 'logs')).length).toBeGreaterThan(logsAntes)
+
+  await resetarPelaFaixa(page)
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+
+  // Volta ao seed: o QGC sem valor, a impugnação pendente e o log da decisão desfeito.
+  await page.goto(CREDOR_IMPUGNACAO.rota)
+  await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome, level: 1 })).toBeVisible()
+  await expect(page.locator('[data-valor="qgc"]')).toContainText('—')
+  await expect(
+    pedidosDeIsadora(page).getByRole('button', { name: /^Acolher impugnação/ }),
+  ).toBeVisible()
+  expect(await lerTabela(page, 'logs')).toHaveLength(logsAntes)
 })
