@@ -137,13 +137,13 @@ export interface ProximaAgc {
  */
 export function proximasAgcs(agcs: readonly Agc[], hoje: DataIso): ProximaAgc[] {
   return agcs
-    .filter((agc) => agc.status !== 'encerrada' && agc.dataSegunda >= hoje)
-    .map(
-      (agc): ProximaAgc =>
-        agc.dataPrimeira >= hoje
-          ? { agc, data: agc.dataPrimeira, convocacao: 1 }
-          : { agc, data: agc.dataSegunda, convocacao: 2 },
-    )
+    .flatMap((agc): ProximaAgc[] => {
+      if (agc.status === 'encerrada') return []
+      // Instalada numa convocação, a outra não acontece mais.
+      const convocacao = agc.convocacaoInstalada ?? (agc.dataPrimeira >= hoje ? 1 : 2)
+      const data = convocacao === 1 ? agc.dataPrimeira : agc.dataSegunda
+      return data >= hoje ? [{ agc, data, convocacao }] : []
+    })
     .sort((a, b) => a.data.localeCompare(b.data) || a.agc.id.localeCompare(b.agc.id))
     .slice(0, LIMITE_AGCS)
 }

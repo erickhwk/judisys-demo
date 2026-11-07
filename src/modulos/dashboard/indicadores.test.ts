@@ -200,6 +200,16 @@ describe('proximasAgcs (RF-10)', () => {
       ['agc-d6', '2026-11-13', 1],
     ])
   })
+
+  it('instalada numa convocação: vale a data dela, sem passar para a outra', () => {
+    const agcs = [
+      { ...agc('agc-1a-passada', '2026-11-05', '2026-11-12', 'instalada'), convocacaoInstalada: 1 },
+      { ...agc('agc-1a-hoje', '2026-11-07', '2026-11-14', 'instalada'), convocacaoInstalada: 1 },
+    ] satisfies Tipos['agcs'][]
+    expect(proximasAgcs(agcs, HOJE).map((p) => [p.agc.id, p.data, p.convocacao])).toEqual([
+      ['agc-1a-hoje', '2026-11-07', 1],
+    ])
+  })
 })
 
 describe('ultimosInformes e atividadeRecente (RF-10)', () => {

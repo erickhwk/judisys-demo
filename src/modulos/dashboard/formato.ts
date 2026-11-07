@@ -4,6 +4,8 @@ const COMPACTO = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
   currency: 'BRL',
   notation: 'compact',
+  // Sem o mínimo, o BRL herda 2 casas cortadas para 1: `R$ 5,0 mi`, `R$ 0,0`.
+  minimumFractionDigits: 0,
   maximumFractionDigits: 1,
 })
 
