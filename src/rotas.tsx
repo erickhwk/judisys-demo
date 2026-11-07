@@ -2,6 +2,7 @@
 // troca só a sua, pondo o componente dela no lugar do `EmConstrucao`. O roteador (roteador.tsx)
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
+import { Agenda } from './modulos/prazos/Agenda'
 import type { Acao, Modulo } from './regras/permissoes'
 import { EmConstrucao } from './ui/TelasDeAviso'
 
@@ -38,7 +39,7 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/informes', 'ler', 'informes', <EmConstrucao titulo="Informes" />),
   rota('/informes/novo', 'editar', 'informes', <EmConstrucao titulo="Novo informe" />),
   rota('/informes/:id', 'ler', 'informes', <EmConstrucao titulo="Informe" />),
-  rota('/agenda', 'ler', 'prazos', <EmConstrucao titulo="Agenda" />),
+  rota('/agenda', 'ler', 'prazos', <Agenda />),
   rota('/usuarios', 'ler', 'usuarios', <EmConstrucao titulo="Usuários" />),
   rota('/logs', 'ler', 'logs', <EmConstrucao titulo="Logs" />),
 ]
