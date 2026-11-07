@@ -2,6 +2,7 @@
 // troca só a sua, pondo o componente dela no lugar do `EmConstrucao`. O roteador (roteador.tsx)
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
+import { TelaCredor, TelaQgc } from './modulos/credores'
 import type { Acao, Modulo } from './regras/permissoes'
 import { EmConstrucao } from './ui/TelasDeAviso'
 
@@ -30,7 +31,7 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/processos/:id/agc', 'ler', 'agc', <EmConstrucao titulo="Processo" />),
   rota('/processos/:id/informes', 'ler', 'informes', <EmConstrucao titulo="Processo" />),
   rota('/processos/:id/historico', 'ler', 'logs', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/credores/:credorId', 'ler', 'credores', <EmConstrucao titulo="Credor" />),
+  rota('/processos/:id/credores/:credorId', 'ler', 'credores', <TelaCredor />),
   rota('/processos/:id/agc/:agcId', 'ler', 'agc', <EmConstrucao titulo="AGC" />),
   rota('/empresas', 'ler', 'empresas', <EmConstrucao titulo="Empresas" />),
   rota('/empresas/novo', 'editar', 'empresas', <EmConstrucao titulo="Nova empresa" />),
@@ -45,5 +46,5 @@ export const ROTAS: DefinicaoRota[] = [
 
 /** Telas sem o layout (impressão). */
 export const ROTAS_SEM_LAYOUT: DefinicaoRota[] = [
-  rota('/processos/:id/qgc', 'ler', 'credores', <EmConstrucao titulo="QGC" />),
+  rota('/processos/:id/qgc', 'ler', 'credores', <TelaQgc />),
 ]

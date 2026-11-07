@@ -1,0 +1,389 @@
+/* Telas de credores (DMO-15): aba, tela do credor, diálogos e QGC para impressão. */
+
+/* --- Cabeçalho de página ------------------------------------------------------------------ */
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalhoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cabecalhoTexto h1 {
+  overflow-wrap: anywhere;
+}
+
+.migalhas {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.migalhas a {
+  color: var(--cor-texto-muted);
+  font-weight: 500;
+}
+
+.subtitulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.acoesCabecalho,
+.barraAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.barraAcoes {
+  justify-content: flex-end;
+}
+
+/* Link com cara de botão secundário (o QGC e "Voltar" navegam, não agem). */
+.botaoLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--altura-campo);
+  padding: 0 20px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.botaoLink:hover {
+  background: var(--cor-hover-fantasma);
+  text-decoration: none;
+}
+
+/* --- Aba e seções --------------------------------------------------------------------------- */
+
+.aba {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.carregando {
+  color: var(--cor-texto-muted);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.secaoTopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tituloSecao {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.notaSecao,
+.notaCard {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.pilha {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secundario {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--cor-texto-muted);
+}
+
+.numeroTexto {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.erroTexto {
+  color: var(--cor-perigo);
+  font-weight: 600;
+}
+
+.erroTexto ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-weight: 400;
+}
+
+/* --- Quadro-resumo -------------------------------------------------------------------------- */
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.cardTopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 20px 24px 12px;
+}
+
+.tituloCard {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.rolagem {
+  overflow-x: auto;
+}
+
+.rolagem:focus-visible {
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 4px var(--cor-azul-900);
+}
+
+.quadro {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.quadro {
+  min-width: 560px;
+}
+
+.quadro th,
+.quadro td {
+  padding: 12px 24px;
+  border-top: 1px solid var(--cor-borda-linha);
+  text-align: left;
+  color: var(--cor-texto-forte);
+}
+
+.quadro thead th {
+  border-top: 0;
+  background: var(--cor-cabecalho-tabela);
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.quadro tbody th {
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.quadro .direita {
+  text-align: right;
+}
+
+.numero,
+.quadro .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.quadro .linhaTotal th,
+.quadro .linhaTotal td {
+  border-top: 2px solid var(--cor-borda);
+  background: var(--cor-superficie-suave);
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+.quadro .aParte th,
+.quadro .aParte td {
+  color: var(--cor-texto-muted);
+}
+
+.quadro .tituloAParte {
+  padding-top: 18px;
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.notaLinha {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--cor-texto-muted);
+}
+
+.semLinhas {
+  color: var(--cor-texto-muted);
+}
+
+/* --- Tela do credor ------------------------------------------------------------------------- */
+
+.valores {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+}
+
+.valor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+  min-width: 0;
+}
+
+.rotuloValor {
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.numeroValor {
+  font-family: var(--fonte-titulo);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.seta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 96px;
+  font-variant-numeric: tabular-nums;
+}
+
+.iconeSeta {
+  color: var(--cor-dourado-600);
+}
+
+.percentual {
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+.diferenca {
+  font-size: 13px;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .valores {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .seta {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .iconeSeta {
+    transform: rotate(90deg);
+  }
+}
+
+/* --- Diálogos ------------------------------------------------------------------------------- */
+
+.formDialogo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  gap: 16px 20px;
+}
+
+.acoesDialogo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.notaFormulario {
+  padding: 12px 16px;
+  border-radius: var(--raio-campo);
+  background: var(--cor-azul-claro);
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-azul-900);
+}
+
+.vinculo,
+.aviso {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--raio-campo);
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.vinculo {
+  background: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
+}
+
+.aviso {
+  background: var(--cor-alerta-claro);
+  color: var(--cor-alerta);
+}
+
+@media print {
+  .quadro {
+    min-width: 0;
+  }
+}
