@@ -1,8 +1,10 @@
 // Mesa de votação (RF-34): voto sim, não ou abstenção por presente com direito a voto, com busca,
 // filtro de classe (ou só quem falta votar) e 50 por página; botões de cenário com as regras puras
-// de `regras/votacao.ts` (T-29). Os votos ficam na tela até "Registrar resultado" (RF-37).
+// de `regras/votacao.ts` (T-29). O painel do art. 45 entra entre os cenários e a tabela, para o
+// resultado ficar à vista de quem aplica um cenário. Os votos ficam na tela até "Registrar
+// resultado" (RF-37).
 import { Shuffle } from 'lucide-react'
-import { useId, useMemo, useState } from 'react'
+import { type ReactNode, useId, useMemo, useState } from 'react'
 import { POR_PAGINA } from '../../dados/repositorio'
 import { formatarMoeda } from '../../regras/datas'
 import { formatarDocumento } from '../../regras/documentos'
@@ -24,6 +26,7 @@ export function MesaVotacao({
   aoVotar,
   aoCenario,
   avisoCenario,
+  painel,
 }: {
   linhas: readonly LinhaMesa[]
   votos: MapaVotos
@@ -33,6 +36,8 @@ export function MesaVotacao({
   aoCenario: (nome: NomeCenario) => void
   /** Mensagem do cenário impossível (T-29), ou `null`. */
   avisoCenario: string | null
+  /** Painel do art. 45, mostrado acima da tabela. */
+  painel: ReactNode
 }) {
   const idTitulo = useId()
   const idAviso = useId()
@@ -90,6 +95,8 @@ export function MesaVotacao({
           {avisoCenario}
         </p>
       )}
+
+      {painel}
 
       <Filtros
         titulo="Buscar na mesa de votação"
@@ -165,7 +172,7 @@ export function MesaVotacao({
           {
             chave: 'voto',
             titulo: 'Voto',
-            largura: '300px',
+            largura: '340px',
             celula: (linha) => (
               <EscolhaVoto
                 linha={linha}

@@ -259,12 +259,14 @@
 }
 
 .opcaoVoto {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 88px;
   min-height: var(--alvo-minimo);
-  padding: 0 10px;
+  padding: 0 12px;
+  white-space: nowrap;
   border: 1px solid var(--cor-borda-campo);
   background: var(--cor-superficie);
   font-size: var(--tamanho-texto-pequeno);
@@ -284,10 +286,15 @@
   border-radius: 0 var(--raio-campo) var(--raio-campo) 0;
 }
 
+/* O rádio cobre a opção inteira, invisível: o clique cai nele e o leitor de tela o anuncia. */
 .opcaoVoto input {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   opacity: 0;
-  pointer-events: none;
+  cursor: inherit;
 }
 
 .opcaoVoto:has(input:focus-visible) {

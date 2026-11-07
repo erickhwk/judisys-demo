@@ -153,30 +153,9 @@ function Aberta({
     }
   }
 
-  return (
+  // O registro fica logo abaixo do painel, antes da tabela da mesa (que pode ter centenas de linhas).
+  const registro = (
     <>
-      {instalada ? (
-        <>
-          <MesaVotacao
-            linhas={linhas}
-            votos={votos}
-            editavel={podeEditar}
-            aoVotar={votar}
-            aoCenario={aplicarCenario}
-            avisoCenario={avisoCenario}
-          />
-          <PainelArt45 resultado={resultado} />
-        </>
-      ) : (
-        <div className={estilos.cartao}>
-          <Vazio
-            icone={<Vote size={24} />}
-            titulo="A votação abre depois da instalação"
-            descricao="Marque os presentes e instale a AGC: votam os presentes da instalação com direito a voto."
-          />
-        </div>
-      )}
-
       {erro && !confirmando && (
         <p className={estilos.erroTexto} role="alert">
           {erro}
@@ -202,6 +181,38 @@ function Aberta({
             Registrar resultado
           </Botao>
         </div>
+      )}
+    </>
+  )
+
+  return (
+    <>
+      {instalada ? (
+        <MesaVotacao
+          linhas={linhas}
+          votos={votos}
+          editavel={podeEditar}
+          aoVotar={votar}
+          aoCenario={aplicarCenario}
+          avisoCenario={avisoCenario}
+          painel={
+            <>
+              <PainelArt45 resultado={resultado} />
+              {registro}
+            </>
+          }
+        />
+      ) : (
+        <>
+          <div className={estilos.cartao}>
+            <Vazio
+              icone={<Vote size={24} />}
+              titulo="A votação abre depois da instalação"
+              descricao="Marque os presentes e instale a AGC: votam os presentes da instalação com direito a voto."
+            />
+          </div>
+          {registro}
+        </>
       )}
       <Confirmacao
         aberto={confirmando}
@@ -259,7 +270,6 @@ function Encerrada({
           )}
         </span>
       </p>
-      <PainelArt45 resultado={resultado} />
       <MesaVotacao
         linhas={linhas}
         votos={votos}
@@ -267,6 +277,7 @@ function Encerrada({
         aoVotar={() => {}}
         aoCenario={() => {}}
         avisoCenario={null}
+        painel={<PainelArt45 resultado={resultado} />}
       />
     </>
   )
