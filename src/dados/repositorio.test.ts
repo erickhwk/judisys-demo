@@ -292,19 +292,29 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
     })
   })
 
-  describe('documento único entre credores do processo (AJ-04)', () => {
+  describe('documento único entre credores do processo e da classe (AJ-04)', () => {
     const documentoDe = async (id: string) =>
       (await armazenamento.get<Tipos['credores']>('credores', id))?.documento ?? ''
     const problemaNoDocumento = [{ campo: 'documento', mensagem: AVISO_DOCUMENTO_EXISTENTE }]
 
-    it('AJ-04 · criar credor com CPF de outro do processo (com pontuação): recusado no campo, nada gravado', async () => {
+    // No seed-mini, crd-0001 é trabalhista e crd-0002, garantia real, ambos de prc-001.
+    it('AJ-04 · criar credor com CPF de outro da mesma classe do processo (com pontuação): recusado no campo, nada gravado', async () => {
       const credores = criarRepositorio(armazenamento, 'credores', contexto())
       const documento = formatarCpf(await documentoDe('crd-0001'))
-      const erro = await credores.criar({ ...NOVO_CREDOR, documento }).catch((e: unknown) => e)
+      const erro = await credores
+        .criar({ ...NOVO_CREDOR, classe: 'trabalhista', documento })
+        .catch((e: unknown) => e)
       expect(erro).toBeInstanceOf(ErroValidacao)
       expect((erro as ErroValidacao).problemas).toEqual(problemaNoDocumento)
       expect(await credores.todos({ onde: { nome: NOVO_CREDOR.nome } })).toEqual([])
       expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-04 · o mesmo documento em outra classe do mesmo processo é permitido (art. 41)', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = await documentoDe('crd-0001')
+      const criado = await credores.criar({ ...NOVO_CREDOR, classe: 'quirografario', documento })
+      expect(criado).toMatchObject({ processoId: 'prc-001', classe: 'quirografario', documento })
     })
 
     it('AJ-04 · o mesmo documento em outro processo continua permitido', async () => {
@@ -314,16 +324,39 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
       expect(criado).toMatchObject({ processoId: 'prc-002', documento })
     })
 
-    it('AJ-04 · editar credor para o documento de outro do processo: recusado no campo, nada gravado', async () => {
+    it('AJ-04 · editar credor para o documento de outro da mesma classe do processo: recusado no campo, nada gravado', async () => {
       const credores = criarRepositorio(armazenamento, 'credores', contexto())
       const antes = await credores.buscar('crd-0002')
       const erro = await credores
-        .atualizar('crd-0002', { documento: await documentoDe('crd-0001'), natureza: 'Outra' })
+        .atualizar('crd-0002', {
+          documento: await documentoDe('crd-0001'),
+          classe: 'trabalhista',
+          natureza: 'Outra',
+        })
         .catch((e: unknown) => e)
       expect(erro).toBeInstanceOf(ErroValidacao)
       expect((erro as ErroValidacao).problemas).toEqual(problemaNoDocumento)
       expect(await credores.buscar('crd-0002')).toEqual(antes)
       expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-04 · editar credor para o documento de outro, mantendo outra classe, é permitido', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = await documentoDe('crd-0001')
+      const atualizado = await credores.atualizar('crd-0002', { documento })
+      expect(atualizado).toMatchObject({ documento, classe: 'garantia-real' })
+    })
+
+    it('AJ-04 · trocar só a classe para uma em que o mesmo documento já tem credor: recusado', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = await documentoDe('crd-0001')
+      const segundo = await credores.criar({ ...NOVO_CREDOR, classe: 'quirografario', documento })
+      const erro = await credores
+        .atualizar(segundo.id, { classe: 'trabalhista' })
+        .catch((e: unknown) => e)
+      expect(erro).toBeInstanceOf(ErroValidacao)
+      expect((erro as ErroValidacao).problemas).toEqual(problemaNoDocumento)
+      expect((await credores.buscar(segundo.id))?.classe).toBe('quirografario')
     })
 
     it('AJ-04 · editar o próprio credor sem mudar o documento continua permitido', async () => {
