@@ -2,6 +2,7 @@
 // troca só a sua, pondo o componente dela no lugar do `EmConstrucao`. O roteador (roteador.tsx)
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
+import { ListaEmpresas, NovaEmpresa, TelaEmpresa } from './modulos/empresas'
 import type { Acao, Modulo } from './regras/permissoes'
 import { EmConstrucao } from './ui/TelasDeAviso'
 
@@ -32,9 +33,9 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/processos/:id/historico', 'ler', 'logs', <EmConstrucao titulo="Processo" />),
   rota('/processos/:id/credores/:credorId', 'ler', 'credores', <EmConstrucao titulo="Credor" />),
   rota('/processos/:id/agc/:agcId', 'ler', 'agc', <EmConstrucao titulo="AGC" />),
-  rota('/empresas', 'ler', 'empresas', <EmConstrucao titulo="Empresas" />),
-  rota('/empresas/novo', 'editar', 'empresas', <EmConstrucao titulo="Nova empresa" />),
-  rota('/empresas/:id', 'ler', 'empresas', <EmConstrucao titulo="Empresa" />),
+  rota('/empresas', 'ler', 'empresas', <ListaEmpresas />),
+  rota('/empresas/novo', 'editar', 'empresas', <NovaEmpresa />),
+  rota('/empresas/:id', 'ler', 'empresas', <TelaEmpresa />),
   rota('/informes', 'ler', 'informes', <EmConstrucao titulo="Informes" />),
   rota('/informes/novo', 'editar', 'informes', <EmConstrucao titulo="Novo informe" />),
   rota('/informes/:id', 'ler', 'informes', <EmConstrucao titulo="Informe" />),

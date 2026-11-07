@@ -1,0 +1,128 @@
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.titulos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.caminho,
+.apoio {
+  color: var(--cor-texto-muted);
+}
+
+.caminho a {
+  font-weight: 500;
+  color: var(--cor-texto-muted);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Lista: razão social com o nome fantasia embaixo */
+.razao {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.razao a,
+.fantasia {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.razao a {
+  font-weight: 600;
+}
+
+.fantasia {
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 400;
+  color: var(--cor-texto-muted);
+}
+
+/* Processos da empresa (RF-17), dentro da seção do formulário */
+.processos {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.processo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: var(--alvo-minimo);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cor-borda-linha);
+}
+
+.processo:first-child {
+  padding-top: 0;
+}
+
+.processo:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.identificacao {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.identificacao a {
+  font-weight: 600;
+}
+
+.numero {
+  font-size: var(--tamanho-texto-pequeno);
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+}
+
+.detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.semProcessos {
+  grid-column: 1 / -1;
+  color: var(--cor-texto-muted);
+}
+
+/* Mensagem da exclusão recusada (T-23) */
+.vinculos {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.vinculos li + li {
+  margin-top: 6px;
+}
