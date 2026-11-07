@@ -20,6 +20,7 @@ pnpm dev          # servidor local em http://localhost:5173/
 | `pnpm test` | Vitest |
 | `pnpm seed` | Gera `public/seed.json` e `public/seed-versao.json` (fora do repositório), determinísticos, com datas relativas a hoje |
 | `pnpm pdfs` | Regera os PDFs genéricos de `public/anexos/` (commitados); rode quando mudar `scripts/seed/anexos.ts` |
+| `pnpm favicons` | Regera `public/favicon.svg`, `favicon-512.png` e `apple-touch-icon.png` (commitados) a partir do símbolo; rode quando mudar `src/ui/logos/judisys-marca-branca.svg` |
 | `pnpm build` | Build de produção em `dist/` |
 | `pnpm e2e` | Playwright (Chromium) contra `vite preview` na porta `PORTA_E2E` (padrão 4173); localmente faz o build antes |
 

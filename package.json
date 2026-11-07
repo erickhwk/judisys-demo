@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "seed": "tsx scripts/gerar-seed.ts",
-    "pdfs": "tsx scripts/gerar-pdfs.ts"
+    "pdfs": "tsx scripts/gerar-pdfs.ts",
+    "favicons": "tsx scripts/gerar-favicons.ts"
   },
   "packageManager": "pnpm@11.0.9",
   "dependencies": {
