@@ -112,12 +112,15 @@ interface ConfigColecao {
 }
 
 /** Um campo único na coleção, ou dentro de um escopo (ex.: por `processoId`). */
-export interface Unicidade {
-  /** Caminho com pontos; valor vazio não é comparado. */
+interface Unicidade {
+  /** Caminho com pontos de um campo escalar; valor vazio não é comparado. */
   campo: string
   /** Campo que delimita a unicidade: só conflitam registros com o mesmo valor nele. */
   escopo?: string
-  /** Forma comparada; padrão `String(valor)`. Documentos usam `somenteDigitos`. */
+  /**
+   * Forma comparada; padrão `String(valor)`. Documentos usam `somenteDigitos`. Com ela, a busca
+   * não usa o índice do campo (que casa o valor exato), só o do escopo, se houver.
+   */
   chave?: (valor: unknown) => string
   /** Vai para o campo no `ErroValidacao`. */
   mensagem: string
@@ -170,6 +173,12 @@ function valorEm(linha: Linha, caminho: string): unknown {
         typeof atual === 'object' && atual !== null ? (atual as Linha)[parte] : undefined,
       linha,
     )
+}
+
+/** Forma comparada do campo pela regra de unicidade; '' quando vazio. */
+function chaveEm(linha: Linha, campo: string, chave: (valor: unknown) => string = String): string {
+  const valor = valorEm(linha, campo)
+  return valor === undefined || valor === null ? '' : chave(valor)
 }
 
 function semCamposDoRegistro(linha: Linha): Linha {
@@ -266,25 +275,41 @@ export function criarRepositorio<K extends Tabela>(
     return resultado.data
   }
 
-  /** Recusa o registro que repete um campo único de outro da coleção (AJ-03). */
-  async function exigirUnicidade(linha: Linha): Promise<void> {
-    for (const { campo, escopo, chave = String, mensagem } of config.unicos ?? []) {
-      const valor = valorEm(linha, campo)
-      if (valor === undefined || valor === null) continue
-      const procurada = chave(valor)
+  /**
+   * Recusa o registro que repete um campo único de outro da coleção (AJ-03). Na edição, só confere
+   * a regra cujo valor (pela chave) ou escopo mudou: registro que já repetia continua editável.
+   */
+  async function exigirUnicidade(linha: Linha, antigo?: Linha): Promise<void> {
+    for (const { campo, escopo, chave, mensagem } of config.unicos ?? []) {
+      const procurada = chaveEm(linha, campo, chave)
       if (!procurada) continue
       const valorDoEscopo = escopo === undefined ? undefined : valorEm(linha, escopo)
-      // O índice casa o valor como gravado (já passado pelo schema); a comparação usa a chave.
-      const vizinhos = await candidatos({ [campo]: valor })
-      const repetido = vizinhos.some((outra) => {
-        if (outra.id === linha.id) return false
-        if (escopo !== undefined && valorEm(outra, escopo) !== valorDoEscopo) return false
-        const valorOutro = valorEm(outra, campo)
-        return valorOutro !== undefined && valorOutro !== null && chave(valorOutro) === procurada
+      if (
+        antigo &&
+        chaveEm(antigo, campo, chave) === procurada &&
+        (escopo === undefined || valorEm(antigo, escopo) === valorDoEscopo)
+      ) {
+        continue
+      }
+      // O índice do campo casa o valor como gravado: com `chave`, a busca fica só no escopo.
+      const vizinhos = await candidatos({
+        ...(chave ? {} : { [campo]: valorEm(linha, campo) }),
+        ...(escopo === undefined ? {} : { [escopo]: valorDoEscopo }),
       })
+      const repetido = vizinhos.some(
+        (outra) =>
+          outra.id !== linha.id &&
+          (escopo === undefined || valorEm(outra, escopo) === valorDoEscopo) &&
+          chaveEm(outra, campo, chave) === procurada,
+      )
       if (repetido) {
         throw new ErroValidacao([
-          { code: 'custom', path: campo.split('.'), message: mensagem, input: valor },
+          {
+            code: 'custom',
+            path: campo.split('.'),
+            message: mensagem,
+            input: valorEm(linha, campo),
+          },
         ])
       }
     }
@@ -385,7 +410,7 @@ export function criarRepositorio<K extends Tabela>(
         const diferencasDoRegistro = diferencas(antigo, novo as Linha)
         // Sem mudança, nada é gravado e não há log (LOG-02).
         if (diferencasDoRegistro.length === 0) return antigo as T
-        await exigirUnicidade(novo as Linha)
+        await exigirUnicidade(novo as Linha, antigo)
         await armazenamento.put(tabela, novo)
         await gravarLog('editou', novo as Linha, diferencasDoRegistro, carimbo)
         return novo

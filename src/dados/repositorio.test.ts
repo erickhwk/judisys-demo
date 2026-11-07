@@ -9,6 +9,7 @@ import {
   ESCRITORIO_ID,
 } from '../../tests/fixtures/seed-mini'
 import { completarCnpj, formatarCnj, formatarCnpj, formatarCpf } from '../regras/documentos'
+import { normalizar } from '../regras/normalizar'
 import type { Papel } from '../regras/permissoes'
 import type { Armazenamento } from './armazenamento'
 import {
@@ -253,6 +254,40 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
         cidade: 'Jundiaí',
       })
       expect(atualizada).toMatchObject({ cnpj, cidade: 'Jundiaí' })
+    })
+
+    it('AJ-03 · empresa que já repetia o CNPJ (dado antigo) continua editável em outros campos', async () => {
+      const empresas = criarRepositorio(armazenamento, 'empresas', contexto())
+      const original = await armazenamento.get<Tipos['empresas']>('empresas', 'emp-01')
+      if (!original) throw new Error('seed sem emp-01')
+      await armazenamento.put('empresas', { ...original, id: 'emp-copia' })
+      const atualizada = await empresas.atualizar('emp-copia', { cidade: 'Itu' })
+      expect(atualizada.cidade).toBe('Itu')
+    })
+
+    it('chave: compara pela forma normalizada, mesmo com o valor gravado diferente', async () => {
+      const config = COLECOES.credores
+      const original = config.unicos
+      config.unicos = [
+        {
+          campo: 'nome',
+          escopo: 'processoId',
+          chave: (valor) => normalizar(String(valor)),
+          mensagem: 'Nome repetido',
+        },
+      ]
+      try {
+        const credores = criarRepositorio(armazenamento, 'credores', contexto())
+        await credores.criar(NOVO_CREDOR)
+        const erro = await credores
+          .criar({ ...NOVO_CREDOR, nome: 'italo barros', documento: cpfDoCredor(501) })
+          .catch((e: unknown) => e)
+        expect((erro as ErroValidacao).problemas).toEqual([
+          { campo: 'nome', mensagem: 'Nome repetido' },
+        ])
+      } finally {
+        config.unicos = original
+      }
     })
 
     it('escopo: o mesmo valor só conflita dentro do escopo', async () => {
