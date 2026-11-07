@@ -1,12 +1,13 @@
 // Roteador hash (T-03) com as guardas da SDD §5.6: sem sessão vai ao login (PER-08); sem permissão
 // mostra "Seu papel não permite esta ação" (RF-40, PER-04); qualquer outra rota, "Página não
-// encontrada". As rotas em si estão em rotas.tsx.
+// encontrada". As rotas em si vêm de rotas.tsx, que junta as de cada módulo.
 import type { ReactNode } from 'react'
 import { createHashRouter, Navigate, Outlet, type RouteObject } from 'react-router'
+import type { DefinicaoRota } from './definicaoRotas'
 import { Entrar } from './modulos/entrada/Entrar'
 import { useSessao } from './modulos/entrada/sessao'
 import { pode } from './regras/permissoes'
-import { type DefinicaoRota, ROTAS, ROTAS_SEM_LAYOUT } from './rotas'
+import { ROTAS, ROTAS_SEM_LAYOUT } from './rotas'
 import { Layout } from './ui/Layout'
 import { MolduraProvider } from './ui/Moldura'
 import { NaoEncontrada, SemPermissao } from './ui/TelasDeAviso'

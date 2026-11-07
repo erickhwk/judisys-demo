@@ -128,7 +128,7 @@ judisys-demo/
     gerar-pdfs.ts
     seed/                     listas de nomes, processos à mão, fábricas
   src/
-    main.tsx, app.tsx, rotas.tsx
+    main.tsx, app.tsx, rotas.tsx    rotas.tsx junta os modulos/*/rotas.tsx (AJ-05)
     dados/
       armazenamento.ts        interface Armazenamento (T-20)
       dexie.ts                ArmazenamentoDexie + VERSAO_SCHEMA
@@ -146,6 +146,7 @@ judisys-demo/
     modulos/
       entrada/ dashboard/ processos/ empresas/ credores/ agc/ prazos/
       informes/ usuarios/ logs/ busca/
+                              cada um com rotas.tsx: rotas e conteúdo das abas do processo
     ui/
       Layout, MenuLateral, FaixaDemo, Rodape, Tabela, Paginacao, Filtros,
       Campo, Formulario, Dialogo, Confirmacao, Selo, Vazio, Erro, VisualizadorPdf
