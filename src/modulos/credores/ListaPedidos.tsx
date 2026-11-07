@@ -39,7 +39,8 @@ export function efeitoDoAcolhimento(pedido: Pedido): string {
     pedido.tipo === 'impugnacao'
       ? 'com zero nas relações do devedor e do AJ e o valor no QGC'
       : 'com zero na relação do devedor e o valor na relação do AJ'
-  return `${pedido.requerente.nome} passa a ser credor do processo, ${criacao}.`
+  // decidirPedido aplica ao credor que, até a decisão, passou a ter o CPF/CNPJ do requerente.
+  return `${pedido.requerente.nome} passa a ser credor do processo, ${criacao}. Se o CPF/CNPJ já for de um credor do processo, o pedido vale para ele: ${destino.charAt(0).toLowerCase()}${destino.slice(1)}`
 }
 
 /**

@@ -10,6 +10,7 @@ import { ROTULOS_FASE } from '../../regras/fases'
 import { rotuloClasse, valorVigente } from '../../regras/qgc'
 import { hoje } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
+import { Erro } from '../../ui/Erro'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useCredoresDoProcesso, useProcesso } from './consultas'
 import estilos from './credores.module.css'
@@ -29,6 +30,14 @@ export function TelaQgc() {
   if (processo.isPending || credores.isPending) {
     return <p className={estilos.carregando}>Carregando o QGC…</p>
   }
+  if (processo.isError || credores.isError) {
+    // Sem os credores, o QGC sairia vazio e com total zero, como se fosse válido.
+    return (
+      <main className={impressao.paginaImpressao}>
+        <Erro mensagem="Não foi possível carregar o QGC. Recarregue a página." />
+      </main>
+    )
+  }
   if (!processo.data) {
     return (
       <main className={impressao.paginaImpressao}>
@@ -36,7 +45,7 @@ export function TelaQgc() {
       </main>
     )
   }
-  return <ConteudoQgc processo={processo.data} credores={credores.data ?? []} />
+  return <ConteudoQgc processo={processo.data} credores={credores.data} />
 }
 
 export function ConteudoQgc({ processo, credores }: { processo: Processo; credores: Credor[] }) {

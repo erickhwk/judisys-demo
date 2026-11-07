@@ -23,7 +23,7 @@ import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useSessao } from '../entrada/sessao'
 import { CabecalhoPagina } from './CabecalhoPagina'
-import { useCredor, usePedidosDoProcesso, useProcesso, useRelacaoPublicada } from './consultas'
+import { useCredor, usePedidosDoCredor, useProcesso, useRelacaoPublicada } from './consultas'
 import estilos from './credores.module.css'
 import { DialogoCredor } from './DialogoCredor'
 import { DialogoPedido } from './DialogoPedido'
@@ -51,13 +51,12 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
   const podeEditar = sessao ? pode(sessao.papel, 'editar', 'credores') : false
   const navegar = useNavigate()
   const excluir = useServico(excluirCredor)
-  const pedidos = usePedidosDoProcesso(processo.id)
+  const pedidos = usePedidosDoCredor(credor.id)
   const publicada = useRelacaoPublicada(processo.id)
   const [dialogo, setDialogo] = useState<'editar' | 'pedido' | 'excluir' | null>(null)
   const [ocupado, setOcupado] = useState(false)
   const [erroExclusao, setErroExclusao] = useState<{ mensagem: string; vinculos: Vinculo[] }>()
 
-  const doCredor = (pedidos.data ?? []).filter((pedido) => pedido.credorId === credor.id)
   const variacoes = variacao(credor)
   const aba = `/processos/${processo.id}/credores`
 
@@ -151,7 +150,7 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
         </div>
         <ListaPedidos
           rotulo={`Pedidos de crédito de ${credor.nome}`}
-          pedidos={doCredor}
+          pedidos={pedidos.data ?? []}
           tipoProcesso={processo.tipo}
           comRequerente={false}
           podeEditar={podeEditar}

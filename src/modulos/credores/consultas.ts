@@ -50,6 +50,15 @@ export function usePedidosDoProcesso(processoId: string) {
   })
 }
 
+/** Pedidos de um credor, pelo índice `credorId`. */
+export function usePedidosDoCredor(credorId: string) {
+  const repo = useRepo('pedidosDeCredito')
+  return useQuery({
+    queryKey: ['pedidosDeCredito', 'todos', { credorId }],
+    queryFn: () => repo.todos({ onde: { credorId }, ordem: { campo: 'data', direcao: 'desc' } }),
+  })
+}
+
 /** A relação do AJ do processo já foi publicada (CRD-10). */
 export function useRelacaoPublicada(processoId: string) {
   const repoMarcos = useRepo('marcosDeFase')

@@ -127,7 +127,11 @@ function FormularioPedido({
   })
 
   async function procurarExistente(documento: string): Promise<Credor | undefined> {
-    if (!validarCpf(documento) && !validarCnpj(documento)) return undefined
+    if (!validarCpf(documento) && !validarCnpj(documento)) {
+      // Documento mudou para um inválido: o aviso do credor anterior não vale mais.
+      setExistente(undefined)
+      return undefined
+    }
     const [achado] = await repoCredores.todos({
       onde: { processoId: processo.id, documento: somenteDigitos(documento) },
     })
