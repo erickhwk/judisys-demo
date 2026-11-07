@@ -71,7 +71,10 @@
   box-shadow: var(--sombra-card);
 }
 
+/* `position`: o texto `.somente-leitor` do visualizador (absoluto) fica preso ao cartão; sem isso
+   ele escapa da coluna que rola e a página inteira ganha uma rolagem a mais. */
 .secao {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -175,7 +178,9 @@
   background: var(--cor-hover-fantasma);
 }
 
+/* `position`: prende o input escondido (`.somente-leitor`, absoluto) ao campo, como em `.secao`. */
 .escolherArquivo {
+  position: relative;
   display: flex;
 }
 
