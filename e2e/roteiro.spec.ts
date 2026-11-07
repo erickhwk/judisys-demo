@@ -64,7 +64,10 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
 
   // 4. AGC daqui a 6 dias, conduzida antes da data com o aviso (RF-31).
   // Volta ao processo pela trilha da tela do credor.
-  await page.getByRole('main').getByRole('link', { name: 'Grupo Lontra Azul' }).click()
+  await page
+    .getByRole('navigation', { name: 'Trilha' })
+    .getByRole('link', { name: 'Grupo Lontra Azul' })
+    .click()
   await abas.getByRole('link', { name: 'AGC' }).click()
   await abrirAgcDaLista(page)
   await expect(page.getByRole('note')).toContainText('Simulação: a data da AGC ainda não chegou')
