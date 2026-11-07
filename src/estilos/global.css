@@ -67,10 +67,13 @@ iframe {
   max-width: 100%;
 }
 
-/* Foco visível dourado em tudo que recebe foco pelo teclado (RNF-01) */
+/* Foco visível dourado em tudo que recebe foco pelo teclado (RNF-01).
+   O dourado sozinho tem 2,6:1 sobre branco; o anel azul-900 por dentro (no vão do offset)
+   garante os 3:1 do WCAG 1.4.11 sem perder o dourado do guia. */
 :focus-visible {
   outline: var(--foco-contorno);
   outline-offset: 2px;
+  box-shadow: var(--foco-anel-interno);
 }
 
 ::placeholder {

@@ -55,6 +55,7 @@
 
   /* Foco */
   --foco-contorno: 2px solid var(--cor-dourado-500);
+  --foco-anel-interno: 0 0 0 2px var(--cor-azul-900);
   --foco-sombra: 0 0 0 3px rgba(200, 153, 63, 0.35);
 
   /* Raios */

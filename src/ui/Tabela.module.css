@@ -26,6 +26,8 @@
 
 .rolagem:focus-visible {
   outline-offset: -2px;
+  /* Contorno por dentro: o anel azul fica dentro do dourado, como no foco global */
+  box-shadow: inset 0 0 0 4px var(--cor-azul-900);
 }
 
 .tabela {
