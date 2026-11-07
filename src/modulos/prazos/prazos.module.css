@@ -167,8 +167,10 @@
   color: var(--cor-texto-forte);
 }
 
-/* Calendário mensal */
+/* Calendário mensal. `position: relative` prende aqui os textos só para leitor de tela (absolutos):
+   sem isso eles escapam da coluna que rola e a janela ganha uma segunda barra de rolagem. */
 .calendario {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-card);
@@ -399,4 +401,10 @@
     clip: auto;
     white-space: normal;
   }
+}
+
+/* Âncora do título "Ações" só para leitor: sem ela o texto absoluto escapa da rolagem da tabela e
+   a página ganha rolagem horizontal no celular. */
+.ancoraLeitor {
+  position: relative;
 }

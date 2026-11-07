@@ -90,6 +90,25 @@ test('PRZ-09 · calendário mensal: prazos por dia, navegação e link para o pr
   await expect(page).toHaveURL(/#\/processos\/prc-001\/prazos\?prazo=prz-0012$/)
 })
 
+test('agenda no celular e no calendário: só a coluna de conteúdo rola, a janela não', async ({
+  page,
+}) => {
+  const tamanhoDaJanela = () =>
+    page.evaluate(() => [
+      document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    ])
+  await entrarComo(page, /Entrar como Administrador/)
+  await abrirAgenda(page, '?vista=calendario')
+  await expect(page.getByRole('region', { name: 'novembro de 2026' })).toBeVisible()
+  expect(await tamanhoDaJanela()).toEqual([0, 0])
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await abrirAgenda(page)
+  await expect(page.locator('tbody tr').first()).toBeVisible()
+  expect(await tamanhoDaJanela()).toEqual([0, 0])
+})
+
 test('PRZ-10 · prazo manual sem base legal', async ({ page }) => {
   await entrarComo(page, /Entrar como Advogado/)
   const lista = await abrirAgenda(page, '?processo=prc-003')
