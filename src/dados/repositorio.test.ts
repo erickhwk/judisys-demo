@@ -335,6 +335,15 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
       })
       expect(atualizado).toMatchObject({ documento, natureza: 'Outra' })
     })
+
+    it('AJ-04 · credor que já repetia o documento no processo (seed) continua editável em outros campos', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const original = await armazenamento.get<Tipos['credores']>('credores', 'crd-0001')
+      if (!original) throw new Error('seed sem crd-0001')
+      await armazenamento.put('credores', { ...original, id: 'crd-copia' })
+      const atualizado = await credores.atualizar('crd-copia', { natureza: 'Outra' })
+      expect(atualizado.natureza).toBe('Outra')
+    })
   })
 
   describe('permissão (INV-02)', () => {
