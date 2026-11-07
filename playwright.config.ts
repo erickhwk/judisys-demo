@@ -14,7 +14,7 @@ export default defineConfig({
   // No CI, além das anotações no PR, gera o HTML que o workflow guarda quando o e2e falha
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: `http://localhost:${porta}/judisys-demo/`,
+    baseURL: `http://localhost:${porta}/`,
     trace: 'on-first-retry',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
@@ -24,7 +24,7 @@ export default defineConfig({
     command: process.env.CI
       ? `pnpm preview --port ${porta} --strictPort`
       : `pnpm seed && pnpm build && pnpm preview --port ${porta} --strictPort`,
-    url: `http://localhost:${porta}/judisys-demo/`,
+    url: `http://localhost:${porta}/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
