@@ -143,9 +143,11 @@
     box-shadow: var(--sombra-dialogo);
   }
 
+  /* Ao abrir, visível na hora (o foco entra num link); ao fechar, some no fim da transição. */
   .gavetaAberta {
     transform: none;
     visibility: visible;
+    transition: transform 0.2s ease;
   }
 
   .recolhido .topo {

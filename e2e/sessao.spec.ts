@@ -113,7 +113,15 @@ test('celular: o menu lateral abre como gaveta e fecha ao navegar', async ({ pag
   await entrarComo(page, /Entrar como Administrador/)
   const processos = page.getByRole('link', { name: 'Processos' })
   await expect(processos).toBeHidden()
-  await page.getByRole('button', { name: 'Abrir menu' }).click()
+  const abrirMenu = page.getByRole('button', { name: 'Abrir menu' })
+  // Teclado: o foco entra na gaveta e, com Esc, volta ao botão que a abriu.
+  await abrirMenu.click()
+  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(processos).toBeHidden()
+  await expect(abrirMenu).toBeFocused()
+
+  await abrirMenu.click()
   await expect(processos).toBeVisible()
   await processos.click()
   await expect(page.getByRole('heading', { name: 'Processos', level: 1 })).toBeVisible()

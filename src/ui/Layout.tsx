@@ -2,7 +2,7 @@
 // topo, menu lateral (recolhível; gaveta no celular), topo com o menu da conta, conteúdo e rodapé.
 // A faixa fica fora da área que rola, então nunca sai da tela.
 import { Menu } from 'lucide-react'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { NOMES_PAPEIS } from '../modulos/entrada/papeis'
 import { useSessao } from '../modulos/entrada/sessao'
@@ -21,6 +21,7 @@ export function Layout() {
   const [recolhido, setRecolhido] = useState(false)
   const [gavetaAberta, setGavetaAberta] = useState(false)
   const coluna = useRef<HTMLDivElement>(null)
+  const botaoMenu = useRef<HTMLButtonElement>(null)
   const { pathname } = useLocation()
 
   // A coluna é que rola: ao trocar de tela, volta ao topo.
@@ -29,14 +30,21 @@ export function Layout() {
     coluna.current?.scrollTo(0, 0)
   }, [pathname])
 
+  // Gaveta aberta: o foco entra no primeiro link e, ao fechar, volta ao botão que a abriu.
+  const fecharGaveta = useCallback(() => {
+    setGavetaAberta(false)
+    botaoMenu.current?.focus()
+  }, [])
+
   useEffect(() => {
     if (!gavetaAberta) return
+    document.getElementById(idMenu)?.querySelector<HTMLElement>('a')?.focus()
     const aoTeclar = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') setGavetaAberta(false)
+      if (evento.key === 'Escape') fecharGaveta()
     }
     document.addEventListener('keydown', aoTeclar)
     return () => document.removeEventListener('keydown', aoTeclar)
-  }, [gavetaAberta])
+  }, [gavetaAberta, idMenu, fecharGaveta])
 
   // A rota só renderiza o Layout com sessão (ExigeSessao).
   if (!sessao) return null
@@ -56,18 +64,15 @@ export function Layout() {
           recolhido={recolhido}
           aoAlternarRecolhido={() => setRecolhido((valor) => !valor)}
           gavetaAberta={gavetaAberta}
-          aoFecharGaveta={() => setGavetaAberta(false)}
+          aoFecharGaveta={fecharGaveta}
         />
         {gavetaAberta && (
-          <div
-            className={estilos.fundoGaveta}
-            aria-hidden="true"
-            onClick={() => setGavetaAberta(false)}
-          />
+          <div className={estilos.fundoGaveta} aria-hidden="true" onClick={fecharGaveta} />
         )}
         <div className={estilos.coluna} ref={coluna}>
           <header className={`${estilos.topo} nao-imprimir`}>
             <button
+              ref={botaoMenu}
               type="button"
               className={estilos.abrirMenu}
               aria-label="Abrir menu"
