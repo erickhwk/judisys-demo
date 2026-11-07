@@ -3,10 +3,9 @@
 // cai para a memória (PRD §13). O reset manual (RF-02) refaz a gravação sobre o mesmo armazenamento.
 import type { DexieOptions } from 'dexie'
 import { z } from 'zod'
-import { type DataIso, somarDias } from '../regras/datas'
-import { proximoRma } from '../regras/prazos'
+import { type DataIso, somarDias, somarMeses } from '../regras/datas'
 import { hoje as hojeDoRelogio } from '../regras/relogio'
-import { type Armazenamento, type Id, TABELAS, type Tabela } from './armazenamento'
+import { type Armazenamento, TABELAS, type Tabela } from './armazenamento'
 import { ArmazenamentoDexie, NOME_BANCO, VERSAO_SCHEMA } from './dexie'
 import { ArmazenamentoMemoria } from './memoria'
 import { SCHEMAS, type Tipos } from './schemas'
@@ -64,36 +63,25 @@ export function resolverDatas<T>(valor: T, hoje: DataIso): T {
 
 type Prazo = Tipos['prazos']
 
-function guardarMaior(mapa: Map<Id, DataIso>, chave: Id, data: DataIso): void {
-  const atual = mapa.get(chave)
-  if (atual === undefined || data > atual) mapa.set(chave, data)
+/** Dia 15 do mês de `data`. */
+function dia15(data: DataIso): DataIso {
+  return `${data.slice(0, 8)}15`
 }
 
 /**
- * Recalcula o vencimento de cada RMA aberto com `proximoRma`, a partir do vencimento do último RMA
- * cumprido do processo ou, sem nenhum, do marco "Processamento deferido" (T-34). O deslocamento
- * fixo do T-24 só acerta o dia 15 quando a demo abre na data-base do seed; nela, isto não muda nada.
+ * Leva cada RMA aberto para um dia 15 sem mudar a situação dele em relação a `hoje` (T-34): o que
+ * está em dia passa a vencer no primeiro dia 15 a partir de hoje; o vencido, no último dia 15 antes
+ * de hoje. O deslocamento fixo do T-24 só acerta o dia 15 na data-base do seed, e recalcular a
+ * partir do último cumprido deixaria quase todo RMA vencido em boa parte do mês. A cadeia de
+ * cumpridos não muda: eles vencem antes de hoje e antes do aberto nos dois casos.
  */
-export function recalcularRmas(
-  prazos: readonly Prazo[],
-  marcos: readonly Tipos['marcosDeFase'][],
-): Prazo[] {
-  const ultimoCumprido = new Map<Id, DataIso>()
-  const deferimento = new Map<Id, DataIso>()
-  for (const prazo of prazos) {
-    if (ehRma(prazo) && prazo.status === 'cumprido') {
-      guardarMaior(ultimoCumprido, prazo.processoId, prazo.vencimento)
-    }
-  }
-  for (const marco of marcos) {
-    if (marco.fase === 'processamento-deferido') {
-      guardarMaior(deferimento, marco.processoId, marco.data)
-    }
-  }
+export function recalcularRmas(prazos: readonly Prazo[], hoje: DataIso): Prazo[] {
+  const desteMes = dia15(hoje)
+  const proximo = hoje <= desteMes ? desteMes : somarMeses(desteMes, 1)
+  const anterior = hoje > desteMes ? desteMes : somarMeses(desteMes, -1)
   return prazos.map((prazo) => {
     if (!ehRma(prazo) || prazo.status !== 'aberto') return prazo
-    const referencia = ultimoCumprido.get(prazo.processoId) ?? deferimento.get(prazo.processoId)
-    return referencia === undefined ? prazo : { ...prazo, vencimento: proximoRma(referencia) }
+    return { ...prazo, vencimento: prazo.vencimento < hoje ? anterior : proximo }
   })
 }
 
@@ -146,7 +134,7 @@ export function prepararSeed(json: unknown, hoje: DataIso): SeedCarregado {
     })
   }
   const validas = tabelas as TabelasSeed
-  validas.prazos = recalcularRmas(validas.prazos, validas.marcosDeFase)
+  validas.prazos = recalcularRmas(validas.prazos, hoje)
   return { versao: arquivo.data.versao, tabelas: validas }
 }
 

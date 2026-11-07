@@ -7,7 +7,6 @@ import { relativizar } from '../../scripts/seed/datas'
 import { type ArquivoSeed, gerarSeed } from '../../scripts/seed/gerar'
 import { comFalhaEm } from '../../tests/fixtures/falhas'
 import { seedMini } from '../../tests/fixtures/seed-mini'
-import { proximoRma } from '../regras/prazos'
 import type { Armazenamento } from './armazenamento'
 import {
   type Banco,
@@ -421,19 +420,25 @@ describe('CAR-12 · sem localStorage', () => {
   })
 })
 
-describe('T-34 · RMA aberto vence no dia 15 em qualquer "hoje"', () => {
+describe('T-34 · RMA aberto vence no dia 15 em qualquer "hoje", sem mudar de situação', () => {
   let seed: ArquivoSeed
   beforeAll(() => {
     seed = gerarSeed()
   })
 
+  const situacoes = (prazos: Tipos['prazos'][], hoje: string) =>
+    prazos
+      .filter((p) => ehRma(p) && p.status === 'aberto')
+      .map((p) => [p.processoId, p.vencimento < hoje ? 'vencido' : 'em dia'])
+      .sort()
+
   it('na data-base do seed, o recálculo não muda nada', () => {
     const tabelas = resolverDatas(seed.tabelas, HOJE)
-    expect(recalcularRmas(tabelas.prazos, tabelas.marcosDeFase)).toEqual(tabelas.prazos)
+    expect(recalcularRmas(tabelas.prazos, HOJE)).toEqual(tabelas.prazos)
   })
 
-  it.each(['2026-11-20', '2026-12-01', '2027-02-28', '2028-02-29'])(
-    'com hoje = %s, cada RMA aberto vence no dia 15 seguinte ao último cumprido',
+  it.each(['2026-11-06', '2026-11-15', '2026-11-20', '2026-12-01', '2027-02-28', '2028-02-29'])(
+    'com hoje = %s, todo RMA aberto vence num dia 15 e cada um mantém a situação da data-base',
     (hoje) => {
       const { tabelas } = prepararSeed(structuredClone(seed), hoje)
       const rmas = tabelas.prazos.filter(ehRma)
@@ -441,13 +446,17 @@ describe('T-34 · RMA aberto vence no dia 15 em qualquer "hoje"', () => {
       expect(abertos.length).toBeGreaterThan(0)
       for (const rma of abertos) {
         expect(rma.vencimento.slice(8), rma.id).toBe('15')
-        const cumpridos = rmas
-          .filter((p) => p.processoId === rma.processoId && p.status === 'cumprido')
-          .map((p) => p.vencimento)
-          .sort()
-        const ultimo = cumpridos.at(-1)
-        if (ultimo !== undefined) expect(rma.vencimento).toBe(proximoRma(ultimo))
+        // O aberto continua depois de todo cumprido do processo.
+        for (const cumprido of rmas.filter(
+          (p) => p.processoId === rma.processoId && p.status === 'cumprido',
+        )) {
+          expect(cumprido.vencimento < rma.vencimento, rma.id).toBe(true)
+        }
       }
+      // Mesma situação (em dia ou vencido) de cada RJ que na data-base: a vitrine continua
+      // com exatamente as RJs de RMA vencido que o gerador projetou (SED-05).
+      const naBase = resolverDatas(seed.tabelas, HOJE).prazos
+      expect(situacoes(tabelas.prazos, hoje)).toEqual(situacoes(naBase, HOJE))
       // Só os RMAs abertos mudam: o resto acompanha o deslocamento do T-24.
       const semRecalculo = resolverDatas(seed.tabelas, hoje).prazos
       const outros = (lista: typeof semRecalculo) =>
@@ -456,42 +465,34 @@ describe('T-34 · RMA aberto vence no dia 15 em qualquer "hoje"', () => {
     },
   )
 
-  it('sem RMA cumprido, conta do marco "Processamento deferido"', () => {
-    const registro = (id: string) => ({
+  it('em dia vai para o primeiro dia 15 a partir de hoje; vencido, para o último antes de hoje', () => {
+    const registro = (id: string, vencimento: string, origem: 'automatico' | 'manual') => ({
       id,
       escritorioId: 'esc-1',
       criadoEm: '2026-11-20T10:00',
       atualizadoEm: '2026-11-20T10:00',
+      processoId: 'prc-1',
+      titulo: 'Relatório mensal de atividades (RMA)',
+      origem,
+      status: 'aberto' as const,
+      vencimento,
     })
-    const marcos: Tipos['marcosDeFase'][] = [
-      {
-        ...registro('mrc-1'),
-        processoId: 'prc-1',
-        fase: 'processamento-deferido',
-        data: '2026-11-20',
-      },
-    ]
     const prazos: Tipos['prazos'][] = [
-      {
-        ...registro('prz-1'),
-        processoId: 'prc-1',
-        titulo: 'Relatório mensal de atividades (RMA)',
-        origem: 'automatico',
-        status: 'aberto',
-        vencimento: '2026-12-28',
-      },
-      {
-        ...registro('prz-2'),
-        processoId: 'prc-1',
-        titulo: 'Relatório mensal de atividades (RMA)',
-        origem: 'manual',
-        status: 'aberto',
-        vencimento: '2026-12-28',
-      },
+      registro('prz-1', '2026-11-28', 'automatico'),
+      registro('prz-2', '2026-11-03', 'automatico'),
+      registro('prz-3', '2026-12-28', 'manual'),
     ]
-    const [rma, manual] = recalcularRmas(prazos, marcos)
-    expect(rma?.vencimento).toBe('2026-12-15')
-    expect(manual?.vencimento).toBe('2026-12-28')
+    expect(recalcularRmas(prazos, '2026-11-20').map((p) => p.vencimento)).toEqual([
+      '2026-12-15',
+      '2026-11-15',
+      '2026-12-28',
+    ])
+    // Hoje no dia 15: em dia vence hoje; vencido vai para o dia 15 do mês anterior.
+    expect(recalcularRmas(prazos, '2026-11-15').map((p) => p.vencimento)).toEqual([
+      '2026-11-15',
+      '2026-10-15',
+      '2026-12-28',
+    ])
   })
 
   it('o seed completo carrega no armazenamento numa outra data', async () => {
