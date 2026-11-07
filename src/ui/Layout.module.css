@@ -13,6 +13,9 @@
 }
 
 .coluna {
+  /* Bloco de contenção dos absolutos de todas as telas (ex.: `.somente-leitor`): sem ele, escapam
+     da rolagem da coluna e a página inteira rola (AJ-02). */
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;

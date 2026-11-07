@@ -65,7 +65,9 @@ export function Dialogo({
         aoFechar()
       }}
       onClose={() => {
-        if (!aberto) return
+        // O `close` chega uma tarefa depois do fechamento: se o diálogo já foi reaberto, o evento é
+        // do fechamento anterior e não fecha o atual (AJ-02).
+        if (!aberto || ref.current?.open) return
         aoFechar()
         ressincronizar()
       }}

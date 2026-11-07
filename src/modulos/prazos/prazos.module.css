@@ -402,9 +402,3 @@
     white-space: normal;
   }
 }
-
-/* Âncora do título "Ações" só para leitor: sem ela o texto absoluto escapa da rolagem da tabela e
-   a página ganha rolagem horizontal no celular. */
-.ancoraLeitor {
-  position: relative;
-}
