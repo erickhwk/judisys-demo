@@ -95,6 +95,9 @@ Nenhuma bloqueia a implementação.
 | T-28 | Prazos automáticos de marcos pulados **não** são criados. Ex.: avançar de "processamento deferido" direto para "plano apresentado" não cria os prazos do edital. | Prazo sem marco não tem data-base. |
 | T-29 | Cenários da mesa de votação (RF-34) são funções puras com RNG injetável. Quando as presenças não permitem o cenário (ex.: cram down com uma única classe presente), nada muda e aparece "Este cenário não é possível com as presenças atuais". | Testável e sem resultado enganoso. |
 | T-30 | O resumo da ata (RF-37) é gravado num campo `resumo` do informe (texto estruturado), exibido na tela do informe acima do PDF genérico. | O PDF anexado é genérico; o resumo é o que tem o resultado real. |
+| T-31 | Requisito 1 do cram down (art. 58, §1º, I): a base é o valor dos votos sim + não dos presentes; abstenções e presentes sem voto ficam fora, como no art. 45 da demo (D-16). Decidido com o usuário em 2026-11-07 (DMO-05). | Coerência com a D-16; a letra do inciso ("todos os créditos presentes") incluiria as abstenções. |
+| T-32 | Em 2ª convocação a AGC instala com qualquer número de presentes votantes, mas não com zero (DMO-05). | Sem presentes não há votação a registrar. |
+| T-33 | Presente sem voto conta como abstenção nas regras puras (`resultadoAgc`); a tela bloqueia "Registrar resultado" enquanto houver presente sem voto (DMO-17). | Painel ao vivo continua simples e uma votação incompleta não vira aprovação. |
 
 ---
 
