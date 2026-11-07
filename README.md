@@ -18,7 +18,8 @@ pnpm dev          # servidor local em http://localhost:5173/judisys-demo/
 | `pnpm lint` | Biome (formatação e lint) |
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm test` | Vitest |
-| `pnpm seed` | Gera `public/seed.json` e `public/seed-versao.json` (até a DMO-07 é um placeholder que só registra no log) |
+| `pnpm seed` | Gera `public/seed.json` e `public/seed-versao.json` (fora do repositório), determinísticos, com datas relativas a hoje |
+| `pnpm pdfs` | Regera os PDFs genéricos de `public/anexos/` (commitados); rode quando mudar `scripts/seed/anexos.ts` |
 | `pnpm build` | Build de produção em `dist/` |
 | `pnpm e2e` | Playwright (Chromium) contra `vite preview` na porta `PORTA_E2E` (padrão 4173); localmente faz o build antes |
 
