@@ -89,7 +89,7 @@ test('AJ-04 · CPF de outro credor do processo recusado na edição, com o erro 
   await documento.fill('89391986463')
   await dialogo.getByRole('button', { name: 'Salvar' }).click()
   await expect(
-    dialogo.getByText('Já existe credor com este CPF/CNPJ neste processo').first(),
+    dialogo.getByText('Já existe credor com este CPF/CNPJ nesta classe do processo').first(),
   ).toBeVisible()
   await expect(documento).toHaveAttribute('aria-invalid', 'true')
   await dialogo.getByRole('button', { name: 'Cancelar' }).click()

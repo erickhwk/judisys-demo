@@ -42,7 +42,8 @@ const CAMPO_DO_PROBLEMA: Record<string, FieldPath<EntradaPedido>> = {
 /**
  * Registrar pedido de crédito (RF-29). Com `credor`, o pedido é dele; sem, é de um requerente fora
  * da lista. O tipo oferecido segue a fase (CRD-10). Se o CPF/CNPJ do requerente já é de um credor
- * do processo, o formulário avisa e oferece vincular o pedido a ele (CRD-08).
+ * do processo na classe pedida, o formulário avisa e oferece vincular o pedido a ele (CRD-08); em
+ * outra classe, não avisa: o credor pode ter um crédito em cada classe (art. 41).
  */
 export function DialogoPedido({
   aberto,
@@ -126,14 +127,18 @@ function FormularioPedido({
     },
   })
 
-  async function procurarExistente(documento: string): Promise<Credor | undefined> {
-    if (!validarCpf(documento) && !validarCnpj(documento)) {
-      // Documento mudou para um inválido: o aviso do credor anterior não vale mais.
+  async function procurarExistente(documento: string, classe: string): Promise<Credor | undefined> {
+    if (!classe || (!validarCpf(documento) && !validarCnpj(documento))) {
+      // Sem classe ou com documento inválido, o aviso do credor anterior não vale mais.
       setExistente(undefined)
       return undefined
     }
     const [achado] = await repoCredores.todos({
-      onde: { processoId: processo.id, documento: somenteDigitos(documento) },
+      onde: {
+        processoId: processo.id,
+        documento: somenteDigitos(documento),
+        classe: classe as Credor['classe'],
+      },
     })
     setExistente(achado)
     return achado
@@ -155,7 +160,9 @@ function FormularioPedido({
 
   async function salvar(saida: SaidaPedido) {
     setErroGeral(null)
-    if (!vinculado && (await procurarExistente(saida.requerenteDocumento))) return
+    if (!vinculado && (await procurarExistente(saida.requerenteDocumento, saida.classePedida))) {
+      return
+    }
     const dados: NovoPedido = {
       processoId: processo.id,
       tipo: saida.tipo,
@@ -171,7 +178,7 @@ function FormularioPedido({
       aoTerminar()
     } catch (falha) {
       if (falha instanceof ErroRegra && falha.message === AVISO_DOCUMENTO_EXISTENTE) {
-        await procurarExistente(saida.requerenteDocumento)
+        await procurarExistente(saida.requerenteDocumento, saida.classePedida)
         return
       }
       if (falha instanceof ErroValidacao) {
@@ -185,7 +192,15 @@ function FormularioPedido({
   }
 
   const documento = register('requerenteDocumento', {
-    onBlur: (evento: { target: { value: string } }) => procurarExistente(evento.target.value),
+    onBlur: (evento: { target: { value: string } }) =>
+      procurarExistente(evento.target.value, getValues('classePedida')),
+  })
+  // O aviso depende da classe: trocá-la refaz a procura (o requerente pode já ser credor nela).
+  const classePedida = register('classePedida', {
+    onChange: (evento: { target: { value: string } }) => {
+      if (!vinculado)
+        return procurarExistente(getValues('requerenteDocumento'), evento.target.value)
+    },
   })
 
   return (
@@ -259,7 +274,7 @@ function FormularioPedido({
           obrigatorio
           colunas={3}
           erro={errors.classePedida?.message}
-          {...register('classePedida')}
+          {...classePedida}
         >
           <option value="">Escolha a classe</option>
           {classesDoTipo(processo.tipo).map((classe) => (

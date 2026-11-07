@@ -90,13 +90,16 @@ export const ERRO_CLASSE_DO_TIPO = 'Esta classe não existe neste tipo de proces
 // A mensagem mora no repositório, que também recusa o documento repetido no cadastro (AJ-04).
 export { AVISO_DOCUMENTO_EXISTENTE }
 
-/** Credor do processo com este CPF/CNPJ (CRD-08), comparando só os dígitos. */
+/**
+ * Credor do processo com este CPF/CNPJ na classe (CRD-08), comparando só os dígitos. O mesmo
+ * documento em outra classe é outro credor (uma linha por classe, art. 41) e não conta.
+ */
 export function credorComDocumento(armazenamento: Armazenamento) {
-  return async (processoId: Id, documento: string): Promise<Credor | undefined> => {
+  return async (processoId: Id, documento: string, classe: Classe): Promise<Credor | undefined> => {
     const digitos = somenteDigitos(documento)
     if (!digitos) return undefined
     const credores = await armazenamento.porIndice<Credor>('credores', 'documento', digitos)
-    return credores.find((credor) => credor.processoId === processoId)
+    return credores.find((credor) => credor.processoId === processoId && credor.classe === classe)
   }
 }
 
@@ -120,8 +123,9 @@ export type NovoPedido = Omit<Novo<Pedido>, 'status'>
 
 /**
  * Registra o pedido como pendente (RF-29). Recusa o tipo que a fase não permite (CRD-10), credor
- * de outro processo e requerente cujo CPF/CNPJ já é de um credor do processo (CRD-08: a tela
- * avisa antes e oferece vincular, ou seja, registrar com `credorId`).
+ * de outro processo e requerente cujo CPF/CNPJ já é de um credor do processo na classe pedida
+ * (CRD-08: a tela avisa antes e oferece vincular, ou seja, registrar com `credorId`). Com o
+ * documento só em outra classe, o pedido segue: acolhido, vira o credor dessa classe.
  */
 export function registrarPedido(armazenamento: Armazenamento, contexto: ContextoGravacao) {
   const repoPedidos = criarRepositorio(armazenamento, 'pedidosDeCredito', contexto)
@@ -153,7 +157,7 @@ export function registrarPedido(armazenamento: Armazenamento, contexto: Contexto
       }
 
       const existente = dados.requerente
-        ? await porDocumento(dados.processoId, dados.requerente.documento)
+        ? await porDocumento(dados.processoId, dados.requerente.documento, dados.classePedida)
         : undefined
       if (existente) {
         throw new ErroRegra(AVISO_DOCUMENTO_EXISTENTE, [
@@ -181,7 +185,8 @@ export interface ResultadoDecisao {
  * - impugnação: valor e classe pedidos no QGC, relação do AJ intacta (CRD-04);
  * - requerente fora da lista: cria o credor (devedor 0; AJ = pedido, ou AJ 0 e QGC = pedido na
  *   impugnação) e liga o pedido a ele (CRD-05, CRD-06). Se, até a decisão, o CPF/CNPJ passou a
- *   ser de um credor do processo, o pedido vale para esse credor, sem criar outro.
+ *   ser de um credor do processo na classe pedida, o pedido vale para esse credor, sem criar
+ *   outro; em outra classe, não conta, e o credor da classe pedida é criado.
  * Pedido já decidido é recusado (CRD-09). Cada gravação tem seu log (credor e pedido).
  */
 export function decidirPedido(armazenamento: Armazenamento, contexto: ContextoGravacao) {
@@ -210,7 +215,8 @@ export function decidirPedido(armazenamento: Armazenamento, contexto: ContextoGr
 
       let credor = pedido.credorId
         ? await buscarOuFalhar(armazenamento, 'credores', pedido.credorId)
-        : pedido.requerente && (await porDocumento(pedido.processoId, pedido.requerente.documento))
+        : pedido.requerente &&
+          (await porDocumento(pedido.processoId, pedido.requerente.documento, pedido.classePedida))
       let credorCriado = false
 
       if (credor) {
