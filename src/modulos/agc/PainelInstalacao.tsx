@@ -125,7 +125,7 @@ export function PainelInstalacao({
         rotulo="Quórum de instalação por classe"
         linhas={situacao.classes}
         chaveLinha={(linha) => linha.classe}
-        larguraMinima={editavel ? 900 : 720}
+        larguraMinima={editavel ? 940 : 720}
         colunas={[
           {
             chave: 'classe',
@@ -172,7 +172,7 @@ export function PainelInstalacao({
                 {
                   chave: 'acao',
                   titulo: <span className="somente-leitor">Ações</span>,
-                  largura: '200px',
+                  largura: '240px',
                   alinhar: 'direita' as const,
                   celula: (linha: InstalacaoClasse) => {
                     if (linha.quantidadeTotal === 0) return null
