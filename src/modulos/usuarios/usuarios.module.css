@@ -1,0 +1,68 @@
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.secao h2 {
+  font-size: 18px;
+}
+
+.descricao {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.voce {
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 400;
+  color: var(--cor-texto-muted);
+}
+
+/* Diálogo de usuário */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  gap: 16px 20px;
+}
+
+.acoesDialogo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.erroTexto {
+  color: var(--cor-perigo);
+  font-weight: 600;
+}
+
+.vinculos {
+  margin: 12px 0 0;
+  padding-left: 20px;
+}
+
+.vinculos li + li {
+  margin-top: 4px;
+}

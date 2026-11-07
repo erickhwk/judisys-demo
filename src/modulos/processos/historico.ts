@@ -7,6 +7,8 @@ import { CAMPO_EMPRESAS } from '../../dados/servicos/processos'
 import { formatarData, formatarMoeda } from '../../regras/datas'
 import { formatarCnj, formatarDocumento } from '../../regras/documentos'
 import { type Fase, ROTULOS_FASE } from '../../regras/fases'
+import { ROTULOS_PORTE } from '../empresas/empresas'
+import { NOMES_PAPEIS } from '../entrada/papeis'
 import { formatarPercentual } from './formulario'
 import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO } from './rotulos'
 
@@ -28,6 +30,8 @@ export const ROTULOS_COLECAO: Partial<Record<Tabela, string>> = {
   votos: 'voto',
   informes: 'informe',
   empresas: 'empresa',
+  usuarios: 'usuário',
+  escritorios: 'escritório',
 }
 
 const ROTULOS_CAMPO: Record<string, string> = {
@@ -63,6 +67,13 @@ const ROTULOS_CAMPO: Record<string, string> = {
   publicadoNoSite: 'Publicado no site',
   pauta: 'Pauta',
   voto: 'Voto',
+  papel: 'Papel',
+  razaoSocial: 'Razão social',
+  nomeFantasia: 'Nome fantasia',
+  cnpj: 'CNPJ',
+  porte: 'Porte',
+  cidade: 'Cidade',
+  cnae: 'CNAE',
   [CAMPO_EMPRESAS]: 'Empresas',
 }
 
@@ -81,6 +92,8 @@ const ROTULOS_VALOR: Record<string, Readonly<Record<string, string>>> = {
   tipo: ROTULOS_TIPO,
   consolidacao: ROTULOS_CONSOLIDACAO,
   origem: { automatico: 'Automático', manual: 'Manual' },
+  papel: NOMES_PAPEIS,
+  porte: ROTULOS_PORTE,
   status: {
     aberto: 'Aberto',
     cumprido: 'Cumprido',
@@ -125,7 +138,9 @@ function formatarValor(campo: string, valor: unknown, nomes: Nomes): string {
   if (campo === 'categoria' && typeof valor === 'string') {
     return CATEGORIAS_INFORME[valor as CategoriaInforme] ?? valor
   }
-  if (campo === 'documento' && typeof valor === 'string') return formatarDocumento(valor)
+  if ((campo === 'documento' || campo === 'cnpj') && typeof valor === 'string') {
+    return formatarDocumento(valor)
+  }
   if (typeof valor === 'boolean') return valor ? 'Sim' : 'Não'
   if (typeof valor === 'object') return JSON.stringify(valor)
   return String(valor)

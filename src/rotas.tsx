@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { TelaCredor, TelaQgc } from './modulos/credores'
 import { ListaEmpresas, NovaEmpresa, TelaEmpresa } from './modulos/empresas'
 import { ListaInformes, NovoInforme, TelaInforme } from './modulos/informes'
+import { TelaLogs } from './modulos/logs'
 import { Agenda } from './modulos/prazos/Agenda'
 import {
   EditarProcesso,
@@ -12,6 +13,7 @@ import {
   NovoProcesso,
   TelaDoProcesso,
 } from './modulos/processos/telas'
+import { TelaUsuarios } from './modulos/usuarios'
 import type { Acao, Modulo } from './regras/permissoes'
 import { EmConstrucao } from './ui/TelasDeAviso'
 
@@ -49,8 +51,8 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/informes/novo', 'editar', 'informes', <NovoInforme />),
   rota('/informes/:id', 'ler', 'informes', <TelaInforme />),
   rota('/agenda', 'ler', 'prazos', <Agenda />),
-  rota('/usuarios', 'ler', 'usuarios', <EmConstrucao titulo="Usuários" />),
-  rota('/logs', 'ler', 'logs', <EmConstrucao titulo="Logs" />),
+  rota('/usuarios', 'ler', 'usuarios', <TelaUsuarios />),
+  rota('/logs', 'ler', 'logs', <TelaLogs />),
 ]
 
 /** Telas sem o layout (impressão). */
