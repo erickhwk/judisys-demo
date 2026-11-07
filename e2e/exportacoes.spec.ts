@@ -3,16 +3,11 @@
 // o arquivo precisa ter todas as linhas do filtro, não só as 50 da página.
 import { readFile } from 'node:fs/promises'
 import { type Download, expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 async function exportar(page: Page): Promise<Download> {
   const [download] = await Promise.all([
@@ -40,7 +35,7 @@ function numero(texto: string | null, posicao: 'primeiro' | 'ultimo' = 'primeiro
 test('CRD-11, CSV-01 · credores da classe III: todas as linhas, com o apelido no nome do arquivo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos/prc-001/credores?classe=quirografario')
   const lista = page.getByRole('region', { name: 'Credores' })
   await expect(lista.locator('tbody tr')).toHaveCount(50)
@@ -58,7 +53,7 @@ test('CRD-11, CSV-01 · credores da classe III: todas as linhas, com o apelido n
 test('CSV-01 · processos: o que passa no tipo, com CNJ pontuado; analista também exporta', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos?tipo=falencia')
   await expect(page.getByRole('heading', { name: 'Processos', level: 1 })).toBeVisible()
   const total = numero(await page.getByText(/^Mostrando /).textContent(), 'ultimo')
@@ -78,7 +73,7 @@ test('CSV-01 · processos: o que passa no tipo, com CNJ pontuado; analista tamb�
 test('CSV-01 · agenda: todos os prazos do período, além da página, com datas dd/mm/aaaa', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/agenda?periodo=todos')
   await expect(page.getByRole('heading', { name: 'Agenda', level: 1 })).toBeVisible()
   const total = numero(await page.getByText(/^\d+ prazos no filtro$/).textContent())

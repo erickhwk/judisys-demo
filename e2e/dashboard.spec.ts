@@ -1,20 +1,15 @@
 // Dashboard no navegador (SDD §7.7, DMO-18): números, listas com link, gráfico e a volta ao
 // dashboard depois de editar (T-22). Os casos com contagem exata ficam em
 // src/modulos/dashboard/dashboard.test.tsx.
-import { expect, type Page, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
 
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
-
 test('DSH-01/DSH-02 · números do topo e AGC do vitrine em D+6, com link', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   for (const nome of ['processos-ativos', 'credores', 'prazos-vencidos', 'prazos-7-dias']) {
     const texto = await page.locator(`[data-stat="${nome}"]`).textContent()
     expect(Number(texto?.replace(/\D/g, '')), nome).toBeGreaterThan(0)
@@ -32,7 +27,7 @@ test('DSH-01/DSH-02 · números do topo e AGC do vitrine em D+6, com link', asyn
 })
 
 test('DSH-03 · 8 próximos prazos; o link leva à aba Prazos do processo', async ({ page }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   const prazos = page.getByRole('region', { name: 'Próximos prazos' }).getByRole('link')
   await expect(prazos).toHaveCount(8)
   await expect(prazos.first()).toContainText('Vencido')
@@ -41,7 +36,7 @@ test('DSH-03 · 8 próximos prazos; o link leva à aba Prazos do processo', asyn
 })
 
 test('DSH-04 · editar um credor aparece na atividade recente ao voltar', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   const antes = Number(await page.locator('[data-stat="passivo"]').getAttribute('data-valor'))
 
   await page.goto('./#/processos/prc-001/credores/crd-0001')

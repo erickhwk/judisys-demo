@@ -8,6 +8,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 /** Ids do seed para as rotas com parâmetro. Parâmetro novo sem id aqui derruba o teste. */
 const IDS_DO_SEED: Record<string, string> = {
@@ -74,14 +75,8 @@ const CAMINHOS = caminhosDoRegistro()
 const ENDERECOS = [...CAMINHOS.map(preencher), ...VISTAS_EXTRAS]
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComoAj(page: Page): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: /Entrar como Administrador/ }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 /** Espera a tela assentar: título, nada carregando e o tamanho da página parado por 3 quadros. */
 async function esperarTela(page: Page): Promise<void> {
@@ -118,7 +113,7 @@ for (const janela of JANELAS) {
   }) => {
     test.setTimeout(120_000)
     await page.setViewportSize({ width: janela.width, height: janela.height })
-    await entrarComoAj(page)
+    await entrarComo(page, 'aj')
     for (const endereco of ENDERECOS) {
       await page.goto(`./#${endereco}`)
       await esperarTela(page)

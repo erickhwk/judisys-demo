@@ -1,30 +1,22 @@
 // Credores, pedidos de crédito e QGC (SDD §7.5; DMO-15) com o seed da demo. A aba Credores entra
 // na tela do processo (DMO-12); aqui ficam as telas com rota própria: o credor e o QGC.
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, CREDOR_IMPUGNACAO, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 /** Cartão de um dos três valores do credor (RF-27). */
 function valor(page: Page, qual: 'devedor' | 'aj' | 'qgc') {
   return page.locator(`[data-valor="${qual}"]`)
 }
 
-// Isadora Costa Batista, do processo vitrine: impugnação pendente (SED-04), sem QGC.
-const CREDOR = './#/processos/prc-001/credores/crd-0066'
-
 test('CRD-02, CRD-04, CRD-09 · três valores; acolher a impugnação muda só o QGC e some a ação', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
-  await page.goto(CREDOR)
+  await entrarComo(page, 'aj')
+  await page.goto(CREDOR_IMPUGNACAO.rota)
   await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
   await expect(valor(page, 'devedor')).toContainText('R$ 52.162,86')
   await expect(valor(page, 'aj')).toContainText('R$ 52.162,86')
@@ -48,7 +40,7 @@ test('CRD-02, CRD-04, CRD-09 · três valores; acolher a impugnação muda só o
 test('CRD-10 · com a relação do AJ publicada, o pedido registrado é impugnação', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos/prc-001/credores/crd-0001')
   await page.getByRole('button', { name: 'Registrar pedido' }).click()
   const dialogo = page.getByRole('dialog', { name: /Pedido de crédito de Maria Helena Silva/ })
@@ -64,7 +56,7 @@ test('CRD-10 · com a relação do AJ publicada, o pedido registrado é impugna�
 })
 
 test('CRD-16 · CPF com dígito inválido: erro no campo e nada gravado', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/processos/prc-001/credores/crd-0001')
   await page.getByRole('button', { name: 'Editar' }).click()
   const dialogo = page.getByRole('dialog', { name: 'Editar credor' })
@@ -80,7 +72,7 @@ test('CRD-16 · CPF com dígito inválido: erro no campo e nada gravado', async 
 test('AJ-04 · CPF de outro credor do processo recusado na edição, com o erro no campo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/processos/prc-001/credores/crd-0001')
   await page.getByRole('button', { name: 'Editar' }).click()
   const dialogo = page.getByRole('dialog', { name: 'Editar credor' })
@@ -99,7 +91,7 @@ test('AJ-04 · CPF de outro credor do processo recusado na edição, com o erro 
 test('CRD-12 · QGC para impressão: grupos, subtotais e total geral iguais ao quadro-resumo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/processos/prc-001/qgc')
   await expect(page.getByRole('heading', { name: 'Grupo Lontra Azul', level: 1 })).toBeVisible()
   await expect(page.getByText('Quadro-geral de credores')).toBeVisible()
@@ -125,7 +117,7 @@ test('CRD-12 · QGC para impressão: grupos, subtotais e total geral iguais ao q
 })
 
 test('aba Credores dentro da tela do processo (RF-13)', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('#/processos/prc-001/credores')
   await expect(page.getByRole('navigation', { name: 'Seções do processo' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Novo credor' })).toBeVisible()
@@ -141,7 +133,7 @@ function buscaNaUrl(page: Page): string | null {
 test('AJ-07 · digitação rápida na busca de Credores não perde caracteres; a URL guarda o filtro', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('#/processos/prc-001/credores')
   const campo = page.getByRole('searchbox', { name: 'Buscar por nome ou CPF/CNPJ' })
   const isadora = page.getByRole('link', { name: 'Isadora Costa Batista' })

@@ -161,3 +161,11 @@ export async function vigiarRede(page: Page, baseURL: string): Promise<string[]>
   )
   return fora
 }
+
+// --- Atalhos dos specs por módulo (AJ-09) -------------------------------------------------------
+
+/** Abre a AGC agendada do vitrine pela aba AGC do processo (agc e agc-votacao). */
+export async function abrirAgcDoVitrine(page: Page): Promise<void> {
+  await page.goto('./#/processos/prc-001/agc')
+  await abrirAgcDaLista(page)
+}

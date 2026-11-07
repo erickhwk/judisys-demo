@@ -1,16 +1,11 @@
 // Telas de processos (SDD §7.3, §7.2; DMO-12): lista, formulário, tela do processo, avançar e
 // desfazer fase e exclusão. Usa só o seed; cada teste começa com o armazenamento limpo.
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 async function abrirProcesso(page: Page, apelido: string): Promise<void> {
   await page.goto('./#/processos')
@@ -23,7 +18,7 @@ const lista = (page: Page) => page.getByRole('region', { name: 'Lista de process
 test('PRC-12 · busca por apelido, número CNJ sem pontuação e razão social de empresa', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos')
   await expect(page.getByRole('heading', { name: 'Processos', level: 1 })).toBeVisible()
   await expect(page.getByText('12 processos cadastrados')).toBeVisible()
@@ -52,7 +47,7 @@ test('PRC-12 · busca por apelido, número CNJ sem pontuação e razão social d
 })
 
 test('RF-11 · abas por tipo e filtro de fase', async ({ page }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos')
   const tipos = page.getByRole('navigation', { name: 'Tipo de processo' })
   await tipos.getByRole('link', { name: /Falência/ }).click()
@@ -67,7 +62,7 @@ test('RF-11 · abas por tipo e filtro de fase', async ({ page }) => {
 })
 
 test('PRC-14 · número CNJ com dígito verificador errado mostra erro no campo', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/processos/novo')
   await page.getByRole('textbox', { name: /Número do processo/ }).fill('0001234-00.2026.8.26.0100')
   await page.getByRole('button', { name: 'Salvar' }).click()
@@ -80,7 +75,7 @@ test('PRC-14 · número CNJ com dígito verificador errado mostra erro no campo'
 })
 
 test('PRC-15 · RJ nova começa em "Pedido", com as empresas e o histórico', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/processos')
   await page.getByRole('button', { name: 'Novo processo' }).click()
   await expect(page.getByRole('heading', { name: 'Novo processo', level: 1 })).toBeVisible()
@@ -139,7 +134,7 @@ test('PRC-15 · RJ nova começa em "Pedido", com as empresas e o histórico', as
 })
 
 test('RF-15 · avançar fase cria os prazos; desfazer lista os prazos que saem', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await abrirProcesso(page, 'Cerâmica Tatu-Bola')
 
   await page.getByRole('button', { name: 'Avançar fase' }).click()
@@ -180,7 +175,7 @@ test('RF-15 · avançar fase cria os prazos; desfazer lista os prazos que saem',
 test('PRC-13 · excluir processo mostra o que sai em cascata e o tira da lista', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirProcesso(page, 'Calçados Tico-Tico')
   await page.getByRole('button', { name: 'Excluir' }).click()
   const confirmacao = page.getByRole('alertdialog', { name: 'Excluir “Calçados Tico-Tico”?' })
@@ -196,7 +191,7 @@ test('PRC-13 · excluir processo mostra o que sai em cascata e o tira da lista',
 test('PER-03 · analista não vê botões de criar, editar, excluir, avançar ou desfazer fase', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos')
   await expect(lista(page).getByRole('link', { name: 'Grupo Lontra Azul' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Novo processo' })).toHaveCount(0)
@@ -214,7 +209,7 @@ test('PER-03 · analista não vê botões de criar, editar, excluir, avançar ou
 })
 
 test('RF-13 · a aba AGC só existe na RJ', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await abrirProcesso(page, 'Grupo Lontra Azul')
   const abas = page.getByRole('navigation', { name: 'Seções do processo' })
   await expect(abas.getByRole('link')).toHaveText([
@@ -235,7 +230,7 @@ test('RF-13 · a aba AGC só existe na RJ', async ({ page }) => {
 test('editar processo: os dados salvos voltam no formulário e a mudança vai ao histórico', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirProcesso(page, 'Gráfica Beija-Flor')
   await page.getByRole('button', { name: 'Editar' }).click()
   await expect(page.getByRole('heading', { name: 'Editar processo', level: 1 })).toBeVisible()

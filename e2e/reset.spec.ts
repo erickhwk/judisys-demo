@@ -177,8 +177,7 @@ test('T-34 · aberta em outra data, todo RMA aberto vence no dia 15', async ({ p
 /** Entra como AJ e altera um processo direto no banco; devolve o apelido original. */
 async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknown }> {
   await abrirDemo(page)
-  await page.getByRole('button', { name: /Entrar como Administrador/ }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await entrarComo(page, 'aj')
   const [processo] = await lerTabela(page, 'processos')
   if (!processo) throw new Error('seed sem processos')
   await gravarLinha(page, 'processos', { ...processo, apelido: 'Alterado na demo' })

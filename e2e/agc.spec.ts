@@ -1,24 +1,11 @@
 // AGC: cadastro, presença e instalação (SDD §7.6; DMO-16) com o seed da demo. O processo vitrine
 // (prc-001) tem uma AGC agendada para daqui a 6 dias (SED-04).
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, abrirAgcDoVitrine, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
-
-/** Abre a AGC agendada do vitrine pela aba do processo. */
-async function abrirAgcDoVitrine(page: Page): Promise<void> {
-  await page.goto('./#/processos/prc-001/agc')
-  const lista = page.getByRole('region', { name: 'AGCs do processo' })
-  await lista.getByRole('link', { name: '13/11/2026' }).click()
-  await expect(page.getByRole('heading', { name: 'AGC de 13/11/2026', level: 1 })).toBeVisible()
-}
 
 function linhaDaClasse(page: Page, rotulo: string) {
   return page
@@ -30,7 +17,7 @@ function linhaDaClasse(page: Page, rotulo: string) {
 test('AGC-01, AGC-02 · AGC futura com aviso; "todos da classe" e instalação em 1ª convocação', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
   await expect(page.getByRole('note')).toContainText('Simulação: a data da AGC ainda não chegou')
 
@@ -75,7 +62,7 @@ test('AGC-01, AGC-02 · AGC futura com aviso; "todos da classe" e instalação e
 test('AGC-24 · quem não vota aparece desabilitado com o motivo; votante marca e desmarca', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
   const lista = page.getByRole('region', { name: 'Lista de presença', exact: true })
   const filtros = page.getByRole('region', { name: 'Buscar na lista de presença' })
@@ -98,7 +85,7 @@ test('AGC-24 · quem não vota aparece desabilitado com o motivo; votante marca 
 })
 
 test('RF-31 · nova AGC pela aba; analista só lê', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/processos/prc-001/agc')
   await page.getByRole('button', { name: 'Nova AGC' }).click()
   const dialogo = page.getByRole('dialog', { name: 'Nova AGC' })
@@ -114,7 +101,7 @@ test('RF-31 · nova AGC pela aba; analista só lê', async ({ page }) => {
   await expect(page.getByText('Aditamento ao plano')).toBeVisible()
   await expect(page.getByRole('note')).toContainText('Simulação')
 
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/processos/prc-001/agc')
   await expect(page.getByRole('region', { name: 'AGCs do processo' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Nova AGC' })).toHaveCount(0)

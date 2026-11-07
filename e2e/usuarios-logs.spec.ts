@@ -2,16 +2,11 @@
 // LOG-04). Usa o seed; cada teste começa com o armazenamento limpo (contexto novo do Playwright).
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 const usuarios = (page: Page) =>
   page.getByRole('region', { name: 'Lista de usuários' }).locator('tbody tr')
@@ -38,7 +33,7 @@ async function logsDoSeed(): Promise<(LogDoSeed & { diasAtras: number })[]> {
 test('PER-06 · advogado vê usuários e a tabela de permissões, sem botões de edição', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/usuarios')
   await expect(page.getByRole('heading', { name: 'Usuários', level: 1 })).toBeVisible()
   await expect(usuarios(page)).toHaveCount(6)
@@ -55,7 +50,7 @@ test('PER-06 · advogado vê usuários e a tabela de permissões, sem botões de
 test('RF-39 · AJ cria, edita e exclui usuário; T-23 recusa o responsável por processo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/usuarios')
   await expect(usuarios(page)).toHaveCount(6)
   // Ninguém exclui a si mesmo: a própria linha não tem o botão.
@@ -109,7 +104,7 @@ test('RF-39 · AJ cria, edita e exclui usuário; T-23 recusa o responsável por 
 })
 
 test('PER-07 · analista vê a tela de logs, a aba Histórico e o dashboard', async ({ page }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/logs')
   await expect(page.getByRole('heading', { name: 'Logs', level: 1 })).toBeVisible()
   await expect(logs(page)).toHaveCount(50)
@@ -133,7 +128,7 @@ test('LOG-04 · ~60 dias de histórico do seed e filtros por usuário, módulo, 
   const doSeed = await logsDoSeed()
   expect(Math.max(...doSeed.map((log) => log.diasAtras))).toBeGreaterThanOrEqual(55)
 
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/logs')
   await expect(logs(page)).toHaveCount(50)
   await expect(page.getByText(`Mostrando 1–50 de ${doSeed.length}`)).toBeVisible()
@@ -183,7 +178,7 @@ test('LOG-03 · registro excluído: "Registro não existe mais", sem erro', asyn
   const erros: string[] = []
   page.on('pageerror', (erro) => erros.push(erro.message))
 
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/usuarios')
   await page.getByRole('button', { name: 'Novo usuário' }).click()
   const dialogo = page.getByRole('dialog', { name: 'Novo usuário' })
@@ -214,7 +209,7 @@ test('LOG-03 · registro excluído: "Registro não existe mais", sem erro', asyn
 })
 
 test('AJ edita o próprio nome: o menu da conta acompanha', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/usuarios')
   await page.getByRole('button', { name: 'Editar Helena Prado' }).click()
   const edicao = page.getByRole('dialog', { name: 'Editar usuário' })
