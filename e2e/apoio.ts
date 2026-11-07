@@ -27,6 +27,29 @@ export async function trocarPara(page: Page, papel: keyof typeof PAPEIS): Promis
   await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
 }
 
+// --- Credor do vitrine com impugnação pendente --------------------------------------------------
+
+/** Isadora Costa Batista, do vitrine: impugnação pendente e sem valor no QGC (SED-04). */
+export const CREDOR_IMPUGNACAO = {
+  rota: './#/processos/prc-001/credores/crd-0066',
+  nome: 'Isadora Costa Batista',
+  qgcAcolhido: 'R$ 65.203,58',
+} as const
+
+export const pedidosDeIsadora = (page: Page) =>
+  page.getByRole('region', { name: /Pedidos de crédito de Isadora/ })
+
+/** Acolhe a impugnação pendente na tela do credor (já aberta) e espera o QGC mudar (RF-29). */
+export async function acolherImpugnacao(page: Page): Promise<void> {
+  await pedidosDeIsadora(page)
+    .getByRole('button', { name: /^Acolher impugnação/ })
+    .click()
+  const acolher = page.getByRole('alertdialog', { name: 'Acolher o pedido?' })
+  await acolher.getByRole('button', { name: 'Acolher' }).click()
+  await expect(acolher).toBeHidden()
+  await expect(page.locator('[data-valor="qgc"]')).toContainText(CREDOR_IMPUGNACAO.qgcAcolhido)
+}
+
 // --- AGC do vitrine (prc-001, AGC em @+6 = 13/11/2026 no relógio fixo) -----------------------
 
 export const CLASSES_DO_VITRINE = [

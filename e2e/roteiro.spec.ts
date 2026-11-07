@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test'
 import {
   AGORA,
   abrirAgcDaLista,
+  acolherImpugnacao,
   CLASSES_DO_VITRINE,
   entrarComo,
   instalar,
@@ -58,12 +59,7 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
   await page.getByRole('link', { name: 'Isadora Costa Batista' }).click()
   await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
   await expect(page.locator('[data-valor="qgc"]')).toContainText('—')
-  const pedidos = page.getByRole('region', { name: /Pedidos de crédito de Isadora/ })
-  await pedidos.getByRole('button', { name: /^Acolher impugnação/ }).click()
-  const acolher = page.getByRole('alertdialog', { name: 'Acolher o pedido?' })
-  await acolher.getByRole('button', { name: 'Acolher' }).click()
-  await expect(acolher).toBeHidden()
-  await expect(page.locator('[data-valor="qgc"]')).toContainText('R$ 65.203,58')
+  await acolherImpugnacao(page)
 
   // 4. AGC daqui a 6 dias, conduzida antes da data com o aviso (RF-31).
   // Volta ao processo pela trilha da tela do credor.
