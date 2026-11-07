@@ -1,0 +1,372 @@
+/* Dashboard no visual do `dashboard.html` do guia: cartões de número, cartões com lista de
+   linhas e barras de categoria. */
+
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.apoio {
+  color: var(--cor-texto-muted);
+}
+
+/* Números do topo */
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.numero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 22px 24px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+}
+
+.numeroTopo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.numeroRotulo {
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: var(--espacamento-caixa-alta);
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.numeroValor {
+  font-family: var(--fonte-titulo);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+  white-space: nowrap;
+}
+
+.par {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+}
+
+.parte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+a.numeroApoio {
+  color: var(--cor-azul-800);
+  font-weight: 500;
+}
+
+.perigo {
+  color: var(--cor-perigo);
+}
+
+.numeroApoio {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.numeroApoio b {
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+.numeroIcone {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--cor-dourado-claro);
+  color: var(--cor-dourado-600);
+}
+
+/* Linhas de cartões */
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.cartao {
+  flex: 1 1 340px;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  box-shadow: var(--sombra-card);
+}
+
+.cartaoLargo {
+  flex: 2 1 520px;
+}
+
+.cartaoCabecalho {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 26px;
+  border-bottom: 1px solid var(--cor-trilho);
+  color: var(--cor-dourado-600);
+}
+
+.cartaoCabecalho h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-texto-forte);
+}
+
+.cartaoCorpo {
+  padding: 22px 26px 26px;
+}
+
+/* Listas (RF-10): cada linha é um link para o registro */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: var(--alvo-minimo);
+  padding: 14px 18px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-linha);
+  background: var(--cor-superficie-suave);
+  color: inherit;
+}
+
+a.item:hover {
+  text-decoration: none;
+  background: var(--cor-hover-fantasma);
+  border-color: var(--cor-borda-campo);
+}
+
+.itemCompacto {
+  padding: 12px 16px;
+}
+
+.semLink {
+  cursor: default;
+}
+
+.itemIcone {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--cor-dourado-claro);
+  color: var(--cor-dourado-600);
+}
+
+.itemTexto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.itemTitulo {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.itemApoio {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+  overflow-wrap: anywhere;
+}
+
+.itemLado {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: var(--tamanho-texto-pequeno);
+  line-height: 1.4;
+  color: var(--cor-texto-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemLado b {
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+/* Funil por fase (RF-08): barras como "Processos por categoria" do guia */
+
+.funis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+}
+
+.funil {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.funilTitulo {
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.funilEtapas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etapa {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: end;
+}
+
+.etapaRotulo {
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 500;
+  color: var(--cor-texto);
+}
+
+.etapaQuantidade {
+  font-family: var(--fonte-titulo);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.trilho {
+  grid-column: 1 / -1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-trilho);
+}
+
+.barraRj,
+.barraFalencia {
+  display: block;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+}
+
+/* Como no guia: Recuperação em dourado, Falência em azul. */
+.barraRj {
+  background: var(--cor-dourado-500);
+}
+
+.barraFalencia {
+  background: var(--cor-azul-900);
+}
+
+/* Passivo por classe (RF-09) */
+
+/* `position: relative` segura a legenda e o cabeçalho só para leitor de tela dentro do cartão. */
+.figura {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+}
+
+.grafico {
+  width: 100%;
+  min-width: 0;
+}
+
+.tabelaValores {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.tabelaValores th,
+.tabelaValores td {
+  padding: 8px 0;
+  border-top: 1px solid var(--cor-borda-linha);
+}
+
+.tabelaValores th {
+  font-weight: 500;
+  text-align: left;
+  color: var(--cor-texto-muted);
+}
+
+.tabelaValores td {
+  font-weight: 600;
+  text-align: right;
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .numero,
+  .cartaoCorpo {
+    padding: 18px;
+  }
+
+  .cartaoCabecalho {
+    padding: 16px 18px;
+  }
+
+  .item {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .itemIcone {
+    display: none;
+  }
+}

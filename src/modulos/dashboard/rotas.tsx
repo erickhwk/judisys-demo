@@ -1,7 +1,7 @@
-// Rota do dashboard (AJ-05). Ainda em construção: a DMO-18 troca este arquivo.
+// Rota do dashboard (DMO-18, AJ-05): todo papel lê (RF-39, PER-07).
 import { type RegistroDoModulo, rota } from '../../definicaoRotas'
-import { EmConstrucao } from '../../ui/TelasDeAviso'
+import { Dashboard } from './Dashboard'
 
 export const registro: RegistroDoModulo = {
-  rotas: [rota('/', 'ler', 'dashboard', <EmConstrucao titulo="Dashboard" />)],
+  rotas: [rota('/', 'ler', 'dashboard', <Dashboard />)],
 }
