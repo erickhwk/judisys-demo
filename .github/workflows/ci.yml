@@ -11,9 +11,11 @@ on:
 permissions:
   contents: read
 
+# Em PR, um push novo cancela a execução anterior; na main cada push tem grupo próprio
+# (run_id), para nenhum commit ficar sem CI. A fila do deploy é o grupo `pages`.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   ci:
@@ -55,10 +57,11 @@ jobs:
 
       # No CI o playwright.config.ts sobe só o vite preview sobre o dist/ já gerado
       - name: Playwright
+        id: e2e
         run: pnpm e2e
 
       - name: Guardar relatório do Playwright
-        if: failure()
+        if: failure() && steps.e2e.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report

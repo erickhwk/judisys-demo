@@ -6,7 +6,8 @@ export default defineConfig({
   testDir: 'e2e',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  // No CI, além das anotações no PR, gera o HTML que o workflow guarda quando o e2e falha
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${porta}/judisys-demo/`,
     trace: 'on-first-retry',
