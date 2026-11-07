@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Tabela } from '../../src/dados/armazenamento'
+import { FORMATO_DATA_RELATIVA, resolverDatas } from '../../src/dados/carga'
 import { COLECOES } from '../../src/dados/repositorio'
 import { SCHEMAS, type Tipos } from '../../src/dados/schemas'
 import { type DataIso, diasEntre } from '../../src/regras/datas'
@@ -12,7 +13,7 @@ import { pode } from '../../src/regras/permissoes'
 import { prazosDoMarco, situacao, TITULO_RMA } from '../../src/regras/prazos'
 import { CLASSES_RJ } from '../../src/regras/qgc'
 import { credoresVotantes, resultadoAgc } from '../../src/regras/votacao'
-import { DATA_BASE, FORMATO_DATA_RELATIVA, resolverDatas } from './datas'
+import { DATA_BASE } from './datas'
 import {
   type ArquivoSeed,
   gerarSeed,

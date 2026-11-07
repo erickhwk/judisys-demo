@@ -190,7 +190,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - [ ] Reset manual (`resetar()`) sem aviso de versão
   - [ ] Plano B em memória e erro de cota por operação (PRD §13)
   - [ ] Tela de erro com "Tentar de novo"
-  - [ ] Vencimento dos RMAs abertos recalculado com `proximoRma` depois da conversão de datas (T-34)
+  - [ ] RMAs abertos levados ao dia 15 depois da conversão de datas, mantendo a situação (em dia ou vencido) em relação a hoje (T-34)
 - **Testes:**
   - [ ] CAR-01 · primeira visita
   - [ ] CAR-02 · versão igual não baixa o seed
@@ -203,7 +203,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - [ ] CAR-10 · sem IndexedDB usa memória
   - [ ] CAR-11 · cota cheia num anexo
   - [ ] CAR-12 · sem localStorage
-  - [ ] RMA aberto vence no dia 15 com a demo aberta em outra data que não a data-base do seed (T-34)
+  - [ ] RMA aberto vence no dia 15, com a mesma situação da data-base, com a demo aberta em outra data (T-34)
 
 ## DMO-09 · Tokens e componentes de interface
 - **Tipo:** Feature
