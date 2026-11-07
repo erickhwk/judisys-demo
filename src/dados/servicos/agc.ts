@@ -7,7 +7,8 @@
 //
 // O registro do resultado (RF-37, DMO-17) grava os votos, encerra a AGC e cria o informe "Atas de
 // AGC" com o resumo (T-30) numa transação só.
-import { type DataIso, formatarData, formatarMoeda } from '../../regras/datas'
+import { type DataIso, formatarData } from '../../regras/datas'
+import { formatarMoeda } from '../../regras/moeda'
 import { type ClasseVotante, rotuloClasse } from '../../regras/qgc'
 import type {
   Convocacao,

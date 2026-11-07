@@ -9,13 +9,13 @@ import { formatarCnj } from '../../regras/documentos'
 import { type Fase, fasesSeguintes, ROTULOS_FASE } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
 import { Botao } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import { AvancarFase } from './AvancarFase'
 import { ABAS, type Aba, type ConteudoAba, DEFINICOES_ABAS } from './abas'
-import { Cabecalho } from './Cabecalho'
 import { DesfazerMarco } from './DesfazerMarco'
 import { useExcluirProcesso } from './ExcluirProcesso'
 import { NavegacaoAbas } from './NavegacaoAbas'
@@ -53,10 +53,10 @@ export function TelaDoProcesso({ aba, Conteudo }: { aba: Aba; Conteudo: Conteudo
 
   return (
     <>
-      <Cabecalho
+      <CabecalhoPagina
         trilha={[{ rotulo: 'Processos', para: '/processos' }, { rotulo: atual.apelido }]}
         titulo={atual.apelido}
-        subtitulo={
+        apoio={
           <dl className={estilos.resumoProcesso} aria-label="Resumo do processo">
             <div>
               <dt>Número</dt>

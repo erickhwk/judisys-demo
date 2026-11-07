@@ -14,10 +14,10 @@ import { chaveAnexo, salvarInforme } from '../../dados/servicos/informes'
 import { fasesDoTipo, ROTULOS_FASE } from '../../regras/fases'
 import { hoje } from '../../regras/relogio'
 import { Botao, BotaoIcone } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Campo, CampoMarcacao, CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
-import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import {
   CAMPOS_FORMULARIO,
   CATEGORIAS,
@@ -41,7 +41,7 @@ export function NovoInforme() {
   return (
     <div className={estilos.tela}>
       <CabecalhoPagina
-        migalhas={[{ rotulo: 'Informes', para: '/informes' }, { rotulo: 'Novo informe' }]}
+        trilha={[{ rotulo: 'Informes', para: '/informes' }, { rotulo: 'Novo informe' }]}
         titulo="Novo informe"
         acoes={<Voltar para={processoId ? `/processos/${processoId}/informes` : '/informes'} />}
       />

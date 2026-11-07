@@ -7,12 +7,12 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useRepo } from '../../dados/contexto'
 import type { Tipos } from '../../dados/schemas'
-import { formatarMoeda } from '../../regras/datas'
 import { formatarDocumento } from '../../regras/documentos'
+import { formatarMoeda, valorOuTraco } from '../../regras/moeda'
 import { pode } from '../../regras/permissoes'
 import { type Classe, resumoPorClasse, rotuloClasse } from '../../regras/qgc'
 import { hoje } from '../../regras/relogio'
-import { Botao } from '../../ui/Botao'
+import { Botao, BotaoLink } from '../../ui/Botao'
 import { CampoSelecao } from '../../ui/Campo'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
@@ -33,7 +33,6 @@ import { DialogoPedido } from './DialogoPedido'
 import { exportarCredores, filtroDaLista } from './exportacao'
 import { classesDoTipo } from './formularios'
 import { ListaPedidos } from './ListaPedidos'
-import { valorOuTraco } from './moeda'
 import { QuadroResumo } from './QuadroResumo'
 
 type Credor = Tipos['credores']
@@ -84,10 +83,9 @@ function ConteudoAba({ processo }: { processo: Processo }) {
   return (
     <div className={estilos.aba}>
       <div className={estilos.barraAcoes}>
-        <Link to={`/processos/${processoId}/qgc`} className={estilos.botaoLink}>
-          <Printer size={18} aria-hidden="true" />
+        <BotaoLink para={`/processos/${processoId}/qgc`} icone={<Printer size={18} />}>
           QGC para impressão
-        </Link>
+        </BotaoLink>
         {exportacao.botao}
         {podeEditar && (
           <>

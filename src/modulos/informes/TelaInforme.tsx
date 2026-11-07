@@ -11,11 +11,11 @@ import { formatarData } from '../../regras/datas'
 import { ROTULOS_FASE } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
 import { Botao } from '../../ui/Botao'
+import { ApoioEmLinha, CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { juntarClasses } from '../../ui/classes'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { VisualizadorPdf } from '../../ui/VisualizadorPdf'
-import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import { useSessao } from '../entrada/sessao'
 import { useUrlDoAnexo } from './anexos'
 import { CamposInforme, Voltar } from './FormularioInforme'
@@ -44,7 +44,7 @@ export function TelaInforme() {
     return (
       <div className={estilos.tela}>
         <CabecalhoPagina
-          migalhas={[{ rotulo: 'Informes', para: '/informes' }, { rotulo: 'Informe' }]}
+          trilha={[{ rotulo: 'Informes', para: '/informes' }, { rotulo: 'Informe' }]}
           titulo="Informe"
           acoes={<Voltar para="/informes" />}
         />
@@ -62,7 +62,7 @@ export function TelaInforme() {
   return (
     <div className={estilos.tela}>
       <CabecalhoPagina
-        migalhas={[
+        trilha={[
           { rotulo: 'Informes', para: '/informes' },
           ...(apelido
             ? [{ rotulo: apelido, para: `/processos/${informe.processoId}/informes` }]
@@ -70,12 +70,12 @@ export function TelaInforme() {
           { rotulo: editando ? 'Editar' : 'Informe' },
         ]}
         titulo={informe.titulo}
-        subtitulo={
-          <>
+        apoio={
+          <ApoioEmLinha>
             <span>{CATEGORIAS_INFORME[informe.categoria]}</span>
             <span>{formatarData(informe.data)}</span>
             {informe.publicadoNoSite && <Selo tom="sucesso">{SELO_PUBLICADO}</Selo>}
-          </>
+          </ApoioEmLinha>
         }
         acoes={
           !editando && (

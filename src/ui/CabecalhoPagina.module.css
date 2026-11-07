@@ -1,0 +1,63 @@
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Sem trilha, 6px entre título e apoio (processos-lista.html); com trilha, 8px (processo-novo.html). */
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.comTrilha {
+  gap: 8px;
+}
+
+.texto h1 {
+  overflow-wrap: anywhere;
+}
+
+.trilha ol {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.trilha li + li::before {
+  content: "\00a0/\00a0";
+  white-space: pre;
+}
+
+.trilha a {
+  color: var(--cor-texto-muted);
+  font-weight: 500;
+}
+
+.apoio {
+  font-size: var(--tamanho-texto);
+  color: var(--cor-texto-muted);
+}
+
+.emLinha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}

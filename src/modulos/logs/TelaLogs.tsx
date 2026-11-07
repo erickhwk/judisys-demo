@@ -11,13 +11,13 @@ import type { Log, Registro } from '../../dados/schemas'
 import { PREFIXO_CASCATA } from '../../dados/servicos/exclusoes'
 import { formatarDataHora } from '../../regras/datas'
 import { type Modulo, pode } from '../../regras/permissoes'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
-import { Cabecalho } from '../empresas/Cabecalho'
 import { useSessao } from '../entrada/sessao'
 import { Mudancas } from '../processos/AbaHistorico'
 import { type Nomes, ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
@@ -225,7 +225,7 @@ export function TelaLogs() {
 
   return (
     <div className={estilos.tela}>
-      <Cabecalho
+      <CabecalhoPagina
         titulo="Logs"
         apoio="Toda criação, edição e exclusão feita no escritório, campo a campo."
       />

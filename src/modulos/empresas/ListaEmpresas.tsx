@@ -8,9 +8,11 @@ import { useRepo } from '../../dados/contexto'
 import { type Filtro, POR_PAGINA } from '../../dados/repositorio'
 import { gerarCsv, nomeArquivoCsv } from '../../regras/csv'
 import { formatarCnpj } from '../../regras/documentos'
+import { ROTULOS_PORTE } from '../../regras/empresas'
 import { pode } from '../../regras/permissoes'
 import { hoje } from '../../regras/relogio'
 import { Botao, BotaoIcone } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
@@ -18,10 +20,9 @@ import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
-import { Cabecalho } from './Cabecalho'
 import estilos from './Empresas.module.css'
 import { useExclusaoEmpresa } from './ExclusaoEmpresa'
-import { COLUNAS_CSV_EMPRESAS, type Empresa, ROTULOS_PORTE } from './empresas'
+import { COLUNAS_CSV_EMPRESAS, type Empresa } from './empresas'
 
 const ORDEM: Filtro<Empresa>['ordem'] = { campo: 'razaoSocial', direcao: 'asc' }
 
@@ -126,7 +127,7 @@ export function ListaEmpresas() {
 
   return (
     <div className={estilos.tela}>
-      <Cabecalho
+      <CabecalhoPagina
         titulo="Empresas"
         apoio={apoio}
         acoes={

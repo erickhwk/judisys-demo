@@ -8,7 +8,7 @@ import { type ContextoGravacao, criarRepositorio } from '../../dados/repositorio
 import { type DataIso, formatarData, somarDias } from '../../regras/datas'
 import { type Papel, pode } from '../../regras/permissoes'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
-import { renderizarComDados } from '../credores/renderizarParaTeste'
+import { renderizarComDados } from '../../ui/renderizarParaTeste'
 import { Dashboard } from './Dashboard'
 import { ehAtivo } from './indicadores'
 import { registro } from './rotas'

@@ -3,8 +3,9 @@
 import { z } from 'zod'
 import { camposProcesso, type Tipos } from '../../dados/schemas'
 import type { DadosProcesso } from '../../dados/servicos/processos'
-import { ehDataIso, formatarCentavos } from '../../regras/datas'
+import { ehDataIso } from '../../regras/datas'
 import { formatarCnj } from '../../regras/documentos'
+import { formatarCentavos } from '../../regras/moeda'
 
 /**
  * Texto em reais → centavos, sem ponto flutuante (INV-03). Aceita `1.234,56`, `1234,5`, `1234` e

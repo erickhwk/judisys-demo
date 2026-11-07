@@ -3,7 +3,7 @@
 // o resultado da classe e o geral. Os números saem de `resultadoAgc` (DMO-05).
 import { Check, X } from 'lucide-react'
 import { useId } from 'react'
-import { formatarMoeda } from '../../regras/datas'
+import { formatarMoeda } from '../../regras/moeda'
 import { rotuloClasse } from '../../regras/qgc'
 import type {
   Contagem,

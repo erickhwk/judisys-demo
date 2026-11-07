@@ -10,12 +10,12 @@ import { type Filtro, POR_PAGINA } from '../../dados/repositorio'
 import { CATEGORIAS_INFORME, type Tipos } from '../../dados/schemas'
 import { pode } from '../../regras/permissoes'
 import { Botao } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { Vazio } from '../../ui/Vazio'
-import { Cabecalho } from '../empresas/Cabecalho'
 import { useSessao } from '../entrada/sessao'
 import { CATEGORIAS, ehCategoria, type Informe, ORDEM_INFORMES } from './informes'
 import estilos from './informes.module.css'
@@ -75,7 +75,7 @@ export function ListaInformes() {
 
   return (
     <div className={estilos.tela}>
-      <Cabecalho
+      <CabecalhoPagina
         titulo="Informes"
         apoio={
           dados && !filtrando && !consulta.isPlaceholderData

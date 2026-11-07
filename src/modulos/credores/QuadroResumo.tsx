@@ -1,5 +1,5 @@
-import { formatarMoeda } from '../../regras/datas'
 import type { TipoProcesso } from '../../regras/fases'
+import { formatarMoeda } from '../../regras/moeda'
 import { formatarCentesimos, type ResumoQgc, rotuloClasse } from '../../regras/qgc'
 import estilos from './credores.module.css'
 

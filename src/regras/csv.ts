@@ -1,7 +1,8 @@
 // Exportação CSV (RF-44, CSV-01 a CSV-04): UTF-8 com BOM e separador `;`, para abrir direto
 // no Excel em pt-BR.
-import { type DataIso, formatarCentavos, formatarData } from './datas'
+import { type DataIso, formatarData } from './datas'
 import { formatarCnj, formatarDocumento } from './documentos'
+import { formatarCentavos } from './moeda'
 import { normalizar } from './normalizar'
 
 const BOM = '﻿'

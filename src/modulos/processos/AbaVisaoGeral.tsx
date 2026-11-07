@@ -2,8 +2,9 @@
 // abertos e os dados do processo.
 import { Link } from 'react-router'
 import { useRegistro, useTodos } from '../../dados/contexto'
-import { diasEntre, formatarData, formatarMoeda } from '../../regras/datas'
+import { diasEntre, formatarData } from '../../regras/datas'
 import { ROTULOS_FASE } from '../../regras/fases'
+import { formatarMoeda } from '../../regras/moeda'
 import { type SituacaoPrazo, situacao } from '../../regras/prazos'
 import { hoje } from '../../regras/relogio'
 import { juntarClasses } from '../../ui/classes'

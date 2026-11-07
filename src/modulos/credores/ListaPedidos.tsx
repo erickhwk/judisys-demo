@@ -8,9 +8,10 @@ import {
   ROTULOS_STATUS_PEDIDO,
   ROTULOS_TIPO_PEDIDO,
 } from '../../dados/servicos/pedidos'
-import { formatarData, formatarMoeda } from '../../regras/datas'
+import { formatarData } from '../../regras/datas'
 import { formatarDocumento } from '../../regras/documentos'
 import type { TipoProcesso } from '../../regras/fases'
+import { formatarMoeda } from '../../regras/moeda'
 import { rotuloClasse } from '../../regras/qgc'
 import { Botao } from '../../ui/Botao'
 import { Confirmacao } from '../../ui/Confirmacao'

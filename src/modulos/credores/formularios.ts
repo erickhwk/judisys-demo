@@ -7,8 +7,8 @@ import type { Novo, Tipos } from '../../dados/schemas'
 import { ehDataIso } from '../../regras/datas'
 import { somenteDigitos, validarCnpj, validarCpf } from '../../regras/documentos'
 import type { TipoProcesso } from '../../regras/fases'
+import { lerMoeda } from '../../regras/moeda'
 import { CLASSES_FALENCIA, CLASSES_RJ, type Classe } from '../../regras/qgc'
-import { lerMoeda } from './moeda'
 
 type Credor = Tipos['credores']
 type Pedido = Tipos['pedidosDeCredito']

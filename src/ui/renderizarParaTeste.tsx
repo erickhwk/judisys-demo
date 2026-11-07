@@ -6,11 +6,11 @@ import { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import type { Armazenamento } from '../../dados/armazenamento'
-import { DadosProvider } from '../../dados/contexto'
-import type { ContextoGravacao } from '../../dados/repositorio'
-import type { Papel } from '../../regras/permissoes'
-import { type Guarda, SessaoProvider } from '../entrada/sessao'
+import type { Armazenamento } from '../dados/armazenamento'
+import { DadosProvider } from '../dados/contexto'
+import type { ContextoGravacao } from '../dados/repositorio'
+import { type Guarda, SessaoProvider } from '../modulos/entrada/sessao'
+import type { Papel } from '../regras/permissoes'
 
 export interface OpcoesRender {
   armazenamento: Armazenamento

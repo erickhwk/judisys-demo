@@ -9,6 +9,7 @@ import { useTodos } from '../../dados/contexto'
 import { POR_PAGINA } from '../../dados/repositorio'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao } from '../../ui/Campo'
 import { juntarClasses } from '../../ui/classes'
 import { Erro } from '../../ui/Erro'
@@ -123,41 +124,39 @@ export function Agenda() {
 
   return (
     <>
-      <div className={estilos.cabecalho}>
-        <div className={estilos.cabecalhoTexto}>
-          <h1>Agenda</h1>
-          <p className={estilos.subtitulo}>
-            {carregando ? 'Carregando…' : contagem(filtrados.length, vista)}
-          </p>
-        </div>
-        <div className={estilos.cabecalhoAcoes}>
-          <fieldset className={estilos.vistas}>
-            <legend className="somente-leitor">Vista</legend>
-            <BotaoVista
-              atual={vista}
-              vista="lista"
-              icone={<List size={18} />}
-              aoEscolher={() => mudar({ vista: null })}
-            >
-              Lista
-            </BotaoVista>
-            <BotaoVista
-              atual={vista}
-              vista="calendario"
-              icone={<CalendarDays size={18} />}
-              aoEscolher={() => mudar({ vista: 'calendario', pagina: null })}
-            >
-              Calendário
-            </BotaoVista>
-          </fieldset>
-          {vista === 'lista' && !carregando && !falhou && exportacao.botao}
-          {acoes.podeEditar && (
-            <Botao variante="primario" icone={<Plus size={18} />} onClick={() => acoes.novo()}>
-              Novo prazo
-            </Botao>
-          )}
-        </div>
-      </div>
+      <CabecalhoPagina
+        titulo="Agenda"
+        apoio={carregando ? 'Carregando…' : contagem(filtrados.length, vista)}
+        acoes={
+          <>
+            <fieldset className={estilos.vistas}>
+              <legend className="somente-leitor">Vista</legend>
+              <BotaoVista
+                atual={vista}
+                vista="lista"
+                icone={<List size={18} />}
+                aoEscolher={() => mudar({ vista: null })}
+              >
+                Lista
+              </BotaoVista>
+              <BotaoVista
+                atual={vista}
+                vista="calendario"
+                icone={<CalendarDays size={18} />}
+                aoEscolher={() => mudar({ vista: 'calendario', pagina: null })}
+              >
+                Calendário
+              </BotaoVista>
+            </fieldset>
+            {vista === 'lista' && !carregando && !falhou && exportacao.botao}
+            {acoes.podeEditar && (
+              <Botao variante="primario" icone={<Plus size={18} />} onClick={() => acoes.novo()}>
+                Novo prazo
+              </Botao>
+            )}
+          </>
+        }
+      />
 
       <Filtros
         titulo="Filtrar"

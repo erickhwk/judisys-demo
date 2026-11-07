@@ -8,6 +8,7 @@
 import { z } from 'zod'
 import { ehDataIso } from '../regras/datas'
 import { somenteDigitos, validarCnj, validarCnpj, validarCpf } from '../regras/documentos'
+import { PORTES } from '../regras/empresas'
 import { FASES_FALENCIA, FASES_FINAIS_ALTERNATIVAS_RJ, FASES_RJ } from '../regras/fases'
 import { PAPEIS } from '../regras/permissoes'
 import { CLASSES_FALENCIA, CLASSES_RJ } from '../regras/qgc'
@@ -105,7 +106,7 @@ export const camposEmpresa = z.object({
   razaoSocial: texto,
   nomeFantasia: textoOpcional,
   cnpj,
-  porte: z.enum(['me', 'epp', 'demais']),
+  porte: z.enum(PORTES),
   cidade: texto,
   uf,
   cnae: textoOpcional,

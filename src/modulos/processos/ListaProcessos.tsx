@@ -20,6 +20,7 @@ import {
 import { pode } from '../../regras/permissoes'
 import { hoje } from '../../regras/relogio'
 import { Botao, BotaoIcone } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
@@ -29,7 +30,6 @@ import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
-import { Cabecalho } from './Cabecalho'
 import { useExcluirProcesso } from './ExcluirProcesso'
 import { exportarProcessos } from './exportacao'
 import { listarProcessos } from './listagem'
@@ -174,9 +174,9 @@ export function ListaProcessos() {
 
   return (
     <>
-      <Cabecalho
+      <CabecalhoPagina
         titulo="Processos"
-        subtitulo={
+        apoio={
           lista.isSuccess && !busca && !fase
             ? `${plural(total, 'processo cadastrado', 'processos cadastrados')}`
             : undefined

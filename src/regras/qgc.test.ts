@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatarMoeda } from './datas'
+import { formatarMoeda } from './moeda'
 import {
   CLASSES_FALENCIA,
   CLASSES_RJ,

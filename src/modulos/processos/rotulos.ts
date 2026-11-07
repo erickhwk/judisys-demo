@@ -1,4 +1,4 @@
-// Rótulos das telas de processo: tipo, consolidação e UFs (RF-11 a RF-13).
+// Rótulos das telas de processo: tipo e consolidação (RF-11 a RF-13); as UFs vêm de regras/empresas.
 import type { TipoProcesso } from '../../regras/fases'
 import type { TomSelo } from '../../ui/Selo'
 
@@ -20,36 +20,6 @@ export const ROTULOS_CONSOLIDACAO = {
 } as const
 
 export type Consolidacao = keyof typeof ROTULOS_CONSOLIDACAO
-
-export const UFS = [
-  'AC',
-  'AL',
-  'AM',
-  'AP',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MG',
-  'MS',
-  'MT',
-  'PA',
-  'PB',
-  'PE',
-  'PI',
-  'PR',
-  'RJ',
-  'RN',
-  'RO',
-  'RR',
-  'RS',
-  'SC',
-  'SE',
-  'SP',
-  'TO',
-] as const
 
 /** "1 prazo", "2 prazos". */
 export function plural(quantidade: number, singular: string, pluralTexto: string): string {

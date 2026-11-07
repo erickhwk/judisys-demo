@@ -1,75 +1,10 @@
 /* Telas de credores (DMO-15): aba, tela do credor, diálogos e QGC para impressão. */
 
-/* --- Cabeçalho de página ------------------------------------------------------------------ */
-
-.cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.cabecalhoTexto {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.cabecalhoTexto h1 {
-  overflow-wrap: anywhere;
-}
-
-.migalhas {
-  font-size: var(--tamanho-texto-pequeno);
-  color: var(--cor-texto-muted);
-}
-
-.migalhas a {
-  color: var(--cor-texto-muted);
-  font-weight: 500;
-}
-
-.subtitulo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  font-size: var(--tamanho-texto-pequeno);
-  color: var(--cor-texto-muted);
-}
-
-.acoesCabecalho,
 .barraAcoes {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-}
-
-.barraAcoes {
   justify-content: flex-end;
-}
-
-/* Link com cara de botão secundário (o QGC e "Voltar" navegam, não agem). */
-.botaoLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: var(--altura-campo);
-  padding: 0 20px;
-  border: 1px solid var(--cor-borda-campo);
-  border-radius: var(--raio-campo);
-  background: var(--cor-superficie);
-  color: var(--cor-texto);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.botaoLink:hover {
-  background: var(--cor-hover-fantasma);
-  text-decoration: none;
+  gap: 12px;
 }
 
 /* --- Aba e seções --------------------------------------------------------------------------- */

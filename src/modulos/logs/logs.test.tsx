@@ -7,7 +7,7 @@ import { type ContextoGravacao, criarRepositorio } from '../../dados/repositorio
 import type { Log } from '../../dados/schemas'
 import { excluirProcesso } from '../../dados/servicos/exclusoes'
 import type { Papel } from '../../regras/permissoes'
-import { renderizarComDados } from '../credores/renderizarParaTeste'
+import { renderizarComDados } from '../../ui/renderizarParaTeste'
 import { TelaLogs } from './TelaLogs'
 
 let armazenamento: ArmazenamentoMemoria
