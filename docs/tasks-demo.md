@@ -364,12 +364,14 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - [ ] Cram down com os três requisitos marcados (RF-36)
   - [ ] `registrarResultadoAgc` numa transação: AGC encerrada, informe "Atas de AGC" com `resumo` e PDF genérico (RF-37)
   - [ ] AGC encerrada só leitura; registrar desabilitado sem instalação
+  - [ ] "Registrar resultado" bloqueado (com aviso no painel) enquanto houver presente sem voto, usando `semVoto` de `resultadoClasse` (T-33)
 - **Testes:**
   - [ ] AGC-19 · cenário cram down na tela
   - [ ] AGC-20 · cenário impossível mostra a mensagem
   - [ ] AGC-21 · registrar resultado cria a ata
   - [ ] AGC-22 · AGC encerrada só leitura
   - [ ] AGC-23 · registrar sem instalação desabilitado
+  - [ ] Registrar com presente sem voto desabilitado (T-33)
 
 ## DMO-18 · Dashboard
 - **Tipo:** Feature
