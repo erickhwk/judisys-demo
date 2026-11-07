@@ -72,13 +72,16 @@ function somenteLeitura<T extends Registro>(repositorio: Repositorio<T>): Reposi
   return { ...repositorio, criar: semSessao, atualizar: semSessao, excluir: semSessao }
 }
 
-/** Espera a gravação e chama `invalidar` ao terminar, deu certo ou não (T-22). */
+/**
+ * Roda a gravação e chama `invalidar` ao terminar, deu certo ou não (T-22). Recebe uma função,
+ * e não a promessa, para que um erro síncrono de quem grava também passe pelo `finally`.
+ */
 async function invalidandoAoTerminar<R>(
-  gravacao: Promise<R>,
+  gravar: () => Promise<R>,
   invalidar: () => Promise<void>,
 ): Promise<R> {
   try {
-    return await gravacao
+    return await gravar()
   } finally {
     await invalidar()
   }
@@ -92,12 +95,12 @@ export function comInvalidacao<T extends Registro>(
   repositorio: Repositorio<T>,
   invalidar: () => Promise<void>,
 ): Repositorio<T> {
-  const depois = <R,>(gravacao: Promise<R>) => invalidandoAoTerminar(gravacao, invalidar)
+  const depois = <R,>(gravar: () => Promise<R>) => invalidandoAoTerminar(gravar, invalidar)
   return {
     ...repositorio,
-    criar: (dados) => depois(repositorio.criar(dados)),
-    atualizar: (id, mudancas) => depois(repositorio.atualizar(id, mudancas)),
-    excluir: (id) => depois(repositorio.excluir(id)),
+    criar: (dados) => depois(() => repositorio.criar(dados)),
+    atualizar: (id, mudancas) => depois(() => repositorio.atualizar(id, mudancas)),
+    excluir: (id) => depois(() => repositorio.excluir(id)),
   }
 }
 
@@ -126,7 +129,10 @@ export function useServico<A extends unknown[], R>(
     if (!contexto) return semSessao
     const servico = fabrica(armazenamento, contexto)
     return (...args: A) =>
-      invalidandoAoTerminar(servico(...args), () => queryClient.invalidateQueries())
+      invalidandoAoTerminar(
+        () => servico(...args),
+        () => queryClient.invalidateQueries(),
+      )
   }, [armazenamento, contexto, queryClient, fabrica])
 }
 

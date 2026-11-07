@@ -80,4 +80,19 @@ describe('contexto de dados', () => {
     await expect(repo.excluir('x')).rejects.toThrow('falhou')
     expect(invalidar).toHaveBeenCalledOnce()
   })
+
+  it('comInvalidacao: erro síncrono de quem grava vira rejeição e também invalida', async () => {
+    const invalidar = vi.fn(async () => {})
+    const lanca = () => {
+      throw new Error('síncrono')
+    }
+    const repo = comInvalidacao(
+      { criar: lanca, atualizar: lanca, excluir: lanca } as unknown as Repositorio<
+        Tipos['credores']
+      >,
+      invalidar,
+    )
+    await expect(repo.excluir('x')).rejects.toThrow('síncrono')
+    expect(invalidar).toHaveBeenCalledOnce()
+  })
 })
