@@ -24,6 +24,7 @@ import {
   ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO,
   ERRO_TIPO_PARA_CREDOR,
   ERRO_TIPO_PARA_REQUERENTE,
+  erroJaTemCreditoNaClasse,
   type NovoPedido,
   registrarPedido,
   relacaoAjPublicada,
@@ -300,6 +301,29 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
         valorQgc: 4_321_00,
       })
       expect(await credor('crd-0004')).toEqual(antes)
+    })
+
+    it('AJ-04 · reclassificar para a classe em que o documento já tem linha: recusado com mensagem própria, nada gravado', async () => {
+      await antesDaRelacao()
+      // O CPF do crd-0004 (ME/EPP) já tem também uma linha quirografária no processo.
+      const quirografario: Tipos['credores'] = {
+        ...((await credor('crd-0004')) as Tipos['credores']),
+        id: 'crd-0900',
+        classe: 'quirografario',
+        valorAj: 10_00,
+      }
+      await armazenamento.put('credores', quirografario)
+      await pedidoPendente({ credorId: 'crd-0004', classePedida: 'quirografario' })
+      const antes = await credor('crd-0004')
+      const logs = (await logsNovos()).length
+      const erro = await erroDe(decidirPedido(armazenamento, contexto())('ped-100', 'acolhido'))
+      expect(erro).toBeInstanceOf(ErroRegra)
+      expect(erro.message).toBe(erroJaTemCreditoNaClasse('quirografario'))
+      expect(erro.message).toContain('Quirografário')
+      expect(await credor('crd-0004')).toEqual(antes)
+      expect(await credor('crd-0900')).toEqual(quirografario)
+      expect((await pedido('ped-100'))?.status).toBe('pendente')
+      expect(await logsNovos()).toHaveLength(logs)
     })
 
     it('AJ-04 · documento só em outra classe: acolher cria o credor da classe pedida', async () => {

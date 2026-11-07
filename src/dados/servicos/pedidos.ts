@@ -8,7 +8,7 @@
 // - Requerente fora da lista só vira credor ao acolher; rejeitar só muda o status (CRD-07).
 import { somenteDigitos } from '../../regras/documentos'
 import { type Fase, fasesDoTipo, type TipoProcesso } from '../../regras/fases'
-import { CLASSES_FALENCIA, CLASSES_RJ, type Classe } from '../../regras/qgc'
+import { CLASSES_FALENCIA, CLASSES_RJ, type Classe, ROTULOS_CLASSE } from '../../regras/qgc'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
 import { AVISO_DOCUMENTO_EXISTENTE, type ContextoGravacao, criarRepositorio } from '../repositorio'
 import type { Novo, Tipos } from '../schemas'
@@ -89,6 +89,11 @@ export const ERRO_CREDOR_DE_OUTRO_PROCESSO = 'O credor não pertence a este proc
 export const ERRO_CLASSE_DO_TIPO = 'Esta classe não existe neste tipo de processo.'
 // A mensagem mora no repositório, que também recusa o documento repetido no cadastro (AJ-04).
 export { AVISO_DOCUMENTO_EXISTENTE }
+
+/** Acolher reclassificaria o credor para uma classe em que o mesmo documento já tem crédito. */
+export function erroJaTemCreditoNaClasse(classe: Classe): string {
+  return `Este credor já tem crédito na classe ${ROTULOS_CLASSE[classe]} deste processo; ajuste o valor na linha existente.`
+}
 
 /**
  * Credor do processo com este CPF/CNPJ na classe (CRD-08), comparando só os dígitos. O mesmo
@@ -220,6 +225,21 @@ export function decidirPedido(armazenamento: Armazenamento, contexto: ContextoGr
       let credorCriado = false
 
       if (credor) {
+        // Reclassificação para uma classe em que o mesmo documento já tem linha: a unicidade
+        // por processo e classe (AJ-04) recusaria com a mensagem de documento repetido, que não
+        // diz nada a quem acolhe. Somar na linha existente fica para a reescrita.
+        if (credor.classe !== pedido.classePedida && credor.documento) {
+          const naClasse = await porDocumento(
+            pedido.processoId,
+            credor.documento,
+            pedido.classePedida,
+          )
+          if (naClasse && naClasse.id !== credor.id) {
+            throw new ErroRegra(erroJaTemCreditoNaClasse(pedido.classePedida), [
+              { colecao: 'credores', id: naClasse.id, rotulo: naClasse.nome },
+            ])
+          }
+        }
         credor = await repoCredores.atualizar(credor.id, valoresAcolhidos(pedido))
       } else {
         if (!pedido.requerente) throw new ErroRegra('Pedido sem credor e sem requerente.')
