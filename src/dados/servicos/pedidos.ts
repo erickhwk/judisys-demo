@@ -10,7 +10,7 @@ import { somenteDigitos } from '../../regras/documentos'
 import { type Fase, fasesDoTipo, type TipoProcesso } from '../../regras/fases'
 import { CLASSES_FALENCIA, CLASSES_RJ, type Classe } from '../../regras/qgc'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
-import { type ContextoGravacao, criarRepositorio } from '../repositorio'
+import { AVISO_DOCUMENTO_EXISTENTE, type ContextoGravacao, criarRepositorio } from '../repositorio'
 import type { Novo, Tipos } from '../schemas'
 import { buscarOuFalhar, ErroRegra, exigirPermissao } from './comum'
 
@@ -87,7 +87,8 @@ export const ERRO_TIPO_PARA_CREDOR = 'Habilitação é para quem não está na l
 export const ERRO_TIPO_PARA_REQUERENTE = 'Divergência é para credor que já está na lista.'
 export const ERRO_CREDOR_DE_OUTRO_PROCESSO = 'O credor não pertence a este processo.'
 export const ERRO_CLASSE_DO_TIPO = 'Esta classe não existe neste tipo de processo.'
-export const AVISO_DOCUMENTO_EXISTENTE = 'Já existe credor com este CPF/CNPJ neste processo'
+// A mensagem mora no repositório, que também recusa o documento repetido no cadastro (AJ-04).
+export { AVISO_DOCUMENTO_EXISTENTE }
 
 /** Credor do processo com este CPF/CNPJ (CRD-08), comparando só os dígitos. */
 export function credorComDocumento(armazenamento: Armazenamento) {

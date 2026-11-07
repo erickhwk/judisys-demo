@@ -77,6 +77,25 @@ test('CRD-16 · CPF com dígito inválido: erro no campo e nada gravado', async 
   await expect(page.getByText('456.306.950-70')).toBeVisible()
 })
 
+test('AJ-04 · CPF de outro credor do processo recusado na edição, com o erro no campo', async ({
+  page,
+}) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  await page.goto('./#/processos/prc-001/credores/crd-0001')
+  await page.getByRole('button', { name: 'Editar' }).click()
+  const dialogo = page.getByRole('dialog', { name: 'Editar credor' })
+  const documento = dialogo.getByLabel('CPF ou CNPJ')
+  // CPF de Benjamin Moraes Albuquerque (crd-0002), sem pontuação.
+  await documento.fill('89391986463')
+  await dialogo.getByRole('button', { name: 'Salvar' }).click()
+  await expect(
+    dialogo.getByText('Já existe credor com este CPF/CNPJ neste processo').first(),
+  ).toBeVisible()
+  await expect(documento).toHaveAttribute('aria-invalid', 'true')
+  await dialogo.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(page.getByText('456.306.950-70')).toBeVisible()
+})
+
 test('CRD-12 · QGC para impressão: grupos, subtotais e total geral iguais ao quadro-resumo', async ({
   page,
 }) => {

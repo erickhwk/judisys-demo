@@ -126,6 +126,9 @@ interface Unicidade {
   mensagem: string
 }
 
+/** Credor com CPF/CNPJ repetido no processo (AJ-04, e CRD-08 no registro de pedido). */
+export const AVISO_DOCUMENTO_EXISTENTE = 'Já existe credor com este CPF/CNPJ neste processo'
+
 export const COLECOES: Record<Tabela, ConfigColecao> = {
   escritorios: { modulo: 'usuarios', busca: ['nome'], log: true },
   usuarios: { modulo: 'usuarios', busca: ['nome', 'email'], log: true },
@@ -145,7 +148,14 @@ export const COLECOES: Record<Tabela, ConfigColecao> = {
   processoEmpresas: { modulo: 'processos', busca: [], log: false },
   marcosDeFase: { modulo: 'processos', busca: [], log: true },
   prazos: { modulo: 'prazos', busca: ['titulo', 'baseLegal'], log: true },
-  credores: { modulo: 'credores', busca: ['nome', 'documento'], log: true },
+  credores: {
+    modulo: 'credores',
+    busca: ['nome', 'documento'],
+    log: true,
+    // AJ-04: o documento já é gravado só com dígitos (schema), então dispensa `chave` e usa o
+    // índice 'documento'. Em processos diferentes, o mesmo CPF/CNPJ continua permitido.
+    unicos: [{ campo: 'documento', escopo: 'processoId', mensagem: AVISO_DOCUMENTO_EXISTENTE }],
+  },
   pedidosDeCredito: {
     modulo: 'credores',
     busca: ['requerente.nome', 'requerente.documento'],

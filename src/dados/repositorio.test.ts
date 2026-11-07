@@ -13,6 +13,7 @@ import { normalizar } from '../regras/normalizar'
 import type { Papel } from '../regras/permissoes'
 import type { Armazenamento } from './armazenamento'
 import {
+  AVISO_DOCUMENTO_EXISTENTE,
   COLECOES,
   type ContextoGravacao,
   criarRepositorio,
@@ -289,27 +290,50 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
         config.unicos = original
       }
     })
+  })
 
-    it('escopo: o mesmo valor só conflita dentro do escopo', async () => {
-      const config = COLECOES.credores
-      const original = config.unicos
-      config.unicos = [{ campo: 'documento', escopo: 'processoId', mensagem: 'Repetido' }]
-      try {
-        const credores = criarRepositorio(armazenamento, 'credores', contexto())
-        const documento = (await credores.buscar('crd-0001'))?.documento ?? ''
-        const erro = await credores.criar({ ...NOVO_CREDOR, documento }).catch((e: unknown) => e)
-        expect((erro as ErroValidacao).problemas).toEqual([
-          { campo: 'documento', mensagem: 'Repetido' },
-        ])
-        const outroProcesso = await credores.criar({
-          ...NOVO_CREDOR,
-          processoId: 'prc-002',
-          documento,
-        })
-        expect(outroProcesso.documento).toBe(documento)
-      } finally {
-        config.unicos = original
-      }
+  describe('documento único entre credores do processo (AJ-04)', () => {
+    const documentoDe = async (id: string) =>
+      (await armazenamento.get<Tipos['credores']>('credores', id))?.documento ?? ''
+    const problemaNoDocumento = [{ campo: 'documento', mensagem: AVISO_DOCUMENTO_EXISTENTE }]
+
+    it('AJ-04 · criar credor com CPF de outro do processo (com pontuação): recusado no campo, nada gravado', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = formatarCpf(await documentoDe('crd-0001'))
+      const erro = await credores.criar({ ...NOVO_CREDOR, documento }).catch((e: unknown) => e)
+      expect(erro).toBeInstanceOf(ErroValidacao)
+      expect((erro as ErroValidacao).problemas).toEqual(problemaNoDocumento)
+      expect(await credores.todos({ onde: { nome: NOVO_CREDOR.nome } })).toEqual([])
+      expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-04 · o mesmo documento em outro processo continua permitido', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = await documentoDe('crd-0001')
+      const criado = await credores.criar({ ...NOVO_CREDOR, processoId: 'prc-002', documento })
+      expect(criado).toMatchObject({ processoId: 'prc-002', documento })
+    })
+
+    it('AJ-04 · editar credor para o documento de outro do processo: recusado no campo, nada gravado', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const antes = await credores.buscar('crd-0002')
+      const erro = await credores
+        .atualizar('crd-0002', { documento: await documentoDe('crd-0001'), natureza: 'Outra' })
+        .catch((e: unknown) => e)
+      expect(erro).toBeInstanceOf(ErroValidacao)
+      expect((erro as ErroValidacao).problemas).toEqual(problemaNoDocumento)
+      expect(await credores.buscar('crd-0002')).toEqual(antes)
+      expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-04 · editar o próprio credor sem mudar o documento continua permitido', async () => {
+      const credores = criarRepositorio(armazenamento, 'credores', contexto())
+      const documento = await documentoDe('crd-0001')
+      const atualizado = await credores.atualizar('crd-0001', {
+        documento: formatarCpf(documento),
+        natureza: 'Outra',
+      })
+      expect(atualizado).toMatchObject({ documento, natureza: 'Outra' })
     })
   })
 
