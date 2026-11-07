@@ -1,56 +1,27 @@
 // AGC: votação, painel do art. 45, cram down e registro do resultado (SDD §7.6; DMO-17) com o seed
 // da demo. O processo vitrine (prc-001) tem uma AGC agendada para daqui a 6 dias (SED-04).
 import { expect, type Page, test } from '@playwright/test'
+import {
+  AGORA,
+  abrirAgcDoVitrine,
+  CLASSES_DO_VITRINE,
+  entrarComo,
+  instalar,
+  todosDaClasse,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
-
-/** Abre a AGC agendada do vitrine pela aba do processo. */
-async function abrirAgcDoVitrine(page: Page): Promise<void> {
-  await page.goto('./#/processos/prc-001/agc')
-  const lista = page.getByRole('region', { name: 'AGCs do processo' })
-  await lista.getByRole('link', { name: '13/11/2026' }).click()
-  await expect(page.getByRole('heading', { name: 'AGC de 13/11/2026', level: 1 })).toBeVisible()
-}
-
-async function todosDaClasse(page: Page, classe: string): Promise<void> {
-  await page.getByRole('button', { name: `Todos da classe ${classe}` }).click()
-  await expect(page.getByRole('button', { name: `Desmarcar classe ${classe}` })).toBeVisible()
-}
-
-async function instalar(page: Page, convocacao: 1 | 2): Promise<void> {
-  if (convocacao === 2) await page.getByRole('radio', { name: /^2ª convocação/ }).check()
-  await page.getByRole('button', { name: `Instalar em ${convocacao}ª convocação` }).click()
-  const confirmacao = page.getByRole('alertdialog', {
-    name: `Instalar a AGC em ${convocacao}ª convocação?`,
-  })
-  await confirmacao.getByRole('button', { name: 'Instalar' }).click()
-  await expect(confirmacao).toBeHidden()
-  await expect(page.getByText(`Instalada em ${convocacao}ª convocação`)).toBeVisible()
-}
 
 const resultadoGeral = (page: Page) => page.locator('[data-resultado-geral]')
 
 test('AGC-19, AGC-21, AGC-22 · roteiro: cram down na tela, registrar cria a ata, AGC encerrada só leitura', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
-  for (const classe of [
-    'I · Trabalhista',
-    'II · Garantia real',
-    'III · Quirografário',
-    'IV · ME/EPP',
-  ]) {
-    await todosDaClasse(page, classe)
-  }
+  for (const classe of CLASSES_DO_VITRINE) await todosDaClasse(page, classe)
   await instalar(page, 1)
 
   // T-33: sem votos, o registro fica bloqueado com o aviso no painel.
@@ -108,7 +79,7 @@ test('AGC-19, AGC-21, AGC-22 · roteiro: cram down na tela, registrar cria a ata
 test('AGC-20 · cenário de cram down com uma única classe presente mostra a mensagem e não muda nada', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
   await todosDaClasse(page, 'I · Trabalhista')
   await instalar(page, 2)
@@ -133,7 +104,7 @@ test('AGC-20 · cenário de cram down com uma única classe presente mostra a me
 test('AGC-23 · AGC não instalada: "Registrar resultado" desabilitado com o motivo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirAgcDoVitrine(page)
   await expect(page.getByText('A votação abre depois da instalação')).toBeVisible()
   const registrar = page.getByRole('button', { name: 'Registrar resultado' })

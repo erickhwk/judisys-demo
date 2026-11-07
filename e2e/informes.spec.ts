@@ -3,18 +3,13 @@
 // não tem rota (é ligada depois na TelaDoProcesso); aqui entram as telas com rota própria.
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
 
 const MB = 1024 * 1024
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 function linhas(page: Page) {
   return page.getByRole('region', { name: 'Lista de informes' }).locator('tbody tr')
@@ -40,7 +35,7 @@ async function abrirNovo(page: Page, processo = 'prc-001'): Promise<void> {
 test('INF-06 · lista geral: mais recentes primeiro e selo "Publicado no site"', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await page.goto('./#/informes')
   await expect(page.getByRole('heading', { name: 'Informes', level: 1 })).toBeVisible()
   await expect(linhas(page)).toHaveCount(50)
@@ -67,7 +62,7 @@ test('INF-06 · lista geral: mais recentes primeiro e selo "Publicado no site"',
 test('INF-01 e INF-02 · fase do processo preenchida e "Data da AGC" só em Atas de AGC', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await abrirNovo(page)
 
   const fase = page.getByRole('combobox', { name: 'Fase' })
@@ -90,7 +85,7 @@ test('INF-01 e INF-02 · fase do processo preenchida e "Data da AGC" só em Atas
 })
 
 test('INF-03 · PDF de 2 MB: salvar e abrir no visualizador', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirNovo(page)
   await page.getByRole('combobox', { name: 'Categoria' }).selectOption('relatorios')
   await page.getByLabel('Título').fill('Relatório mensal de atividades')
@@ -121,7 +116,7 @@ test('INF-03 · PDF de 2 MB: salvar e abrir no visualizador', async ({ page }) =
 })
 
 test('INF-04 · arquivo acima de 10 MB é recusado', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirNovo(page)
   await page.getByLabel('Anexar arquivos').setInputFiles({
     name: 'grande.pdf',
@@ -147,7 +142,7 @@ test('CAR-11 · cota cheia ao gravar o anexo: só essa gravação falha, com a m
     IDBObjectStore.prototype.put = falhar(IDBObjectStore.prototype.put)
     IDBObjectStore.prototype.add = falhar(IDBObjectStore.prototype.add)
   })
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirNovo(page)
   await page.evaluate(() => {
     ;(window as { cotaCheia?: boolean }).cotaCheia = true
@@ -178,7 +173,7 @@ test('CAR-11 · cota cheia ao gravar o anexo: só essa gravação falha, com a m
 })
 
 test('INF-05 · anexo .docx é baixado', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirNovo(page)
   await page.getByRole('combobox', { name: 'Categoria' }).selectOption('outros-documentos')
   await page.getByLabel('Título').fill('Parecer técnico')
@@ -199,7 +194,7 @@ test('INF-05 · anexo .docx é baixado', async ({ page }) => {
 test('T-30 · ata do seed: resumo acima do PDF genérico; editar tira a data da AGC', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/informes/inf-024')
   await expect(
     page.getByRole('heading', { name: 'Ata da assembleia geral de credores', level: 1 }),

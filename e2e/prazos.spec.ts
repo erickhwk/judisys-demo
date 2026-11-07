@@ -2,16 +2,11 @@
 // (SDD §7.4, DMO-14). A aba Prazos do processo usa a mesma lista e ações; enquanto ela não tem
 // rota (TelaDoProcesso, DMO-12), é testada em src/modulos/prazos/AbaPrazos.test.tsx.
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo, trocarPara } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 async function abrirAgenda(page: Page, consulta = ''): Promise<Locator> {
   await page.goto(`./#/agenda${consulta}`)
@@ -44,7 +39,7 @@ async function vencimentosFiltrados(lista: Locator, ok: (data: string) => boolea
 }
 
 test('PRZ-08 · filtros "7 dias" e "vencidos" da agenda', async ({ page }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   const lista = await abrirAgenda(page)
 
   await page.getByLabel('Período').selectOption({ label: 'Próximos 7 dias' })
@@ -73,7 +68,7 @@ test('PRZ-08 · filtros "7 dias" e "vencidos" da agenda', async ({ page }) => {
 test('PRZ-09 · calendário mensal: prazos por dia, navegação e link para o prazo', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await abrirAgenda(page)
   await page.getByRole('button', { name: 'Calendário' }).click()
   await expect(page).toHaveURL(/vista=calendario/)
@@ -99,7 +94,7 @@ test('PRZ-09 · calendário mensal: prazos por dia, navegação e link para o pr
 })
 
 test('PRZ-10 · prazo manual sem base legal', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   const lista = await abrirAgenda(page, '?processo=prc-003')
   // Espera a lista carregar antes de contar.
   await expect(lista.locator('tbody tr').first()).toBeVisible()
@@ -125,7 +120,7 @@ test('PRZ-10 · prazo manual sem base legal', async ({ page }) => {
 })
 
 test('PRZ-11 · editar vencimento de prazo automático (título travado)', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   const lista = await abrirAgenda(page, '?processo=prc-001')
 
   await lista.getByRole('button', { name: 'Editar "Stay period"' }).click()
@@ -145,7 +140,7 @@ test('PRZ-11 · editar vencimento de prazo automático (título travado)', async
 test('PRZ-01 · marcar o RMA como cumprido cria o seguinte; analista não vê as ações', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   const lista = await abrirAgenda(page, '?processo=prc-001')
   const rma = 'Relatório mensal de atividades (RMA)'
 
@@ -161,16 +156,14 @@ test('PRZ-01 · marcar o RMA como cumprido cria o seguinte; analista não vê as
   await expect(linhaRma).toHaveCount(1)
   await expect(linhaRma).toContainText('15/12/2026')
 
-  await page.getByRole('button', { name: 'Menu da conta' }).click()
-  await page.getByRole('button', { name: 'Trocar de papel' }).click()
-  await entrarComo(page, /Entrar como Analista/)
+  await trocarPara(page, 'analista')
   await abrirAgenda(page)
   await expect(page.getByRole('button', { name: 'Novo prazo' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /como cumprido/ })).toHaveCount(0)
 })
 
 test('aba Prazos dentro da tela do processo (RF-13)', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('#/processos/prc-001/prazos')
   await expect(page.getByRole('navigation', { name: 'Seções do processo' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Prazos', exact: true })).toBeVisible()

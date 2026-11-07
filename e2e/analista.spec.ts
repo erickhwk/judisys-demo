@@ -6,6 +6,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import {
   AGORA,
   abrirAgcDaLista,
+  abrirAgcDoVitrine,
   CREDOR_IMPUGNACAO,
   entrarComo,
   lerTabela,
@@ -122,8 +123,7 @@ const TELAS: Tela[] = [
   {
     nome: 'AGC agendada',
     abrir: async (page) => {
-      await page.goto(`${VITRINE}/agc`)
-      await abrirAgcDaLista(page)
+      await abrirAgcDoVitrine(page)
       const lista = page.getByRole('region', { name: 'Lista de presença', exact: true })
       await expect(lista.getByRole('checkbox').first()).toBeVisible()
     },

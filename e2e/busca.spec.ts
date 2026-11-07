@@ -1,16 +1,11 @@
 // Busca global (SDD §7.8, RF-38; DMO-20) com o seed da demo: atalho e ícone do topo, grupos de
 // até 5, setas + Enter e o índice refeito depois de uma gravação.
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 function busca(page: Page) {
   return page.getByRole('dialog', { name: 'Busca global' })
@@ -21,7 +16,7 @@ function campo(page: Page) {
 }
 
 test('BUS-01 · Ctrl+K, ⌘K e o ícone do topo abrem a busca com foco no campo', async ({ page }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
 
   await page.keyboard.press('Control+k')
   await expect(busca(page)).toBeVisible()
@@ -40,7 +35,7 @@ test('BUS-01 · Ctrl+K, ⌘K e o ícone do topo abrem a busca com foco no campo'
 })
 
 test('BUS-04 · 110 credores casam com "silva": o grupo mostra só 5', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.keyboard.press('Control+k')
   await campo(page).fill('SILVA')
   const credores = busca(page).locator('[data-grupo="credores"]')
@@ -50,7 +45,7 @@ test('BUS-04 · 110 credores casam com "silva": o grupo mostra só 5', async ({ 
 })
 
 test('BUS-05 · ↓ ↓ Enter navega até o registro escolhido', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.keyboard.press('Control+k')
   // Acentos e maiúsculas não importam: processo e empresas "Lontra Azul".
   await campo(page).fill('lôntra AZUL')
@@ -73,7 +68,7 @@ test('BUS-05 · ↓ ↓ Enter navega até o registro escolhido', async ({ page }
 })
 
 test('BUS-06 · credor recém-criado aparece na busca', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   // Abre a busca antes, para o índice já estar montado quando a gravação acontecer.
   await page.keyboard.press('Control+k')
   await campo(page).fill('quiteria xavante')

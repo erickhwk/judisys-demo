@@ -4,11 +4,12 @@
 // ou anel); o que falhar entra na lista do fim do teste.
 // A rolagem horizontal da página no celular é conferida pela guarda de `rolagem.spec.ts` (AJ-02).
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { AGORA } from './apoio'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
 
 /** Paradas do foco sem contorno visível ou fora da janela, para o relatório do fim. */

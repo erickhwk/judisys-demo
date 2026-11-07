@@ -2,16 +2,11 @@
 // teste começa com o armazenamento limpo (contexto novo do Playwright).
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
+import { AGORA, entrarComo } from './apoio'
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
-
-async function entrarComo(page: Page, papel: RegExp): Promise<void> {
-  await page.goto('./#/entrar')
-  await page.getByRole('button', { name: papel }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
-}
 
 async function abrirEmpresas(page: Page): Promise<void> {
   await page.goto('./#/empresas')
@@ -29,7 +24,7 @@ function linhas(page: Page) {
 test('RF-16 · lista com as 40 empresas do seed e busca por razão social, nome fantasia e CNPJ', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await abrirEmpresas(page)
   await expect(page.getByText('40 empresas cadastradas')).toBeVisible()
   await expect(linhas(page)).toHaveCount(40)
@@ -59,7 +54,7 @@ test('RF-16 · lista com as 40 empresas do seed e busca por razão social, nome 
 })
 
 test('CSV-01 · exportar empresas baixa o que passa na busca, com BOM e `;`', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await abrirEmpresas(page)
   await busca(page).fill('lontra')
   await expect(linhas(page)).toHaveCount(5)
@@ -79,7 +74,7 @@ test('CSV-01 · exportar empresas baixa o que passa na busca, com BOM e `;`', as
 })
 
 test('CNPJ inválido recusado; empresa válida criada e excluída', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirEmpresas(page)
   await page.getByRole('button', { name: 'Nova empresa' }).click()
   await expect(page.getByRole('heading', { name: 'Nova empresa', level: 1 })).toBeVisible()
@@ -113,7 +108,7 @@ test('CNPJ inválido recusado; empresa válida criada e excluída', async ({ pag
 })
 
 test('AJ-03 · CNPJ de outra empresa recusado, com o erro no campo', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirEmpresas(page)
   await page.getByRole('button', { name: 'Nova empresa' }).click()
   await expect(page.getByRole('heading', { name: 'Nova empresa', level: 1 })).toBeVisible()
@@ -133,7 +128,7 @@ test('AJ-03 · CNPJ de outra empresa recusado, com o erro no campo', async ({ pa
 })
 
 test('T-23 · empresa sem processo excluída pelo formulário volta à lista', async ({ page }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await page.goto('./#/empresas/novo')
   await page.getByLabel('Razão social').fill('Tucano Bico Verde Ltda.')
   await page.getByLabel('CNPJ').fill('11222333000181')
@@ -156,7 +151,7 @@ test('T-23 · empresa sem processo excluída pelo formulário volta à lista', a
 test('T-23 · exclusão de empresa vinculada recusada, com os processos na mensagem', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Administrador/)
+  await entrarComo(page, 'aj')
   await abrirEmpresas(page)
   await busca(page).fill('sapo-cururu')
   await page.getByRole('button', { name: 'Excluir Fundição Sapo-Cururu Ltda.' }).click()
@@ -179,7 +174,7 @@ test('T-23 · exclusão de empresa vinculada recusada, com os processos na mensa
 })
 
 test('RF-17 · na edição, os processos da empresa com link para a visão geral', async ({ page }) => {
-  await entrarComo(page, /Entrar como Advogado/)
+  await entrarComo(page, 'advogado')
   await page.goto('./#/empresas/emp-025')
   await expect(
     page.getByRole('heading', { name: 'Fundição Sapo-Cururu Ltda.', level: 1 }),
@@ -203,7 +198,7 @@ test('RF-17 · na edição, os processos da empresa com link para a visão geral
 test('PER-03 · analista consulta empresas sem botões de criar, editar ou excluir', async ({
   page,
 }) => {
-  await entrarComo(page, /Entrar como Analista/)
+  await entrarComo(page, 'analista')
   await abrirEmpresas(page)
   await expect(page.getByRole('button', { name: 'Nova empresa' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^(Editar|Excluir) / })).toHaveCount(0)
