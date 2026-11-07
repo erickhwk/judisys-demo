@@ -51,7 +51,7 @@ function errosDoRepositorio(erro: ErroValidacao): { campos: ErrosPrazo; geral?: 
   return outros.length > 0 ? { campos, geral: outros.join('; ') } : { campos }
 }
 
-/** Monte com `key` para recomeçar do zero a cada abertura. */
+/** Monte só com o diálogo aberto (e desmonte ao fechar), para recomeçar do zero a cada abertura. */
 export function FormularioPrazo({
   prazo,
   processoId = '',

@@ -21,7 +21,7 @@ export interface Aviso {
   texto: string
 }
 
-type Edicao = { prazo?: Prazo; processoId?: string; chave: number }
+type Edicao = { prazo?: Prazo; processoId?: string }
 
 export interface AcoesPrazo {
   /** `false` para quem só lê prazos: a tela não mostra os botões. */
@@ -56,12 +56,11 @@ export function useAcoesPrazo({
   const [aCumprir, setACumprir] = useState<Prazo | null>(null)
   const [cumprindo, setCumprindo] = useState(false)
   const [aviso, setAviso] = useState<Aviso | null>(null)
-  const [chave, setChave] = useState(0)
 
-  const abrirEdicao = (dados: Omit<Edicao, 'chave'>) => {
+  // O formulário só existe com o diálogo aberto: cada abertura começa do zero.
+  const abrirEdicao = (dados: Edicao) => {
     setAviso(null)
-    setChave((n) => n + 1)
-    setEdicao({ ...dados, chave: chave + 1 })
+    setEdicao(dados)
   }
 
   const confirmarCumprimento = async () => {
@@ -90,7 +89,6 @@ export function useAcoesPrazo({
     <>
       {edicao && (
         <FormularioPrazo
-          key={edicao.chave}
           {...(edicao.prazo ? { prazo: edicao.prazo } : {})}
           {...(edicao.processoId ? { processoId: edicao.processoId } : {})}
           {...(opcoesProcesso ? { processos: opcoesProcesso } : {})}

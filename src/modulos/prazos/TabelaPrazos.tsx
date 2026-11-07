@@ -104,9 +104,8 @@ export function TabelaPrazos({
         },
       })
     }
-  }
-  // Na agenda a coluna Origem dá lugar a Processo e Responsável, para o título caber.
-  if (!processos) {
+  } else {
+    // Na agenda a coluna Origem dá lugar a Processo e Responsável, para o título caber.
     colunas.push({
       chave: 'origem',
       titulo: 'Origem',
