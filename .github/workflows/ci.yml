@@ -45,7 +45,7 @@ jobs:
       - name: Vitest
         run: pnpm test
 
-      # Até a DMO-07 scripts/gerar-seed.ts é um placeholder que só registra no log
+      # Gera public/seed.json e public/seed-versao.json (DMO-07), que o build copia para dist/
       - name: Gerar seed
         run: pnpm seed
 

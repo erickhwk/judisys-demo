@@ -16,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "seed": "tsx scripts/gerar-seed.ts"
+    "seed": "tsx scripts/gerar-seed.ts",
+    "pdfs": "tsx scripts/gerar-pdfs.ts"
   },
   "packageManager": "pnpm@11.0.9",
   "dependencies": {
