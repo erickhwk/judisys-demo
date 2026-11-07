@@ -3,6 +3,7 @@
 // Playwright).
 import { expect, type Page, test } from '@playwright/test'
 import {
+  AGORA,
   acolherImpugnacao,
   CREDOR_IMPUGNACAO,
   entrarComo,
@@ -49,7 +50,7 @@ async function abrirDemo(page: Page): Promise<void> {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+  await page.clock.setFixedTime(AGORA)
 })
 
 test('CAR-01 · primeira visita mostra o carregamento, baixa o seed e grava a versão', async ({
@@ -184,9 +185,8 @@ async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknow
   return { id: processo.id, apelido: processo.apelido }
 }
 
-test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
-  const processo = await entrarEAlterar(page)
-  await page.goto('./#/logs')
+/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
+async function resetarPelaFaixa(page: Page): Promise<void> {
   await page
     .getByRole('region', { name: 'Demonstração' })
     .getByRole('button', { name: 'Resetar demo' })
@@ -194,8 +194,13 @@ test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async 
   const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
   await expect(confirmacao).toBeVisible()
   await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-
   await expect(confirmacao).toBeHidden()
+}
+
+test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
+  const processo = await entrarEAlterar(page)
+  await page.goto('./#/logs')
+  await resetarPelaFaixa(page)
   await expect(page).toHaveURL(/#\/$/)
   await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
   const depois = await lerTabela(page, 'processos')
@@ -228,12 +233,7 @@ test('CAR-04 · alteração feita pela tela (acolher a impugnação) é desfeita
   await acolherImpugnacao(page)
   expect((await lerTabela(page, 'logs')).length).toBeGreaterThan(logsAntes)
 
-  await page
-    .getByRole('region', { name: 'Demonstração' })
-    .getByRole('button', { name: 'Resetar demo' })
-    .click()
-  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
-  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
+  await resetarPelaFaixa(page)
   await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
 
   // Volta ao seed: o QGC sem valor, a impugnação pendente e o log da decisão desfeito.
