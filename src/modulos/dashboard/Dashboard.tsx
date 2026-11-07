@@ -25,6 +25,7 @@ import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
 import { type Modulo, pode } from '../../regras/permissoes'
 import { situacao } from '../../regras/prazos'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
@@ -77,7 +78,7 @@ export function Dashboard() {
   if (consultas.some((c) => c.isError)) {
     return (
       <div className={estilos.tela}>
-        <h1>Dashboard</h1>
+        <CabecalhoPagina titulo="Dashboard" />
         <Erro mensagem="Não foi possível carregar o dashboard." />
       </div>
     )
@@ -93,7 +94,7 @@ export function Dashboard() {
   ) {
     return (
       <div className={estilos.tela}>
-        <h1>Dashboard</h1>
+        <CabecalhoPagina titulo="Dashboard" />
         <p className={estilos.apoio}>Carregando…</p>
       </div>
     )
@@ -109,7 +110,7 @@ export function Dashboard() {
 
   return (
     <div className={estilos.tela}>
-      <h1>Dashboard</h1>
+      <CabecalhoPagina titulo="Dashboard" />
 
       <section aria-label="Números do escritório" className={estilos.numeros}>
         <Numero
