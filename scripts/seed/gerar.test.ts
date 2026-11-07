@@ -279,6 +279,25 @@ describe('SED-07 · logs coerentes', () => {
     }
   })
 
+  it('o histórico de cada registro encadeia: o "de" de cada edição é o valor anterior', () => {
+    const estado = new Map<string, Record<string, unknown>>()
+    for (const log of t.logs) {
+      const chave = `${log.colecao}:${log.registroId}`
+      const atual = estado.get(chave)
+      if (log.acao === 'editou' && atual) {
+        for (const mudanca of log.mudancas) expect(mudanca.de, chave).toEqual(atual[mudanca.campo])
+      }
+      const novo = { ...atual }
+      for (const mudanca of log.mudancas) novo[mudanca.campo] = mudanca.para
+      estado.set(chave, novo)
+    }
+    // Quem nasceu na janela termina como está no seed.
+    for (const log of t.logs.filter((l) => l.acao === 'criou')) {
+      const registro = (t[log.colecao] as { id: string }[]).find((r) => r.id === log.registroId)
+      expect(registro).toMatchObject(estado.get(`${log.colecao}:${log.registroId}`) ?? {})
+    }
+  })
+
   it('cobrem os últimos ~60 dias, em ordem, sem nada no futuro (RF-43)', () => {
     const datas = t.logs.map((l) => l.data.slice(0, 10))
     expect([...datas].sort()).toEqual(datas)

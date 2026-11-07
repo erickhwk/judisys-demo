@@ -566,6 +566,8 @@ class Gerador {
     let novo = primeiro.prazo
     let criadoEm = primeiro.marco.criadoEm
     for (;;) {
+      // RJ em fase final: nenhum RMA vence depois do último marco.
+      if (finalizado && ultimo !== undefined && novo.vencimento > ultimo.data) return cumpridos
       const id = this.novoId('prz', 4)
       const seguinte = novoRma(especificacao.id, novo.vencimento)
       const aberto = finalizado
@@ -590,7 +592,6 @@ class Gerador {
         data: entregue,
         responsavelId: especificacao.responsavelId,
       })
-      if (finalizado && ultimo !== undefined && seguinte.vencimento > ultimo.data) return cumpridos
       novo = seguinte
       criadoEm = entregue
     }
@@ -619,12 +620,6 @@ class Gerador {
         const tipo = i % 3 === 2 ? 'habilitacao' : 'divergencia'
         const valorPedido = Math.round(credor.valorDevedor * (this.inteiro(105, 160) / 100))
         const status = pendente ? 'pendente' : i % 3 === 1 ? 'rejeitado' : 'acolhido'
-        if (status === 'acolhido') {
-          if (tipo === 'habilitacao') credor.valorDevedor = 0 // credor criado pelo pedido (CRD-05)
-          credor.valorAj = valorPedido
-          if (credor.valorQgc !== null && credor.valorQgc !== undefined)
-            credor.valorQgc = valorPedido
-        }
         if (pendente && tipo === 'habilitacao') {
           this.novoPedido(especificacao.id, data, {
             requerente: { nome: this.nomePessoa(), documento: this.novoCpf() },
@@ -633,14 +628,25 @@ class Gerador {
             classePedida: 'trabalhista',
             status,
           })
-        } else {
-          this.novoPedido(especificacao.id, data, {
-            credorId: credor.id,
-            tipo,
-            valorPedido,
-            classePedida: credor.classe,
-            status,
-          })
+          continue
+        }
+        const pedidoEm = this.novoPedido(especificacao.id, data, {
+          credorId: credor.id,
+          tipo,
+          valorPedido,
+          classePedida: credor.classe,
+          status,
+        })
+        if (status === 'acolhido') {
+          if (tipo === 'habilitacao') {
+            // Credor criado pelo pedido (CRD-05): não estava na relação do devedor.
+            credor.valorDevedor = 0
+            credor.criadoEm = pedidoEm
+          }
+          credor.valorAj = valorPedido
+          if (credor.valorQgc !== null && credor.valorQgc !== undefined)
+            credor.valorQgc = valorPedido
+          tocar(credor, pedidoEm)
         }
       }
     }
@@ -669,14 +675,17 @@ class Gerador {
           credores.filter((c) => c.classe === 'quirografario' || c.classe === 'trabalhista'),
         )
         const valorPedido = Math.round((credor.valorAj ?? credor.valorDevedor) * 1.25)
-        if (status === 'acolhido') credor.valorQgc = valorPedido
-        this.novoPedido(especificacao.id, data, {
+        const pedidoEm = this.novoPedido(especificacao.id, data, {
           credorId: credor.id,
           tipo: 'impugnacao',
           valorPedido,
           classePedida: credor.classe,
           status,
         })
+        if (status === 'acolhido') {
+          credor.valorQgc = valorPedido // CRD-04
+          tocar(credor, pedidoEm)
+        }
       }
     }
   }
@@ -688,7 +697,7 @@ class Gerador {
       Tipos['pedidosDeCredito'],
       'credorId' | 'requerente' | 'tipo' | 'valorPedido' | 'classePedida' | 'status'
     >,
-  ): void {
+  ): Carimbo {
     const criadoEm = this.noExpediente(data)
     this.tabelas.pedidosDeCredito.push({
       ...this.registro(this.novoId('ped', 3), criadoEm),
@@ -696,6 +705,7 @@ class Gerador {
       ...campos,
       data,
     })
+    return criadoEm
   }
 
   // --- AGC -------------------------------------------------------------------------------------
@@ -810,6 +820,9 @@ class Gerador {
       ) {
         voto.voto = para
       }
+    }
+    if (resultadoAgc(votantes, presentes, votos).situacao !== esperado) {
+      throw new Error(`Votos da AGC não chegam ao resultado ${esperado}`)
     }
     return votos
   }
@@ -955,8 +968,10 @@ class Gerador {
     const comAcento = this.tabelas.credores.filter(
       (c) => ativos.has(c.processoId) && semAcento(c.nome) !== c.nome,
     )
+    const corrigidos = new Set<string>()
     for (let i = 0; i < 40; i++) {
       const credor = this.escolher(comAcento)
+      if (corrigidos.has(credor.id)) continue
       const data = this.noExpediente(dia(-this.inteiro(1, DIAS_DE_LOG)))
       if (data <= credor.atualizadoEm) continue
       this.edicoes.push({
@@ -967,6 +982,7 @@ class Gerador {
         data,
       })
       credor.atualizadoEm = data
+      corrigidos.add(credor.id)
     }
     // Cada informe recente publicado no site passou por "publicar" depois de criado.
     for (const informe of this.tabelas.informes) {
@@ -994,6 +1010,11 @@ class Gerador {
     const naJanela = (data: Carimbo) => data >= inicio && data < fim
     const responsavelDe = new Map(this.tabelas.processos.map((p) => [p.id, p.responsavelId]))
     const processoDaAgc = new Map(this.tabelas.agcs.map((a) => [a.id, a.processoId]))
+    const edicoesDe = new Map<string, EdicaoDoLog[]>()
+    for (const edicao of [...this.edicoes].sort((x, y) => (x.data < y.data ? -1 : 1))) {
+      const chave = `${edicao.tabela}:${edicao.registroId}`
+      edicoesDe.set(chave, [...(edicoesDe.get(chave) ?? []), edicao])
+    }
     const logs: Omit<Tipos['logs'], 'id' | 'escritorioId' | 'criadoEm' | 'atualizadoEm'>[] = []
 
     // Tabelas com log próprio, como no repositório (escritório e usuários caem fora da janela).
@@ -1008,8 +1029,12 @@ class Gerador {
             : typeof registro.processoId === 'string'
               ? registro.processoId
               : processoDaAgc.get(registro.agcId as string)
+        // O "criou" mostra o registro como nasceu: as edições posteriores são desfeitas.
         const campos = { ...registro }
         for (const campo of CAMPOS_REGISTRO) delete campos[campo]
+        for (const edicao of edicoesDe.get(`${tabela}:${registro.id}`)?.toReversed() ?? []) {
+          for (const mudanca of edicao.mudancas) campos[mudanca.campo] = mudanca.de
+        }
         logs.push({
           usuarioId: this.autor(tabela, processoId && responsavelDe.get(processoId)),
           acao: 'criou',
@@ -1043,6 +1068,11 @@ class Gerador {
       this.tabelas.logs.push({ ...this.registro(this.novoId('log', 4), log.data), ...log })
     }
   }
+}
+
+/** Avança o `atualizadoEm` do registro até `quando`, se for depois. */
+function tocar(registro: { atualizadoEm: Carimbo }, quando: Carimbo): void {
+  if (quando > registro.atualizadoEm) registro.atualizadoEm = quando
 }
 
 function semAcento(texto: string): string {
