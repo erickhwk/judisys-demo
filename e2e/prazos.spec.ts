@@ -179,3 +179,12 @@ test('PRZ-01 · marcar o RMA como cumprido cria o seguinte; analista não vê as
   await expect(page.getByRole('button', { name: 'Novo prazo' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /como cumprido/ })).toHaveCount(0)
 })
+
+test('aba Prazos dentro da tela do processo (RF-13)', async ({ page }) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  await page.goto('#/processos/prc-001/prazos')
+  await expect(page.getByRole('navigation', { name: 'Seções do processo' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Prazos', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Novo prazo' })).toBeVisible()
+  await expect(page.locator('tbody tr').first()).toBeVisible()
+})
