@@ -20,7 +20,7 @@ pnpm dev          # servidor local em http://localhost:5173/judisys-demo/
 | `pnpm test` | Vitest |
 | `pnpm seed` | Gera `public/seed.json` e `public/seed-versao.json` (até a DMO-07 é um placeholder que só registra no log) |
 | `pnpm build` | Build de produção em `dist/` |
-| `pnpm e2e` | Playwright (Chromium) contra `vite preview`; localmente faz o build antes |
+| `pnpm e2e` | Playwright (Chromium) contra `vite preview` na porta `PORTA_E2E` (padrão 4173); localmente faz o build antes |
 
 ## CI e publicação
 
