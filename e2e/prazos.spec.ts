@@ -112,6 +112,8 @@ test('agenda no celular e no calendário: só a coluna de conteúdo rola, a jane
 test('PRZ-10 · prazo manual sem base legal', async ({ page }) => {
   await entrarComo(page, /Entrar como Advogado/)
   const lista = await abrirAgenda(page, '?processo=prc-003')
+  // Espera a lista carregar antes de contar.
+  await expect(lista.locator('tbody tr').first()).toBeVisible()
   const antes = await lista.locator('tbody tr').count()
 
   await page.getByRole('button', { name: 'Novo prazo' }).click()
