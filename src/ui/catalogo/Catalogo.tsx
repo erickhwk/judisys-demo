@@ -1,7 +1,7 @@
 /*
  * Catálogo dos componentes de `ui/`, só em desenvolvimento:
  * `pnpm dev` → http://localhost:5173/judisys-demo/#/catalogo
- * Não entra no build de produção (o desvio em main.tsx depende de `import.meta.env.DEV`).
+ * Não entra no build de produção (a rota em roteador.tsx depende de `import.meta.env.DEV`).
  * Os dados são fictícios e os valores já vêm formatados como texto.
  */
 import { Pencil, Plus, Trash } from 'lucide-react'
