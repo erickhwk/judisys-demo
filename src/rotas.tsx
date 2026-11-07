@@ -3,6 +3,8 @@
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
 import { TelaCredor, TelaQgc } from './modulos/credores'
+import { ListaEmpresas, NovaEmpresa, TelaEmpresa } from './modulos/empresas'
+import { Agenda } from './modulos/prazos/Agenda'
 import {
   EditarProcesso,
   ListaProcessos,
@@ -39,13 +41,13 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/processos/:id/informes', 'ler', 'informes', <TelaDoProcesso aba="informes" />),
   rota('/processos/:id/historico', 'ler', 'logs', <TelaDoProcesso aba="historico" />),
   rota('/processos/:id/agc/:agcId', 'ler', 'agc', <EmConstrucao titulo="AGC" />),
-  rota('/empresas', 'ler', 'empresas', <EmConstrucao titulo="Empresas" />),
-  rota('/empresas/novo', 'editar', 'empresas', <EmConstrucao titulo="Nova empresa" />),
-  rota('/empresas/:id', 'ler', 'empresas', <EmConstrucao titulo="Empresa" />),
+  rota('/empresas', 'ler', 'empresas', <ListaEmpresas />),
+  rota('/empresas/novo', 'editar', 'empresas', <NovaEmpresa />),
+  rota('/empresas/:id', 'ler', 'empresas', <TelaEmpresa />),
   rota('/informes', 'ler', 'informes', <EmConstrucao titulo="Informes" />),
   rota('/informes/novo', 'editar', 'informes', <EmConstrucao titulo="Novo informe" />),
   rota('/informes/:id', 'ler', 'informes', <EmConstrucao titulo="Informe" />),
-  rota('/agenda', 'ler', 'prazos', <EmConstrucao titulo="Agenda" />),
+  rota('/agenda', 'ler', 'prazos', <Agenda />),
   rota('/usuarios', 'ler', 'usuarios', <EmConstrucao titulo="Usuários" />),
   rota('/logs', 'ler', 'logs', <EmConstrucao titulo="Logs" />),
 ]
