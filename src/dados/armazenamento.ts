@@ -4,6 +4,11 @@
 
 export type Id = string
 
+/** Ordem das chaves do IndexedDB para ids (strings): por unidade de código, não por locale. */
+export function compararIds(a: Id, b: Id): number {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
 /** Índices de cada tabela, na sintaxe do Dexie; o primeiro é a chave (SDD §5.4). */
 export const INDICES = {
   escritorios: 'id',

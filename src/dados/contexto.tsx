@@ -72,6 +72,18 @@ function somenteLeitura<T extends Registro>(repositorio: Repositorio<T>): Reposi
   return { ...repositorio, criar: semSessao, atualizar: semSessao, excluir: semSessao }
 }
 
+/** Espera a gravação e chama `invalidar` ao terminar, deu certo ou não (T-22). */
+async function invalidandoAoTerminar<R>(
+  gravacao: Promise<R>,
+  invalidar: () => Promise<void>,
+): Promise<R> {
+  try {
+    return await gravacao
+  } finally {
+    await invalidar()
+  }
+}
+
 /**
  * Repositório cujas gravações chamam `invalidar` ao terminar, deu certo ou não: depois de
  * qualquer gravação a tela recarrega tudo (T-22).
@@ -80,13 +92,7 @@ export function comInvalidacao<T extends Registro>(
   repositorio: Repositorio<T>,
   invalidar: () => Promise<void>,
 ): Repositorio<T> {
-  async function depois<R>(gravacao: Promise<R>): Promise<R> {
-    try {
-      return await gravacao
-    } finally {
-      await invalidar()
-    }
-  }
+  const depois = <R,>(gravacao: Promise<R>) => invalidandoAoTerminar(gravacao, invalidar)
   return {
     ...repositorio,
     criar: (dados) => depois(repositorio.criar(dados)),
@@ -119,13 +125,8 @@ export function useServico<A extends unknown[], R>(
   return useMemo(() => {
     if (!contexto) return semSessao
     const servico = fabrica(armazenamento, contexto)
-    return async (...args: A) => {
-      try {
-        return await servico(...args)
-      } finally {
-        await queryClient.invalidateQueries()
-      }
-    }
+    return (...args: A) =>
+      invalidandoAoTerminar(servico(...args), () => queryClient.invalidateQueries())
   }, [armazenamento, contexto, queryClient, fabrica])
 }
 

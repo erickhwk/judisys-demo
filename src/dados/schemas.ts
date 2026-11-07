@@ -85,6 +85,11 @@ const id = z.string().trim().min(1, 'Campo obrigatório')
 const texto = z.string().trim().min(1, 'Campo obrigatório')
 const textoOpcional = z.string().trim()
 const centavos = z.number().int('Valor em centavos deve ser inteiro').nonnegative()
+const tamanhoAnexo = z
+  .number()
+  .int()
+  .nonnegative()
+  .max(TAMANHO_MAXIMO_ANEXO, 'Arquivo acima de 10 MB.')
 const uf = z.string().regex(/^[A-Z]{2}$/, 'UF inválida')
 
 const dataIso = z.string().refine(ehDataIso, 'Data inválida')
@@ -263,7 +268,7 @@ export const schemaAnexo = z.discriminatedUnion('origem', [
     arquivoId: id,
     nome: texto,
     tipo: textoOpcional,
-    tamanho: z.number().int().nonnegative().max(TAMANHO_MAXIMO_ANEXO, 'Arquivo acima de 10 MB.'),
+    tamanho: tamanhoAnexo,
   }),
 ])
 export type Anexo = z.output<typeof schemaAnexo>
@@ -298,7 +303,7 @@ export type Informe = z.output<typeof schemaInforme>
 export const camposArquivo = z.object({
   nome: texto,
   tipo: textoOpcional,
-  tamanho: z.number().int().nonnegative().max(TAMANHO_MAXIMO_ANEXO, 'Arquivo acima de 10 MB.'),
+  tamanho: tamanhoAnexo,
   conteudo: z.instanceof(Blob),
 })
 export const schemaArquivo = schemaRegistro.extend(camposArquivo.shape)

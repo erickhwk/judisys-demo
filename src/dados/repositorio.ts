@@ -8,7 +8,7 @@ import type { Carimbo } from '../regras/datas'
 import { diferencas, type Mudanca } from '../regras/diff'
 import { normalizar } from '../regras/normalizar'
 import { type Modulo, type Papel, pode } from '../regras/permissoes'
-import { type Armazenamento, type Id, indicesDe, type Tabela } from './armazenamento'
+import { type Armazenamento, compararIds, type Id, indicesDe, type Tabela } from './armazenamento'
 import { CAMPOS_REGISTRO, type Log, type Novo, type Registro, SCHEMAS, type Tipos } from './schemas'
 
 /** Quem grava, com que papel e em que instante (SDD §5.2). Vem da sessão; nos testes, explícito. */
@@ -164,12 +164,6 @@ function comparar(a: unknown, b: unknown, sentido: 1 | -1): number {
   return COLADOR.compare(String(a), String(b)) * sentido
 }
 
-function porId(a: Linha, b: Linha): number {
-  const ia = String(a.id)
-  const ib = String(b.id)
-  return ia < ib ? -1 : ia > ib ? 1 : 0
-}
-
 function ehChaveSimples(valor: unknown): valor is string | number {
   return typeof valor === 'string' || typeof valor === 'number'
 }
@@ -229,7 +223,7 @@ export function criarRepositorio<K extends Tabela>(
       const resultado = ordem
         ? comparar(a[ordem.campo as string], b[ordem.campo as string], sentido)
         : 0
-      return resultado !== 0 ? resultado : porId(a, b)
+      return resultado !== 0 ? resultado : compararIds(String(a.id), String(b.id))
     })
     return linhas as T[]
   }

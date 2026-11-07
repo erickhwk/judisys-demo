@@ -1,7 +1,14 @@
 // Armazenamento em memória com o mesmo contrato do Dexie (T-20): usado nos testes e quando o
 // IndexedDB não abre (PRD §13, CAR-10). Os registros são copiados na entrada e na saída, como
 // no IndexedDB, para que quem chama não altere o que está gravado sem passar por `put`.
-import { type Armazenamento, type Id, indicesDe, TABELAS, type Tabela } from './armazenamento'
+import {
+  type Armazenamento,
+  compararIds,
+  type Id,
+  indicesDe,
+  TABELAS,
+  type Tabela,
+} from './armazenamento'
 
 type Linha = Record<string, unknown>
 
@@ -11,11 +18,8 @@ function chaveDe(registro: Linha): Id {
   return id
 }
 
-/** Ordem das chaves do IndexedDB para ids (strings): por unidade de código, não por locale. */
 function porChave(a: Linha, b: Linha): number {
-  const ia = chaveDe(a)
-  const ib = chaveDe(b)
-  return ia < ib ? -1 : ia > ib ? 1 : 0
+  return compararIds(chaveDe(a), chaveDe(b))
 }
 
 function camposDoIndice(indice: string): string[] {
