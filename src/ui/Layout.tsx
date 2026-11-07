@@ -6,7 +6,7 @@ import { Menu } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { BuscaGlobal } from '../modulos/busca/BuscaGlobal'
+import { BuscaGlobal, ehAtalhoBusca } from '../modulos/busca/BuscaGlobal'
 import { NOMES_PAPEIS } from '../modulos/entrada/papeis'
 import { useSessao } from '../modulos/entrada/sessao'
 import { FaixaDemo } from './FaixaDemo'
@@ -15,6 +15,9 @@ import { MenuConta } from './MenuConta'
 import { MenuLateral } from './MenuLateral'
 import { useMoldura } from './Moldura'
 import { Rodape } from './Rodape'
+
+/** Largura máxima em que o menu vira gaveta (`@media (max-width: 900px)` dos CSS do Layout e do menu). */
+const PONTO_GAVETA = 900
 
 export function Layout() {
   const { sessao, sair } = useSessao()
@@ -45,9 +48,20 @@ export function Layout() {
     document.getElementById(idMenu)?.querySelector<HTMLElement>('a')?.focus()
     const aoTeclar = (evento: KeyboardEvent) => {
       if (evento.key === 'Escape') fecharGaveta()
+      // A busca mora na coluna inerte: a gaveta fecha junto, sem roubar o foco do campo da busca.
+      else if (ehAtalhoBusca(evento)) setGavetaAberta(false)
+    }
+    // Acima do ponto da gaveta não há fundo escuro nem botão de fechar: a coluna não fica inerte.
+    const telaLarga = window.matchMedia(`(min-width: ${PONTO_GAVETA + 1}px)`)
+    const aoAlargar = () => {
+      if (telaLarga.matches) setGavetaAberta(false)
     }
     document.addEventListener('keydown', aoTeclar)
-    return () => document.removeEventListener('keydown', aoTeclar)
+    telaLarga.addEventListener('change', aoAlargar)
+    return () => {
+      document.removeEventListener('keydown', aoTeclar)
+      telaLarga.removeEventListener('change', aoAlargar)
+    }
   }, [gavetaAberta, idMenu, fecharGaveta])
 
   // A rota só renderiza o Layout com sessão (ExigeSessao).

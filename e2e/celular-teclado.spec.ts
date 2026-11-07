@@ -260,3 +260,40 @@ test('CEL-03 · diálogos no celular: o foco entra, Esc fecha e volta ao botão 
   await expect(registrar).toBeFocused()
   expect(falhas).toEqual([])
 })
+
+/** Entra pelo teclado e abre a gaveta do menu; devolve o botão que a abre. */
+async function abrirGaveta(page: Page): Promise<Locator> {
+  const falhas: Falhas = []
+  await entrarPeloTeclado(page, falhas)
+  const abrir = page.getByRole('button', { name: 'Abrir menu' })
+  await tabAte(page, abrir, falhas, { limite: 20 })
+  await page.keyboard.press('Enter')
+  await expect(abrir).toHaveAttribute('aria-expanded', 'true')
+  expect(falhas).toEqual([])
+  return abrir
+}
+
+test('CEL-04 · gaveta aberta: Ctrl+K fecha a gaveta e a busca recebe o foco e a digitação', async ({
+  page,
+}) => {
+  const abrir = await abrirGaveta(page)
+  await page.keyboard.press('Control+k')
+  await expect(abrir).toHaveAttribute('aria-expanded', 'false')
+  const campo = page.getByRole('dialog', { name: 'Busca global' }).getByRole('combobox')
+  await expect(campo).toBeFocused()
+  await page.keyboard.type('Maria Helena')
+  await expect(campo).toHaveValue('Maria Helena')
+})
+
+test('CEL-05 · gaveta aberta e a tela alarga (giro do tablet): a gaveta fecha e nada fica inerte', async ({
+  page,
+}) => {
+  await abrirGaveta(page)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  // No computador o botão fica escondido e sai da árvore de acessibilidade: localizado pelo atributo.
+  await expect(page.locator('button[aria-label="Abrir menu"]')).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+  await expect(page.locator('[inert]')).toHaveCount(0)
+})
