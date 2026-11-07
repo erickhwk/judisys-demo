@@ -3,6 +3,7 @@
 import type { Armazenamento, Tabela } from '../../src/dados/armazenamento'
 import type { Tipos } from '../../src/dados/schemas'
 import { completarCnj, completarCnpj, completarCpf } from '../../src/regras/documentos'
+import { CLASSES_RJ } from '../../src/regras/qgc'
 
 export type SeedMini = { [K in Tabela]: Tipos[K][] }
 
@@ -27,13 +28,6 @@ export const CNJ_RJ = completarCnj('000123420268260100')
 export const CNJ_FALENCIA = completarCnj('000456720258260224')
 
 const NOMES = ['José Conceição', 'Ana Ávila', 'Bruno Souza', 'Carla Nunes', 'Débora Lima']
-const CLASSES_RJ = [
-  'trabalhista',
-  'garantia-real',
-  'quirografario',
-  'me-epp',
-  'nao-sujeito',
-] as const
 
 export function seedMini(): SeedMini {
   const credoresRj: Tipos['credores'][] = Array.from({ length: CREDORES_RJ }, (_, i) => {

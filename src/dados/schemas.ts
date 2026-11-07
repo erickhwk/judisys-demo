@@ -8,52 +8,12 @@
 import { z } from 'zod'
 import { ehDataIso } from '../regras/datas'
 import { somenteDigitos, validarCnj, validarCnpj, validarCpf } from '../regras/documentos'
+import { FASES_FALENCIA, FASES_FINAIS_ALTERNATIVAS_RJ, FASES_RJ } from '../regras/fases'
 import { PAPEIS } from '../regras/permissoes'
+import { CLASSES_FALENCIA, CLASSES_RJ } from '../regras/qgc'
 import { TABELAS, type Tabela } from './armazenamento'
 
 z.config(z.locales.pt())
-
-// TEMPORÁRIO (lote 3): trocar por import de regras/fases.ts e regras/qgc.ts
-const FASES_RJ = [
-  'pedido',
-  'processamento-deferido',
-  'edital-publicado',
-  'relacao-aj-publicada',
-  'plano-apresentado',
-  'prazo-objecoes',
-  'agc',
-  'plano-homologado',
-  'fiscalizacao',
-  'encerrada',
-] as const
-const FASES_FINAIS_ALTERNATIVAS_RJ = ['convolada-falencia', 'desistencia'] as const
-const FASES_FALENCIA = [
-  'decretada',
-  'arrecadacao',
-  'quadro-credores',
-  'realizacao-ativo',
-  'pagamentos',
-  'prestacao-contas',
-  'encerrada',
-] as const
-const CLASSES_RJ = [
-  'trabalhista',
-  'garantia-real',
-  'quirografario',
-  'me-epp',
-  'nao-sujeito',
-] as const
-const CLASSES_FALENCIA = [
-  'trabalhista',
-  'garantia-real',
-  'tributario',
-  'quirografario',
-  'multas',
-  'subordinados',
-  'juros',
-  'extraconcursal',
-] as const
-// fim do bloco TEMPORÁRIO
 
 // ---------------------------------------------------------------------------------------------
 // Peças comuns
