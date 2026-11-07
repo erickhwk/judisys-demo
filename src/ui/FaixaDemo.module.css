@@ -3,7 +3,7 @@
   position: relative;
   z-index: 30;
   background: var(--cor-azul-login);
-  color: var(--cor-texto-invertido);
+  color: var(--cor-escuro-texto);
   border-bottom: 2px solid var(--cor-dourado-500);
 }
 
@@ -47,10 +47,10 @@
   gap: 8px;
   min-height: 36px;
   padding: 0 14px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid var(--cor-escuro-borda);
   border-radius: var(--raio-campo);
   background: transparent;
-  color: var(--cor-texto-invertido);
+  color: var(--cor-escuro-texto);
   font-size: var(--tamanho-texto-pequeno);
   font-weight: 600;
   white-space: nowrap;
@@ -58,26 +58,26 @@
 }
 
 .botao:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--cor-texto-invertido);
+  background: var(--cor-escuro-realce);
+  color: var(--cor-escuro-texto);
   text-decoration: none;
 }
 
 .destaque {
   border-color: transparent;
   background: var(--cor-dourado-degrade);
-  color: var(--cor-azul-900);
+  color: var(--cor-sobre-dourado);
 }
 
 .destaque:hover {
   background: var(--cor-dourado-200);
-  color: var(--cor-azul-900);
+  color: var(--cor-sobre-dourado);
 }
 
 .avisos {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid var(--cor-escuro-divisoria);
   background: var(--cor-dourado-claro);
   color: var(--cor-azul-900);
 }
@@ -94,7 +94,7 @@
 }
 
 .aviso + .aviso {
-  border-top: 1px solid rgba(10, 31, 77, 0.1);
+  border-top: 1px solid var(--cor-divisoria-sutil);
 }
 
 .dispensar,
@@ -117,7 +117,7 @@
 
 .dispensar:hover,
 .link:hover {
-  background: rgba(10, 31, 77, 0.08);
+  background: var(--cor-realce-sutil);
 }
 
 @media (max-width: 640px) {

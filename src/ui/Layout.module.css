@@ -72,7 +72,7 @@
     position: fixed;
     inset: 0;
     z-index: 45;
-    background: rgba(10, 31, 77, 0.45);
+    background: var(--cor-veu-gaveta);
   }
 }
 

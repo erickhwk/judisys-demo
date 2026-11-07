@@ -1,0 +1,24 @@
+/* Mesmo desenho do botão de abrir o menu no topo (Layout.module.css): quadrado de 44px. */
+.botao {
+  width: var(--alvo-minimo);
+  height: var(--alvo-minimo);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--cor-borda-suave);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: var(--cor-hover-fantasma);
+}
+
+/* Sem o script do tema, o tema não alterna: o botão some (como no site da Draft). */
+:global(:root:not([data-theme])) .botao {
+  display: none;
+}

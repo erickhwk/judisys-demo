@@ -14,7 +14,7 @@
 }
 
 .dialogo::backdrop {
-  background: rgba(8, 26, 61, 0.55);
+  background: var(--cor-veu-dialogo);
 }
 
 .caixa {

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { useTodos } from '../../dados/contexto'
 import type { Usuario } from '../../dados/schemas'
 import { PAPEIS, type Papel } from '../../regras/permissoes'
+import { BotaoTema } from '../../ui/BotaoTema'
 import { FaixaDemo } from '../../ui/FaixaDemo'
 import { Logo } from '../../ui/Logo'
 import estilos from './Entrar.module.css'
@@ -43,9 +44,10 @@ export function Entrar() {
       <FaixaDemo />
       <div className={estilos.metades}>
         <main className={estilos.formulario}>
-          <span className={estilos.logo}>
+          <div className={estilos.topo}>
             <Logo altura={52} />
-          </span>
+            <BotaoTema />
+          </div>
           <div className={estilos.centro}>
             <div className={estilos.caixa}>
               <div className={estilos.cabecalho}>
