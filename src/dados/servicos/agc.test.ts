@@ -2,21 +2,29 @@
 // de Armazenamento (SDD §10). As regras puras do quórum têm os seus testes em regras/votacao.test.ts.
 import { beforeEach, describe, expect, it } from 'vitest'
 import { IMPLEMENTACOES } from '../../../tests/fixtures/armazenamentos'
+import { comFalhaEm } from '../../../tests/fixtures/falhas'
 import { carregarSeedMini, ESCRITORIO_ID } from '../../../tests/fixtures/seed-mini'
 import type { Papel } from '../../regras/permissoes'
-import { credoresVotantes } from '../../regras/votacao'
+import { credoresVotantes, resultadoAgc } from '../../regras/votacao'
 import type { Armazenamento } from '../armazenamento'
 import { type ContextoGravacao, ErroPermissao, ErroValidacao } from '../repositorio'
 import type { Log, Tipos } from '../schemas'
 import {
+  ERRO_AGC_ENCERRADA,
   ERRO_AGC_NAO_AGENDADA,
+  ERRO_AGC_NAO_INSTALADA,
   ERRO_AGC_SO_RJ,
   ERRO_CREDOR_DE_OUTRO_PROCESSO,
+  ERRO_PRESENTE_SEM_VOTO,
   ERRO_SEM_PRESENTES,
+  ERRO_VOTO_DE_NAO_PRESENTE,
   instalarAgc,
   marcarClasse,
   marcarPresenca,
+  registrarResultadoAgc,
+  resumoDaAta,
   salvarAgc,
+  TITULO_ATA,
 } from './agc'
 import { ErroRegra } from './comum'
 
@@ -252,5 +260,176 @@ describe.each(IMPLEMENTACOES)('serviços da AGC (%s)', (_nome, criar) => {
         instalarAgc(armazenamento, contexto())({ agcId: 'agc-001', convocacao: 2 }),
       ).rejects.toThrow(ERRO_SEM_PRESENTES)
     })
+  })
+})
+
+// Registro do resultado (RF-37, T-30, T-33; DMO-17). No seed mini, a agc-001 tem presentes
+// crd-0001 (I · Trabalhista, R$ 110) e crd-0003 (III · Quirografário, R$ 330), e um voto "sim" de
+// crd-0001 já gravado (vot-001).
+describe.each(IMPLEMENTACOES)('registrarResultadoAgc (%s)', (_nome, criar) => {
+  let armazenamento: Armazenamento
+
+  beforeEach(async () => {
+    armazenamento = criar()
+    await carregarSeedMini(armazenamento)
+  })
+
+  const instalarEm2a = () =>
+    instalarAgc(armazenamento, contexto())({ agcId: 'agc-001', convocacao: 2 })
+  const registrar = (votos: { credorId: string; voto: 'sim' | 'nao' | 'abstencao' }[]) =>
+    registrarResultadoAgc(armazenamento, contexto())({ agcId: 'agc-001', votos })
+  const votosGravados = async () =>
+    (await armazenamento.porIndice<Tipos['votos']>('votos', 'agcId', 'agc-001'))
+      .map((v) => `${v.credorId}:${v.voto}`)
+      .sort()
+  const atas = async () =>
+    (await armazenamento.porIndice<Tipos['informes']>('informes', 'processoId', 'prc-001')).filter(
+      (i) => i.categoria === 'atas-agc',
+    )
+  const statusDaAgc = async () =>
+    (await armazenamento.get<Tipos['agcs']>('agcs', 'agc-001'))?.status
+  const logs = () => armazenamento.todos<Log>('logs')
+
+  it('AGC-21 · grava os votos, encerra a AGC e cria a ata com o resumo e o PDF genérico', async () => {
+    await instalarEm2a()
+    const { agc, informe, resultado } = await registrar([
+      { credorId: 'crd-0001', voto: 'nao' },
+      { credorId: 'crd-0003', voto: 'sim' },
+    ])
+
+    expect(agc.status).toBe('encerrada')
+    expect(await statusDaAgc()).toBe('encerrada')
+    // O voto já gravado de crd-0001 é atualizado, não duplicado.
+    expect(await votosGravados()).toEqual(['crd-0001:nao', 'crd-0003:sim'])
+    expect(resultado.situacao).toBe('rejeitado')
+
+    expect(informe).toMatchObject({
+      processoId: 'prc-001',
+      titulo: TITULO_ATA,
+      categoria: 'atas-agc',
+      fase: 'plano-apresentado',
+      dataAgc: '2026-11-20',
+      data: '2026-11-07',
+      publicadoNoSite: false,
+      anexos: [{ origem: 'publico', caminho: 'anexos/ata-agc.pdf', nome: 'Ata da AGC.pdf' }],
+    })
+    expect(informe.resumo).toContain('AGC de 20/11/2026, instalada em 2ª convocação.')
+    expect(informe.resumo).toContain('I · Trabalhista: rejeitada (0 sim, 1 não, 0 abstenções).')
+    expect(informe.resumo).toContain('III · Quirografário: aprovada (1 sim, 0 não, 0 abstenções;')
+    expect(informe.resumo).toContain('Resultado: plano rejeitado.')
+    expect(informe.resumo).toContain('Cram down (art. 58, §1º):')
+    expect(informe.resumo).toMatch(/3\. Em cada classe que rejeitou.*: não cumprido/)
+    expect(await atas()).toEqual([informe])
+
+    expect(await logs()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ acao: 'editou', colecao: 'votos', registroId: 'vot-001' }),
+        expect.objectContaining({ acao: 'criou', colecao: 'votos' }),
+        expect.objectContaining({ acao: 'editou', colecao: 'agcs', registroId: 'agc-001' }),
+        expect.objectContaining({ acao: 'criou', colecao: 'informes', registroId: informe.id }),
+      ]),
+    )
+  })
+
+  it('INV-01 · falha ao criar a ata não deixa nada gravado (votos, AGC, logs)', async () => {
+    await instalarEm2a()
+    const logsAntes = (await logs()).length
+    const falha = comFalhaEm(armazenamento, 'put', 'informes')
+    await expect(
+      registrarResultadoAgc(
+        falha,
+        contexto(),
+      )({
+        agcId: 'agc-001',
+        votos: [
+          { credorId: 'crd-0001', voto: 'nao' },
+          { credorId: 'crd-0003', voto: 'sim' },
+        ],
+      }),
+    ).rejects.toThrow('falha simulada')
+    expect(await statusDaAgc()).toBe('instalada')
+    expect(await votosGravados()).toEqual(['crd-0001:sim'])
+    expect(await atas()).toEqual([])
+    expect(await logs()).toHaveLength(logsAntes)
+  })
+
+  it('T-33 · presente sem voto impede o registro', async () => {
+    await instalarEm2a()
+    await expect(registrar([{ credorId: 'crd-0001', voto: 'sim' }])).rejects.toThrow(
+      ERRO_PRESENTE_SEM_VOTO,
+    )
+    expect(await statusDaAgc()).toBe('instalada')
+    expect(await atas()).toEqual([])
+  })
+
+  it('recusa voto de quem não está presente', async () => {
+    await instalarEm2a()
+    await expect(
+      registrar([
+        { credorId: 'crd-0001', voto: 'sim' },
+        { credorId: 'crd-0003', voto: 'sim' },
+        { credorId: 'crd-0002', voto: 'sim' },
+      ]),
+    ).rejects.toThrow(ERRO_VOTO_DE_NAO_PRESENTE)
+    expect(await statusDaAgc()).toBe('instalada')
+  })
+
+  it('AGC-23 · AGC não instalada não registra', async () => {
+    const falha = registrar([
+      { credorId: 'crd-0001', voto: 'sim' },
+      { credorId: 'crd-0003', voto: 'sim' },
+    ])
+    await expect(falha).rejects.toBeInstanceOf(ErroRegra)
+    await expect(falha).rejects.toThrow(ERRO_AGC_NAO_INSTALADA)
+    expect(await statusDaAgc()).toBe('agendada')
+  })
+
+  it('AGC-22 · AGC encerrada não registra de novo', async () => {
+    await instalarEm2a()
+    const votos = [
+      { credorId: 'crd-0001', voto: 'sim' as const },
+      { credorId: 'crd-0003', voto: 'sim' as const },
+    ]
+    await registrar(votos)
+    await expect(registrar(votos)).rejects.toThrow(ERRO_AGC_ENCERRADA)
+    expect(await atas()).toHaveLength(1)
+  })
+
+  it('INV-02 · analista não registra', async () => {
+    await instalarEm2a()
+    await expect(
+      registrarResultadoAgc(armazenamento, contexto('analista'))({ agcId: 'agc-001', votos: [] }),
+    ).rejects.toBeInstanceOf(ErroPermissao)
+    expect(await statusDaAgc()).toBe('instalada')
+  })
+})
+
+describe('resumoDaAta (T-30)', () => {
+  it('com todas as classes que votaram aprovando, sem cram down', () => {
+    const votantes = [
+      { credorId: 'a', classe: 'trabalhista' as const, valor: 100 },
+      { credorId: 'b', classe: 'garantia-real' as const, valor: 500 },
+    ]
+    const resultado = resultadoAgc(
+      votantes,
+      ['a', 'b'],
+      [
+        { credorId: 'a', voto: 'sim' },
+        { credorId: 'b', voto: 'sim' },
+      ],
+    )
+    expect(resumoDaAta('2026-11-13', 1, resultado)).toBe(
+      [
+        'AGC de 13/11/2026, instalada em 1ª convocação.',
+        '',
+        'Resultado por classe (art. 45):',
+        'I · Trabalhista: aprovada (1 sim, 0 não, 0 abstenções).',
+        'II · Garantia real: aprovada (1 sim, 0 não, 0 abstenções; valor: R$ 5,00 sim, R$ 0,00 não).',
+        'III · Quirografário: não votou (sem presentes).',
+        'IV · ME/EPP: não votou (sem presentes).',
+        '',
+        'Resultado: plano aprovado em todas as classes que votaram.',
+      ].join('\n'),
+    )
   })
 })

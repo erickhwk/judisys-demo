@@ -5,6 +5,7 @@ import { carregarSeedMini } from '../../../tests/fixtures/seed-mini'
 import { ArmazenamentoMemoria } from '../../dados/memoria'
 import type { Tipos } from '../../dados/schemas'
 import { pode } from '../../regras/permissoes'
+import { credoresVotantes, resultadoAgc } from '../../regras/votacao'
 import { renderizarComDados } from '../credores/renderizarParaTeste'
 import { AbaAgc } from './AbaAgc'
 import {
@@ -14,6 +15,7 @@ import {
   linhasDePresenca,
   MENSAGEM_SIMULACAO,
 } from './agc'
+import { filtrarMesa, linhasDaMesa, motivoSemRegistro, percentualDe } from './mesa'
 import { registro } from './rotas'
 import { TelaAgc } from './TelaAgc'
 
@@ -148,8 +150,6 @@ describe('TelaAgc', () => {
     expect(html).toMatch(
       /Não atinge: I · Trabalhista, II · Garantia real, III · Quirografário, IV · ME\/EPP\./,
     )
-    // Reservado para a DMO-17.
-    expect(html).toContain('Mesa de votação em construção')
   })
 
   it('analista vê a lista e o painel só para leitura (PER-05)', async () => {
@@ -167,11 +167,137 @@ describe('TelaAgc', () => {
     expect(html).toContain('Instalada em 2ª convocação')
     expect(caixaDe(html, 'Ana Ávila')).toContain('disabled=""')
     expect(html).not.toContain('Todos da classe')
-    expect(html).not.toContain('type="radio"')
+    expect(html).not.toContain('name="convocacao-')
   })
 
   it('AGC de outro processo ou processo de falência: não encontrada', async () => {
     expect(await tela('agc-001', 'aj', 'prc-002')).toContain('Página não encontrada')
     expect(await tela('agc-999')).toContain('Página não encontrada')
+  })
+})
+
+// Votação (RF-34 a RF-37, T-33; DMO-17). No seed mini, os presentes da agc-001 são crd-0001
+// (I · Trabalhista, José Conceição) e crd-0003 (III · Quirografário, Bruno Souza); crd-0001 já tem
+// um voto "sim" gravado.
+describe('votação', () => {
+  async function mudarAgc(campos: Partial<Tipos['agcs']>) {
+    const agc = await armazenamento.get<Tipos['agcs']>('agcs', 'agc-001')
+    await armazenamento.put('agcs', { ...agc, ...campos })
+  }
+  const instalar = () => mudarAgc({ status: 'instalada', convocacaoInstalada: 2 })
+  async function votar(credorId: string, voto: 'sim' | 'nao' | 'abstencao') {
+    await armazenamento.put('votos', {
+      id: `vot-${credorId}`,
+      escritorioId: 'esc-1',
+      criadoEm: '2026-11-07T09:00:00',
+      atualizadoEm: '2026-11-07T09:00:00',
+      agcId: 'agc-001',
+      credorId,
+      voto,
+    })
+  }
+  /** A tag `<button>` de "Registrar resultado". */
+  function botaoRegistrar(html: string): string {
+    const fim = html.indexOf('Registrar resultado</button>')
+    if (fim === -1) return ''
+    const inicio = html.lastIndexOf('<button', fim)
+    return html.slice(inicio, html.indexOf('>', inicio) + 1)
+  }
+
+  it('AGC-23 · AGC não instalada: sem mesa, "Registrar resultado" desabilitado com o motivo', async () => {
+    const html = await tela()
+    expect(html).toContain('A votação abre depois da instalação')
+    expect(html).not.toContain('Mesa de votação')
+    const botao = botaoRegistrar(html)
+    expect(botao).toContain('disabled=""')
+    expect(botao).toMatch(/aria-describedby="[^"]+"/)
+    expect(html).toContain('Instale a AGC para abrir a votação')
+  })
+
+  it('T-33 · presente sem voto: aviso no painel e registro desabilitado', async () => {
+    await instalar()
+    const html = await tela()
+    expect(html).toContain('Mesa de votação')
+    expect(html).toContain('Aprovação por cram down')
+    expect(html).toMatch(/1<!-- --> de <!-- -->2<!-- --> presentes com voto lançado/)
+    expect(html).toContain('Falta o voto de 1 presente.')
+    expect(botaoRegistrar(html)).toContain('disabled=""')
+    // O voto gravado entra no painel: o "sim" da classe I aprova; a III ainda não votou.
+    expect(html).toContain('data-classe="trabalhista" data-resultado="aprovada"')
+    expect(html).toContain('data-classe="quirografario" data-resultado="nao-votou"')
+  })
+
+  it('RF-35, RF-36 · com todos os votos, painel por classe, cram down e registro habilitado', async () => {
+    await instalar()
+    await votar('crd-0003', 'nao')
+    const html = await tela()
+    expect(html).not.toContain('Falta o voto')
+    expect(botaoRegistrar(html)).not.toContain('disabled')
+    expect(html).toContain('data-classe="quirografario" data-resultado="rejeitada"')
+    expect(html).toContain('data-resultado-geral="rejeitado"')
+    expect(html).toContain('Cram down (art. 58, §1º)')
+    expect(html).toContain('data-cram-down="nao-cumprido"')
+    expect(html).toContain('data-requisito="2" data-cumprido="true"')
+    expect(html).toContain('data-requisito="1" data-cumprido="false"')
+  })
+
+  it('AGC-18 · todas as classes que votaram aprovam: cram down não aparece', async () => {
+    await instalar()
+    await votar('crd-0003', 'sim')
+    const html = await tela()
+    expect(html).toContain('Aprovado em todas as classes')
+    expect(html).not.toContain('Cram down (art. 58, §1º)')
+  })
+
+  it('AGC-22 · AGC encerrada: votos e presença só leitura, sem cenários nem registro', async () => {
+    await mudarAgc({ status: 'encerrada', convocacaoInstalada: 2 })
+    await votar('crd-0003', 'sim')
+    const html = await tela()
+    expect(html).toContain('Resultado registrado: presença e votos ficam só leitura.')
+    expect(html).toContain('href="/processos/prc-001/informes"')
+    expect(html).toMatch(/<fieldset[^>]*disabled=""[^>]*><legend[^>]*>Voto de José Conceição/)
+    expect(html).not.toContain('Registrar resultado')
+    expect(html).not.toContain('Aprovação por cram down')
+    expect(caixaDe(html, 'José Conceição')).toContain('disabled=""')
+    expect(html).toContain('Aprovado em todas as classes')
+  })
+
+  it('analista vê a mesa só para leitura, sem cenários nem registro (PER-05)', async () => {
+    await instalar()
+    const html = await tela('agc-001', 'analista')
+    expect(html).toContain('Mesa de votação')
+    expect(html).toMatch(/<fieldset[^>]*disabled=""[^>]*><legend[^>]*>Voto de Bruno Souza/)
+    expect(html).not.toContain('Aprovação por cram down')
+    expect(html).not.toContain('Registrar resultado')
+  })
+
+  it('peças da mesa: linhas só de presentes votantes, filtros, motivo e percentual', async () => {
+    const credores = await credoresRj()
+    const votantes = credoresVotantes(credores)
+    // crd-0007 (valor zero) marcado presente não entra na mesa.
+    const linhas = linhasDaMesa(credores, votantes, new Set(['crd-0003', 'crd-0001', 'crd-0007']))
+    expect(linhas.map((l) => l.credor.id)).toEqual(['crd-0001', 'crd-0003'])
+
+    const votos = new Map([['crd-0001', 'sim' as const]])
+    const semVoto = filtrarMesa(linhas, votos, { busca: '', filtro: 'sem-voto' })
+    expect(semVoto.map((l) => l.credor.id)).toEqual(['crd-0003'])
+    expect(filtrarMesa(linhas, votos, { busca: 'bruno', filtro: '' })).toHaveLength(1)
+    expect(filtrarMesa(linhas, votos, { busca: '', filtro: 'trabalhista' })).toHaveLength(1)
+
+    const presentes = ['crd-0001', 'crd-0003']
+    const parcial = resultadoAgc(votantes, presentes, [{ credorId: 'crd-0001', voto: 'sim' }])
+    expect(motivoSemRegistro({ status: 'agendada' }, parcial)).toMatch(/^Instale a AGC/)
+    expect(motivoSemRegistro({ status: 'instalada' }, parcial)).toMatch(
+      /^Falta o voto de 1 presente/,
+    )
+    const completo = resultadoAgc(votantes, presentes, [
+      { credorId: 'crd-0001', voto: 'sim' },
+      { credorId: 'crd-0003', voto: 'abstencao' },
+    ])
+    expect(motivoSemRegistro({ status: 'instalada' }, completo)).toBeNull()
+
+    expect(percentualDe(1, 3)).toBe('33,33%')
+    expect(percentualDe(50_004, 100_000)).toBe('50,00%')
+    expect(percentualDe(1, 0)).toBe('—')
   })
 })

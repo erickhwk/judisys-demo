@@ -29,3 +29,12 @@ export function usePresentes(agcId: string) {
     queryFn: async () => new Set((await repo.todos({ onde: { agcId } })).map((p) => p.credorId)),
   })
 }
+
+/** Votos gravados da AGC (os da AGC encerrada são os do resultado registrado). */
+export function useVotos(agcId: string) {
+  const repo = useRepo('votos')
+  return useQuery({
+    queryKey: ['votos', 'todos', agcId],
+    queryFn: () => repo.todos({ onde: { agcId } }),
+  })
+}

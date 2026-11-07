@@ -211,3 +211,270 @@
     grid-column: 1 / -1;
   }
 }
+
+/* --- Votação (DMO-17): mesa, painel do art. 45, cram down ---------------------------------- */
+
+.subtituloSecao {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.cenarios {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rotuloCenarios {
+  float: left;
+  margin-right: 4px;
+  padding: 0;
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 600;
+  letter-spacing: var(--espacamento-caixa-alta);
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.avisoCenario,
+.avisoVotos {
+  padding: 10px 14px;
+  border-radius: var(--raio-campo);
+  background: var(--cor-alerta-claro);
+  color: var(--cor-alerta);
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 600;
+}
+
+/* Sim / Não / Abstenção: rádios com cara de botões segmentados, alvo de 44px. */
+.escolhaVoto {
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.opcaoVoto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  min-height: var(--alvo-minimo);
+  padding: 0 10px;
+  border: 1px solid var(--cor-borda-campo);
+  background: var(--cor-superficie);
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.opcaoVoto + .opcaoVoto {
+  margin-left: -1px;
+}
+
+.opcaoVoto:first-of-type {
+  border-radius: var(--raio-campo) 0 0 var(--raio-campo);
+}
+
+.opcaoVoto:last-of-type {
+  border-radius: 0 var(--raio-campo) var(--raio-campo) 0;
+}
+
+.opcaoVoto input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcaoVoto:has(input:focus-visible) {
+  outline: 2px solid var(--cor-azul-900);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+.opcaoVoto[data-voto="sim"]:has(input:checked) {
+  border-color: var(--cor-sucesso);
+  background: var(--cor-sucesso-claro);
+  color: var(--cor-sucesso);
+  z-index: 1;
+}
+
+.opcaoVoto[data-voto="nao"]:has(input:checked) {
+  border-color: var(--cor-perigo);
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+  z-index: 1;
+}
+
+.opcaoVoto[data-voto="abstencao"]:has(input:checked) {
+  border-color: var(--cor-texto-muted);
+  background: var(--cor-superficie-suave);
+  color: var(--cor-texto-forte);
+  z-index: 1;
+}
+
+.escolhaVoto:disabled .opcaoVoto {
+  cursor: default;
+}
+
+.escolhaVoto:disabled .opcaoVoto:not(:has(input:checked)) {
+  color: var(--cor-texto-desabilitado);
+}
+
+.resultadoGeral {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rotuloResultado {
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 600;
+  letter-spacing: var(--espacamento-caixa-alta);
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.classesVotacao {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartaoClasse,
+.cramDown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.topoClasse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nomeClasse {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--cor-texto-forte);
+}
+
+.barraVoto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legendaBarra {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 600;
+}
+
+.rotuloBarra {
+  color: var(--cor-texto-forte);
+}
+
+.trilhoBarra {
+  position: relative;
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--cor-trilho);
+}
+
+.barraSim {
+  background: var(--cor-sucesso);
+}
+
+.barraNao {
+  background: var(--cor-perigo);
+}
+
+/* Marca dos 50%: "mais da metade" precisa passar dela. */
+.marcaMetade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--cor-superficie);
+}
+
+.cramDown {
+  border-color: var(--cor-dourado-200);
+}
+
+.requisitos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.requisito {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.iconeCumprido,
+.iconeNaoCumprido {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+}
+
+.iconeCumprido {
+  background: var(--cor-sucesso-claro);
+  color: var(--cor-sucesso);
+}
+
+.iconeNaoCumprido {
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+.registrado {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--raio-campo);
+  background: var(--cor-sucesso-claro);
+  color: var(--cor-texto-forte);
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.registrado svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--cor-sucesso);
+}
