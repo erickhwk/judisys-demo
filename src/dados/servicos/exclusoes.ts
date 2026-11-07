@@ -1,5 +1,6 @@
 // Exclusões com cascata ou bloqueio (T-23). O `excluir` genérico do repositório apaga só o
 // registro; aqui ficam as regras de processo, empresa, credor e usuário, cada uma numa transação.
+import { diferencas } from '../../regras/diff'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
 import { type ContextoGravacao, criarRepositorio } from '../repositorio'
 import { CAMPOS_REGISTRO, type Tipos } from '../schemas'
@@ -48,9 +49,14 @@ async function coletarCascata(armazenamento: Armazenamento, processoId: Id): Pro
   }
   const informes = await doProcesso('informes')
   // Uploads dos informes (SDD §5.4): o conteúdo fica em `arquivos` e sairia órfão.
-  const arquivos = informes.flatMap((informe) =>
-    informe.anexos.flatMap((anexo) => (anexo.origem === 'local' ? [anexo.arquivoId] : [])),
-  )
+  // Sem repetição: o mesmo upload citado duas vezes conta e sai uma vez só.
+  const arquivos = [
+    ...new Set(
+      informes.flatMap((informe) =>
+        informe.anexos.flatMap((anexo) => (anexo.origem === 'local' ? [anexo.arquivoId] : [])),
+      ),
+    ),
+  ]
   return {
     processoEmpresas: ids(await doProcesso('processoEmpresas')),
     marcosDeFase: ids(await doProcesso('marcosDeFase')),
@@ -101,8 +107,11 @@ export function excluirProcesso(armazenamento: Armazenamento, contexto: Contexto
       await armazenamento.delete('processos', processoId)
 
       const contagem = contar(cascata)
-      const campos = Object.entries(processo).filter(
-        ([campo]) => !(CAMPOS_REGISTRO as readonly string[]).includes(campo),
+      // Mesma montagem do `excluir` do repositório: campos do processo, de valor para nada.
+      const campos = Object.fromEntries(
+        Object.entries(processo).filter(
+          ([campo]) => !(CAMPOS_REGISTRO as readonly string[]).includes(campo),
+        ),
       )
       await gravarLogDireto(
         armazenamento,
@@ -113,7 +122,7 @@ export function excluirProcesso(armazenamento: Armazenamento, contexto: Contexto
           registroId: processoId,
           processoId,
           mudancas: [
-            ...campos.map(([campo, de]) => ({ campo, de, para: undefined })),
+            ...diferencas(campos, {}),
             ...Object.entries(contagem).map(([tabela, de]) => ({
               campo: `${PREFIXO_CASCATA}${tabela}`,
               de,
@@ -149,11 +158,16 @@ export function excluirEmpresa(armazenamento: Armazenamento, contexto: ContextoG
           empresaId,
         )
         const processos: Vinculo[] = []
+        const orfaos: Id[] = []
         for (const vinculo of vinculos) {
           const processo = await armazenamento.get<Processo>('processos', vinculo.processoId)
           if (processo) processos.push(vinculoDoProcesso(processo))
+          else orfaos.push(vinculo.id)
         }
         if (processos.length > 0) throw new ErroRegra(ERRO_EMPRESA_VINCULADA, processos)
+        // Vínculo com processo que já não existe sai junto, sem log próprio (segue o do
+        // processo, SDD §5.4), para não apontar para a empresa excluída.
+        for (const id of orfaos) await armazenamento.delete('processoEmpresas', id)
         await repoEmpresas.excluir(empresaId)
       },
     )

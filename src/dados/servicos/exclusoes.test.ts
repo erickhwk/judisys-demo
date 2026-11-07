@@ -6,7 +6,7 @@ import { carregarSeedMini, ESCRITORIO_ID, seedMini } from '../../../tests/fixtur
 import type { Papel } from '../../regras/permissoes'
 import { type Armazenamento, TABELAS, type Tabela } from '../armazenamento'
 import { type ContextoGravacao, ErroPermissao } from '../repositorio'
-import type { Log } from '../schemas'
+import type { Log, Tipos } from '../schemas'
 import { ErroRegra } from './comum'
 import {
   contarExclusaoProcesso,
@@ -123,6 +123,20 @@ describe.each(IMPLEMENTACOES)('exclusões sobre %s', (_nome, criar) => {
       expect(await armazenamento.get('logs', 'log-001')).toBeDefined()
     })
 
+    it('upload citado em dois anexos conta e sai uma vez', async () => {
+      const informe = await armazenamento.get<Tipos['informes']>('informes', 'inf-002')
+      if (!informe) throw new Error('sem informe')
+      await armazenamento.put('informes', {
+        ...informe,
+        anexos: [...informe.anexos, ...informe.anexos],
+      })
+      expect(await contarExclusaoProcesso(armazenamento)('prc-001')).toMatchObject({ arquivos: 1 })
+      expect(await excluirProcesso(armazenamento, contexto())('prc-001')).toMatchObject({
+        arquivos: 1,
+      })
+      expect(await ids('arquivos')).toEqual([])
+    })
+
     it('INV-01 · falha no meio da cascata não remove nada', async () => {
       const falha = comFalhaEm(armazenamento, 'delete', 'informes')
       await expect(excluirProcesso(falha, contexto())('prc-001')).rejects.toThrow('falha simulada')
@@ -158,6 +172,13 @@ describe.each(IMPLEMENTACOES)('exclusões sobre %s', (_nome, criar) => {
       expect(await logsNovos()).toEqual([
         expect.objectContaining({ acao: 'excluiu', colecao: 'empresas', registroId: 'emp-02' }),
       ])
+    })
+
+    it('vínculo com processo que já não existe sai junto com a empresa', async () => {
+      await armazenamento.delete('processos', 'prc-002')
+      await excluirEmpresa(armazenamento, contexto())('emp-02')
+      expect(await ids('empresas')).toEqual(['emp-01'])
+      expect(await ids('processoEmpresas')).toEqual(['pe-001'])
     })
   })
 
