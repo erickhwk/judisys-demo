@@ -1,0 +1,132 @@
+.card {
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.rolagem {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rolagem:focus-visible {
+  outline-offset: -2px;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tabela th {
+  padding: 14px 20px;
+  background: var(--cor-cabecalho-tabela);
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--cor-texto-muted);
+}
+
+.tabela td {
+  padding: 8px 20px;
+  height: 60px;
+  border-bottom: 1px solid var(--cor-borda-linha);
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-forte);
+  overflow-wrap: anywhere;
+}
+
+.tabela th:first-child,
+.tabela td:first-child {
+  padding-left: 24px;
+}
+
+.tabela th:last-child,
+.tabela td:last-child {
+  padding-right: 16px;
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabela tbody tr:hover {
+  background: var(--cor-hover-linha);
+}
+
+.tabela .direita {
+  text-align: right;
+}
+
+.tabela .centro {
+  text-align: center;
+}
+
+.numerica {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabela .destaque {
+  font-size: var(--tamanho-texto);
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.vazio {
+  padding: 24px;
+}
+
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+@media print {
+  .card {
+    border: 0;
+    overflow: visible;
+  }
+
+  .rolagem {
+    overflow: visible;
+  }
+
+  .tabela th,
+  .tabela td {
+    padding: 6px 8px;
+    height: auto;
+    color: #000000;
+    background: none;
+  }
+}

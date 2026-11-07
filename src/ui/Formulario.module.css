@@ -1,0 +1,70 @@
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.secao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px 40px;
+  padding: 28px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.cabecalho {
+  flex: 0 1 260px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.titulo {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.descricao {
+  font-size: var(--tamanho-texto-pequeno);
+  line-height: 1.6;
+  color: var(--cor-texto-muted);
+}
+
+.campos {
+  flex: 1 1 520px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+@media (max-width: 640px) {
+  .secao {
+    padding: 20px;
+  }
+
+  .cabecalho {
+    min-width: 0;
+  }
+
+  .campos {
+    flex-basis: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,147 @@
+.campo {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  grid-column: span 6;
+}
+
+.colunas1 {
+  grid-column: span 1;
+}
+.colunas2 {
+  grid-column: span 2;
+}
+.colunas3 {
+  grid-column: span 3;
+}
+.colunas4 {
+  grid-column: span 4;
+}
+.colunas5 {
+  grid-column: span 5;
+}
+.colunas6 {
+  grid-column: span 6;
+}
+
+@media (max-width: 640px) {
+  .campo {
+    grid-column: 1 / -1;
+  }
+}
+
+.rotulo {
+  font-size: var(--tamanho-rotulo);
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.obrigatorio {
+  color: var(--cor-perigo);
+}
+
+.envoltorio {
+  position: relative;
+}
+
+.controle {
+  width: 100%;
+  height: var(--altura-campo);
+  padding: 0 16px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: var(--tamanho-texto);
+}
+
+.controle:focus,
+.controle:focus-visible {
+  outline: none;
+  border-color: var(--cor-azul-900);
+  box-shadow: var(--foco-sombra);
+}
+
+.controle:disabled {
+  background: var(--cor-superficie-suave);
+  color: var(--cor-texto-muted);
+  cursor: not-allowed;
+}
+
+.comErro {
+  border-color: var(--cor-perigo);
+}
+
+.selecao {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  color: var(--cor-texto-forte);
+  cursor: pointer;
+}
+
+.areaTexto {
+  height: auto;
+  min-height: 96px;
+  padding: 12px 16px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.icone {
+  position: absolute;
+  top: 0;
+  height: var(--altura-campo);
+  display: flex;
+  align-items: center;
+  color: var(--cor-texto-muted);
+  pointer-events: none;
+}
+
+.iconeInicio {
+  left: 16px;
+}
+
+.iconeFim {
+  right: 14px;
+}
+
+.comIconeInicio {
+  padding-left: 46px;
+}
+
+.comIconeFim {
+  padding-right: 46px;
+}
+
+.ajuda {
+  font-size: 13px;
+  color: var(--cor-texto-muted);
+}
+
+.erro {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-perigo);
+}
+
+.marcacao {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--alvo-minimo);
+  font-size: var(--tamanho-texto);
+  color: var(--cor-texto);
+  cursor: pointer;
+}
+
+.caixa {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--cor-azul-900);
+  cursor: pointer;
+}

@@ -1,0 +1,37 @@
+.erro {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  border: 1px solid var(--cor-perigo-borda);
+  border-radius: var(--raio-linha);
+  background: var(--cor-perigo-claro);
+}
+
+.icone {
+  display: flex;
+  flex: none;
+  padding-top: 2px;
+  color: var(--cor-perigo);
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.titulo {
+  font-weight: 700;
+  color: var(--cor-perigo);
+}
+
+.mensagem {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-forte);
+}
+
+.acao {
+  margin-top: 12px;
+}
