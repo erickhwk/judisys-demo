@@ -1,9 +1,11 @@
 // Layout das telas internas (RF-01, RF-04, RF-06; DESIGN.md §Dashboard): faixa da demo fixa no
-// topo, menu lateral (recolhível; gaveta no celular), topo com o menu da conta, conteúdo e rodapé.
+// topo, menu lateral (recolhível; gaveta no celular), topo com a busca global e o menu da conta,
+// conteúdo e rodapé.
 // A faixa fica fora da área que rola, então nunca sai da tela.
 import { Menu } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
+import { BuscaGlobal } from '../modulos/busca/BuscaGlobal'
 import { NOMES_PAPEIS } from '../modulos/entrada/papeis'
 import { useSessao } from '../modulos/entrada/sessao'
 import { FaixaDemo } from './FaixaDemo'
@@ -82,6 +84,7 @@ export function Layout() {
             >
               <Menu size={24} aria-hidden="true" />
             </button>
+            <BuscaGlobal papel={sessao.papel} />
             <MenuConta
               nome={sessao.nome}
               papel={NOMES_PAPEIS[sessao.papel]}
