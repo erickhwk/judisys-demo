@@ -38,6 +38,9 @@
 }
 
 .conteudo {
+  /* Contém os absolutos do conteúdo (ex.: rótulo `.somente-leitor`), como a coluna do Layout: sem
+     isso escapam da rolagem para o <dialog> e criam uma segunda rolagem (AJ-02). */
+  position: relative;
   overflow-y: auto;
   padding: 8px 24px 24px;
   font-size: var(--tamanho-texto);
