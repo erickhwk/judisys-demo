@@ -75,7 +75,7 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
       <CabecalhoPagina
         trilha={[
           { rotulo: 'Processos', para: '/processos' },
-          { rotulo: processo.apelido, para: aba },
+          { rotulo: processo.apelido, para: `/processos/${processo.id}/visao-geral` },
           { rotulo: 'AGC', para: aba },
         ]}
         titulo={`AGC de ${formatarData(agc.dataPrimeira)}`}

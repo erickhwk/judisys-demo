@@ -106,3 +106,28 @@ test('RF-31 · nova AGC pela aba; analista só lê', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'AGCs do processo' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Nova AGC' })).toHaveCount(0)
 })
+
+test('AJ-15 · na trilha da AGC, o processo leva à visão geral e AGC à aba', async ({ page }) => {
+  await entrarComo(page, 'aj')
+  await abrirAgcDoVitrine(page)
+  const trilha = page.getByRole('navigation', { name: 'Trilha' })
+  const processo = trilha.getByRole('link', { name: 'Grupo Lontra Azul', exact: true })
+  const agc = trilha.getByRole('link', { name: 'AGC', exact: true })
+  await expect(processo).toHaveAttribute('href', '#/processos/prc-001/visao-geral')
+  await expect(agc).toHaveAttribute('href', '#/processos/prc-001/agc')
+
+  await processo.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-001\/visao-geral$/)
+  await expect(page.getByRole('heading', { name: 'Grupo Lontra Azul', level: 1 })).toBeVisible()
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Seções do processo' })
+      .getByRole('link', { name: 'Visão geral' }),
+  ).toHaveAttribute('aria-current', 'page')
+
+  await page.goBack()
+  await expect(page.getByRole('heading', { name: /^AGC de /, level: 1 })).toBeVisible()
+  await agc.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-001\/agc$/)
+  await expect(page.getByRole('region', { name: 'AGCs do processo' })).toBeVisible()
+})
