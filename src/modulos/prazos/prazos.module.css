@@ -145,8 +145,8 @@
   color: var(--cor-texto-forte);
 }
 
-/* Calendário mensal. `position: relative` prende aqui os textos só para leitor de tela (absolutos):
-   sem isso eles escapam da coluna que rola e a janela ganha uma segunda barra de rolagem. */
+/* Calendário mensal. `position: relative`: o `overflow: hidden` só recorta os absolutos (textos só
+   para leitor de tela) que têm o calendário como bloco de contenção. */
 .calendario {
   position: relative;
   overflow: hidden;
