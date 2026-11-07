@@ -2,31 +2,9 @@
 // CAR-05) veio com a DMO-10. Cada teste começa com o armazenamento limpo (contexto novo do
 // Playwright).
 import { expect, type Page, test } from '@playwright/test'
+import { entrarComo, type Linha, lerTabela } from './apoio'
 
 const CHAVE_VERSAO = 'judisys:versao'
-
-type Linha = Record<string, unknown> & { id: string }
-
-/** Lê uma tabela do IndexedDB da demo direto pela API do navegador. */
-function lerTabela(page: Page, tabela: string): Promise<Linha[]> {
-  return page.evaluate(
-    (nome) =>
-      new Promise<Linha[]>((resolver, rejeitar) => {
-        const abertura = indexedDB.open('judisys')
-        abertura.onerror = () => rejeitar(abertura.error)
-        abertura.onsuccess = () => {
-          const db = abertura.result
-          const pedido = db.transaction(nome).objectStore(nome).getAll()
-          pedido.onsuccess = () => {
-            db.close()
-            resolver(pedido.result as Linha[])
-          }
-          pedido.onerror = () => rejeitar(pedido.error)
-        }
-      }),
-    tabela,
-  )
-}
 
 function gravarLinha(page: Page, tabela: string, linha: Linha): Promise<void> {
   return page.evaluate(
@@ -231,4 +209,38 @@ test('CAR-05 · Resetar demo → cancelar não muda nada', async ({ page }) => {
   await expect(confirmacao).toBeHidden()
   const depois = await lerTabela(page, 'processos')
   expect(depois.find((p) => p.id === processo.id)?.apelido).toBe('Alterado na demo')
+})
+
+test('CAR-04 · alteração feita pela tela (acolher a impugnação) é desfeita ao resetar', async ({
+  page,
+}) => {
+  // Isadora Costa Batista, do vitrine: impugnação pendente e sem valor no QGC (SED-04).
+  const credor = './#/processos/prc-001/credores/crd-0066'
+  const qgc = page.locator('[data-valor="qgc"]')
+  const pedidos = page.getByRole('region', { name: /Pedidos de crédito de Isadora/ })
+  await entrarComo(page, 'aj')
+  const logsAntes = (await lerTabela(page, 'logs')).length
+
+  await page.goto(credor)
+  await pedidos.getByRole('button', { name: /^Acolher impugnação/ }).click()
+  const acolher = page.getByRole('alertdialog', { name: 'Acolher o pedido?' })
+  await acolher.getByRole('button', { name: 'Acolher' }).click()
+  await expect(acolher).toBeHidden()
+  await expect(qgc).toContainText('R$ 65.203,58')
+  expect((await lerTabela(page, 'logs')).length).toBeGreaterThan(logsAntes)
+
+  await page
+    .getByRole('region', { name: 'Demonstração' })
+    .getByRole('button', { name: 'Resetar demo' })
+    .click()
+  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
+  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+
+  // Volta ao seed: o QGC sem valor, a impugnação pendente e o log da decisão desfeito.
+  await page.goto(credor)
+  await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
+  await expect(qgc).toContainText('—')
+  await expect(pedidos.getByRole('button', { name: /^Acolher impugnação/ })).toBeVisible()
+  expect(await lerTabela(page, 'logs')).toHaveLength(logsAntes)
 })
