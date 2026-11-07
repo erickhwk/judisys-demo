@@ -8,6 +8,7 @@ import {
   abrirAgcDaLista,
   acolherImpugnacao,
   CLASSES_DO_VITRINE,
+  CREDOR_IMPUGNACAO,
   entrarComo,
   instalar,
   todosDaClasse,
@@ -39,7 +40,7 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
   )
 
   // 2. Abre o processo vitrine pela lista: timeline de fases e prazos.
-  await page.getByRole('link', { name: 'Processos' }).first().click()
+  await page.getByRole('navigation').getByRole('link', { name: 'Processos', exact: true }).click()
   await page
     .getByRole('region', { name: 'Lista de processos' })
     .getByRole('link', { name: 'Grupo Lontra Azul', exact: true })
@@ -56,8 +57,8 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
   // 3. Credores: a impugnação pendente de Isadora (SED-04); acolher muda o QGC.
   await abas.getByRole('link', { name: 'Credores' }).click()
   await page.getByRole('searchbox', { name: 'Buscar por nome ou CPF/CNPJ' }).fill('Isadora Costa')
-  await page.getByRole('link', { name: 'Isadora Costa Batista' }).click()
-  await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: CREDOR_IMPUGNACAO.nome }).click()
+  await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome, level: 1 })).toBeVisible()
   await expect(page.locator('[data-valor="qgc"]')).toContainText('—')
   await acolherImpugnacao(page)
 

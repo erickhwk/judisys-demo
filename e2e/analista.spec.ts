@@ -3,7 +3,14 @@
 // trocado não deixa o "sem botão" passar à toa). As rotas de edição abertas direto ficam
 // bloqueadas para o analista e abrem para o AJ.
 import { expect, type Locator, type Page, test } from '@playwright/test'
-import { AGORA, abrirAgcDaLista, entrarComo, lerTabela, trocarPara } from './apoio'
+import {
+  AGORA,
+  abrirAgcDaLista,
+  CREDOR_IMPUGNACAO,
+  entrarComo,
+  lerTabela,
+  trocarPara,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -21,8 +28,19 @@ interface Tela {
 const botao = (page: Page, nome: string | RegExp) =>
   page.getByRole('button', { name: nome, exact: typeof nome === 'string' })
 
-async function abrirComLinhas(page: Page, rota: string): Promise<void> {
+/**
+ * Passa pelo dashboard antes de abrir a rota. Entre rotas da SPA o goto só troca o hash, e a tela
+ * anterior continua no DOM até a nova renderizar: sem a parada, uma asserção de "tem 0" (ou uma
+ * linha de tabela) passaria olhando a tela velha.
+ */
+async function irPara(page: Page, rota: string): Promise<void> {
+  await page.goto('./#/')
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
   await page.goto(rota)
+}
+
+async function abrirComLinhas(page: Page, rota: string): Promise<void> {
+  await irPara(page, rota)
   await expect(page.locator('tbody tr').first()).toBeVisible()
 }
 
@@ -129,6 +147,8 @@ test('PER-03 · analista não vê botões de edição; credores continuam editá
     })
   }
   await test.step('presença da AGC só leitura', async () => {
+    await irPara(page, `${VITRINE}/agc`)
+    await abrirAgcDaLista(page)
     const lista = page.getByRole('region', { name: 'Lista de presença', exact: true })
     await expect(lista.getByRole('checkbox').first()).toBeDisabled()
   })
@@ -140,8 +160,8 @@ test('PER-03 · analista não vê botões de edição; credores continuam editá
   await test.step('credores', async () => {
     await page.goto(`${VITRINE}/credores`)
     await expect(botao(page, 'Novo credor')).toBeVisible()
-    await page.goto(`${VITRINE}/credores/crd-0066`)
-    await expect(page.getByRole('heading', { name: 'Isadora Costa Batista' })).toBeVisible()
+    await page.goto(CREDOR_IMPUGNACAO.rota)
+    await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome })).toBeVisible()
     await expect(botao(page, 'Editar')).toBeVisible()
     await expect(botao(page, 'Registrar pedido')).toBeVisible()
   })
@@ -172,7 +192,7 @@ test('PER-04 · rotas de edição abertas direto: bloqueadas para o analista, ab
   await entrarComo(page, 'analista')
   for (const { rota, titulo } of ROTAS_DE_EDICAO) {
     await test.step(`analista em ${rota}`, async () => {
-      await page.goto(rota)
+      await irPara(page, rota)
       await expect(page.getByRole('alert'), rota).toContainText('Seu papel não permite esta ação')
       await expect(page.getByRole('heading', { name: titulo, level: 1 })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Salvar' })).toHaveCount(0)
@@ -182,15 +202,19 @@ test('PER-04 · rotas de edição abertas direto: bloqueadas para o analista, ab
   // O modo de edição do informe pela URL (`?editar=1`) fica só leitura.
   const [informe] = await lerTabela(page, 'informes')
   if (!informe) throw new Error('seed sem informes')
-  await page.goto(`./#/informes/${informe.id}?editar=1`)
+  const edicaoDoInforme = `./#/informes/${informe.id}?editar=1`
+  await irPara(page, edicaoDoInforme)
   await expect(page.getByRole('heading', { name: 'Anexos' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Salvar' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Editar', exact: true })).toHaveCount(0)
 
   await trocarPara(page, 'aj')
+  // Contraprova: a mesma URL abre o formulário para o AJ.
+  await irPara(page, edicaoDoInforme)
+  await expect(page.getByRole('button', { name: 'Salvar' })).toBeVisible()
   for (const { rota, titulo } of ROTAS_DE_EDICAO) {
     await test.step(`AJ em ${rota}`, async () => {
-      await page.goto(rota)
+      await irPara(page, rota)
       await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible()
       await expect(page.getByText('Seu papel não permite esta ação')).toHaveCount(0)
     })
