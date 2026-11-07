@@ -1,7 +1,7 @@
 // Telas de processos (SDD §7.3, §7.2; DMO-12): lista, formulário, tela do processo, avançar e
 // desfazer fase e exclusão. Usa só o seed; cada teste começa com o armazenamento limpo.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, digitarBusca, entrarComo, limparBuscaPendente } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -250,4 +250,36 @@ test('editar processo: os dados salvos voltam no formulário e a mudança vai ao
       .getByRole('region', { name: 'Histórico do processo' })
       .getByText('Gráfica Beija-Flor Renomeada'),
   ).toBeVisible()
+})
+
+test('AJ-12 · digitação rápida na busca de Processos não perde caracteres; a URL guarda o filtro', async ({
+  page,
+}) => {
+  await entrarComo(page, 'analista')
+  await page.goto('./#/processos')
+  await expect(page.getByText('12 processos cadastrados')).toBeVisible()
+  const busca = page.getByRole('searchbox', { name: /Buscar por apelido/ })
+  const lontra = lista(page).getByRole('link', { name: 'Grupo Lontra Azul' })
+
+  await digitarBusca(page, busca, 'Grupo Lontra Azul')
+  await expect(lista(page).getByRole('row')).toHaveCount(2)
+  await expect(lontra).toBeVisible()
+
+  // Atualizar a página mantém o filtro.
+  await page.reload()
+  await expect(busca).toHaveValue('Grupo Lontra Azul')
+  await expect(lista(page).getByRole('row')).toHaveCount(2)
+
+  // Ir ao processo e voltar também.
+  await lontra.click()
+  await expect(page.getByRole('heading', { name: 'Grupo Lontra Azul', level: 1 })).toBeVisible()
+  await page.goBack()
+  await expect(busca).toHaveValue('Grupo Lontra Azul')
+  await expect(lista(page).getByRole('row')).toHaveCount(2)
+
+  // Trocar o texto rápido também chega à URL; "Limpar busca" com texto pendente esvazia tudo.
+  await digitarBusca(page, busca, 'armazens gerais')
+  await expect(lista(page).getByRole('link', { name: 'Transportes Jabuticaba' })).toBeVisible()
+  await limparBuscaPendente(page, busca)
+  await expect(lista(page).getByRole('row')).toHaveCount(13)
 })

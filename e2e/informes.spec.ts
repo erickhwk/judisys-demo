@@ -3,7 +3,7 @@
 // não tem rota (é ligada depois na TelaDoProcesso); aqui entram as telas com rota própria.
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, digitarBusca, entrarComo, limparBuscaPendente } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -215,4 +215,39 @@ test('T-30 · ata do seed: resumo acima do PDF genérico; editar tira a data da 
   // O anexo do seed e o resumo continuam.
   await expect(page.locator('iframe[title="Ata da AGC.pdf"]')).toBeVisible()
   await expect(page.getByText('Plano aprovado em todas as classes.')).toBeVisible()
+})
+
+test('AJ-12 · digitação rápida na busca de Informes não perde caracteres; a URL guarda o filtro', async ({
+  page,
+}) => {
+  await entrarComo(page, 'analista')
+  await page.goto('./#/informes')
+  await expect(linhas(page)).toHaveCount(50)
+  const campo = page.getByRole('searchbox', { name: 'Buscar informe por título' })
+  const titulo = 'Edital de convocação de credores (art. 52, §1º)'
+
+  await digitarBusca(page, campo, titulo)
+  await expect(page.getByText('77 informes, mais recentes primeiro')).toHaveCount(0)
+  const informe = page.getByRole('link', { name: titulo, exact: true }).first()
+  await expect(informe).toBeVisible()
+  const total = await linhas(page).count()
+  expect(total).toBeLessThan(50)
+
+  // Atualizar a página mantém o filtro.
+  await page.reload()
+  await expect(campo).toHaveValue(titulo)
+  await expect(linhas(page)).toHaveCount(total)
+
+  // Ir ao informe e voltar também.
+  await informe.click()
+  await expect(page.getByRole('heading', { name: titulo, level: 1 })).toBeVisible()
+  await page.goBack()
+  await expect(campo).toHaveValue(titulo)
+  await expect(linhas(page)).toHaveCount(total)
+
+  // Trocar o texto rápido também chega à URL; "Limpar busca" com texto pendente esvazia tudo.
+  await digitarBusca(page, campo, 'Petição inicial')
+  await expect(linhas(page).first()).toContainText('Petição inicial')
+  await limparBuscaPendente(page, campo)
+  await expect(linhas(page)).toHaveCount(50)
 })
