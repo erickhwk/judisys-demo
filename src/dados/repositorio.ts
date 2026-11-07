@@ -275,10 +275,7 @@ export function criarRepositorio<K extends Tabela>(
       if (!procurada) continue
       const valorDoEscopo = escopo === undefined ? undefined : valorEm(linha, escopo)
       // O índice casa o valor como gravado (já passado pelo schema); a comparação usa a chave.
-      const vizinhos =
-        !campo.includes('.') && indicesDe(tabela).includes(campo) && ehChaveSimples(valor)
-          ? await armazenamento.porIndice<Linha>(tabela, campo, valor)
-          : await armazenamento.todos<Linha>(tabela)
+      const vizinhos = await candidatos({ [campo]: valor })
       const repetido = vizinhos.some((outra) => {
         if (outra.id === linha.id) return false
         if (escopo !== undefined && valorEm(outra, escopo) !== valorDoEscopo) return false
