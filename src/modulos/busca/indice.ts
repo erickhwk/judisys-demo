@@ -71,7 +71,7 @@ export function montarIndice({ processos, empresas, credores }: DadosIndice): In
         titulo: empresa.razaoSocial,
         detalhe: formatarCnpj(empresa.cnpj),
         destino: `/empresas/${empresa.id}`,
-        textos: textos(empresa.razaoSocial, empresa.cnpj),
+        textos: textos(empresa.razaoSocial, empresa.nomeFantasia, empresa.cnpj),
       }))
       .sort(porTitulo),
     credores: (credores ?? [])

@@ -30,6 +30,16 @@ describe('buscarNoIndice', () => {
     expect(buscarNoIndice(indice, CNJ_RJ)[0]).toMatchObject({ tipo: 'processos', total: 1 })
   })
 
+  it('empresa também é achada pelo nome fantasia, como na lista de empresas', () => {
+    const empresas = seed.empresas.map((empresa) =>
+      empresa.id === 'emp-01' ? { ...empresa, nomeFantasia: 'Malharia Sol' } : empresa,
+    )
+    const grupos = buscarNoIndice(montarIndice({ ...seed, empresas }), 'malharia sol')
+    expect(grupos.find((grupo) => grupo.tipo === 'empresas')?.itens.map((item) => item.id)).toEqual(
+      ['emp-01'],
+    )
+  })
+
   it('BUS-04 · 50 credores casam: no máximo 5 no grupo, com o total', () => {
     const grupos = buscarNoIndice(indice, 'credor')
     const credores = grupos.find((grupo) => grupo.tipo === 'credores')
