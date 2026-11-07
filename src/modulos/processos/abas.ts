@@ -1,23 +1,8 @@
-// Abas da tela do processo (RF-13, SDD §5.6): a ordem, o rótulo e o módulo de leitura de cada uma.
-// O conteúdo vem do módulo dono, no `registro.abas` do seu `rotas.tsx` (AJ-05); o cabeçalho e a
-// navegação são da TelaDoProcesso.
+// Abas da tela do processo (RF-13, SDD §5.6): a ordem (a das chaves), o rótulo e o módulo de
+// leitura de cada uma. O conteúdo vem do módulo dono, no `registro.abas` do seu `rotas.tsx`
+// (AJ-05); o cabeçalho e a navegação são da TelaDoProcesso.
 import type { JSX } from 'react'
 import type { Modulo } from '../../regras/permissoes'
-
-export const ABAS = [
-  'visao-geral',
-  'empresas',
-  'credores',
-  'prazos',
-  'agc',
-  'informes',
-  'historico',
-] as const
-
-export type Aba = (typeof ABAS)[number]
-
-/** O conteúdo de uma aba recebe só o `processoId`. */
-export type ConteudoAba = (props: { processoId: string }) => JSX.Element | null
 
 export interface DefinicaoAba {
   rotulo: string
@@ -27,7 +12,7 @@ export interface DefinicaoAba {
   soRj?: boolean
 }
 
-export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = {
+const definicoes = {
   'visao-geral': { rotulo: 'Visão geral', modulo: 'processos' },
   empresas: { rotulo: 'Empresas', modulo: 'empresas' },
   credores: { rotulo: 'Credores', modulo: 'credores' },
@@ -35,4 +20,14 @@ export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = {
   agc: { rotulo: 'AGC', modulo: 'agc', soRj: true },
   informes: { rotulo: 'Informes', modulo: 'informes' },
   historico: { rotulo: 'Histórico', modulo: 'logs' },
-}
+} satisfies Record<string, DefinicaoAba>
+
+export type Aba = keyof typeof definicoes
+
+export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = definicoes
+
+/** As abas na ordem da tela. */
+export const ABAS = Object.keys(DEFINICOES_ABAS) as Aba[]
+
+/** O conteúdo de uma aba recebe só o `processoId`. */
+export type ConteudoAba = (props: { processoId: string }) => JSX.Element | null

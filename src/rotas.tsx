@@ -18,18 +18,20 @@ const REGISTROS = Object.entries(
 export function juntarConteudosDasAbas(
   registros: [arquivo: string, registro: RegistroDoModulo][],
 ): Record<Aba, ConteudoAba> {
-  const conteudos: Partial<Record<Aba, ConteudoAba>> = {}
-  const donos: Partial<Record<Aba, string>> = {}
+  const achadas: Partial<Record<Aba, { arquivo: string; conteudo: ConteudoAba }>> = {}
   for (const [arquivo, registro] of registros) {
     for (const [aba, conteudo] of Object.entries(registro.abas ?? {}) as [Aba, ConteudoAba][]) {
-      if (donos[aba]) throw new Error(`aba "${aba}" declarada em ${donos[aba]} e em ${arquivo}`)
-      donos[aba] = arquivo
-      conteudos[aba] = conteudo
+      const anterior = achadas[aba]
+      if (anterior) throw new Error(`aba "${aba}" declarada em ${anterior.arquivo} e em ${arquivo}`)
+      achadas[aba] = { arquivo, conteudo }
     }
   }
-  const semConteudo = ABAS.filter((aba) => !conteudos[aba])
+  const semConteudo = ABAS.filter((aba) => !achadas[aba])
   if (semConteudo.length) throw new Error(`abas sem conteúdo: ${semConteudo.join(', ')}`)
-  return conteudos as Record<Aba, ConteudoAba>
+  return Object.fromEntries(ABAS.map((aba) => [aba, achadas[aba]?.conteudo])) as Record<
+    Aba,
+    ConteudoAba
+  >
 }
 
 const CONTEUDOS_DAS_ABAS = juntarConteudosDasAbas(REGISTROS)

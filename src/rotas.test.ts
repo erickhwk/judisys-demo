@@ -24,32 +24,38 @@ function abre(papel: Papel, caminho: string): boolean {
 }
 
 describe('rotas (SDD §5.6)', () => {
+  // As rotas de antes do AJ-05 e a permissão de cada uma. Rota nova não precisa entrar aqui (o
+  // `rotas.tsx` do módulo basta): a tabela guarda que as existentes não mudaram de permissão.
   it.each([
-    '/',
-    '/processos',
-    '/processos/novo',
-    '/processos/prc-001/editar',
-    '/processos/prc-001/visao-geral',
-    '/processos/prc-001/empresas',
-    '/processos/prc-001/credores',
-    '/processos/prc-001/prazos',
-    '/processos/prc-001/agc',
-    '/processos/prc-001/informes',
-    '/processos/prc-001/historico',
-    '/processos/prc-001/credores/crd-0001',
-    '/processos/prc-001/agc/agc-01',
-    '/processos/prc-001/qgc',
-    '/empresas',
-    '/empresas/novo',
-    '/empresas/emp-001',
-    '/informes',
-    '/informes/novo',
-    '/informes/inf-001',
-    '/agenda',
-    '/usuarios',
-    '/logs',
-  ])('%s está registrada', (caminho) => {
-    expect(rotaDe(caminho)).toBeDefined()
+    ['/', 'ler', 'dashboard'],
+    ['/processos', 'ler', 'processos'],
+    ['/processos/novo', 'editar', 'processos'],
+    ['/processos/prc-001/editar', 'editar', 'processos'],
+    ['/processos/prc-001/visao-geral', 'ler', 'processos'],
+    ['/processos/prc-001/empresas', 'ler', 'empresas'],
+    ['/processos/prc-001/credores', 'ler', 'credores'],
+    ['/processos/prc-001/prazos', 'ler', 'prazos'],
+    ['/processos/prc-001/agc', 'ler', 'agc'],
+    ['/processos/prc-001/informes', 'ler', 'informes'],
+    ['/processos/prc-001/historico', 'ler', 'logs'],
+    ['/processos/prc-001/credores/crd-0001', 'ler', 'credores'],
+    ['/processos/prc-001/agc/agc-01', 'ler', 'agc'],
+    ['/processos/prc-001/qgc', 'ler', 'credores'],
+    ['/empresas', 'ler', 'empresas'],
+    ['/empresas/novo', 'editar', 'empresas'],
+    ['/empresas/emp-001', 'ler', 'empresas'],
+    ['/informes', 'ler', 'informes'],
+    ['/informes/novo', 'editar', 'informes'],
+    ['/informes/inf-001', 'ler', 'informes'],
+    ['/agenda', 'ler', 'prazos'],
+    ['/usuarios', 'ler', 'usuarios'],
+    ['/logs', 'ler', 'logs'],
+  ])('%s está registrada, com permissão %s/%s', (caminho, acao, modulo) => {
+    expect(rotaDe(caminho)).toMatchObject({ acao, modulo })
+  })
+
+  it('o QGC abre sem o layout (impressão)', () => {
+    expect(ROTAS_SEM_LAYOUT.map((rota) => rota.caminho)).toContain('/processos/:id/qgc')
   })
 
   it('caminho fora da tabela não casa com nenhuma rota (página não encontrada)', () => {
@@ -60,44 +66,6 @@ describe('rotas (SDD §5.6)', () => {
   it('cada caminho aparece uma vez', () => {
     const caminhos = TODAS.map((rota) => rota.caminho)
     expect(new Set(caminhos).size).toBe(caminhos.length)
-  })
-
-  it('AJ-05 · mesmas rotas, permissões e layout de antes de cada módulo declarar as suas', () => {
-    const resumo = (rotas: DefinicaoRota[]) =>
-      rotas.map((r) => [r.caminho, r.acao, r.modulo]).sort((a, b) => a[0].localeCompare(b[0]))
-    expect(resumo(ROTAS)).toEqual(
-      resumo(
-        [
-          ['/', 'ler', 'dashboard'],
-          ['/processos/:id/credores/:credorId', 'ler', 'credores'],
-          ['/processos', 'ler', 'processos'],
-          ['/processos/novo', 'editar', 'processos'],
-          ['/processos/:id/editar', 'editar', 'processos'],
-          ['/processos/:id/visao-geral', 'ler', 'processos'],
-          ['/processos/:id/empresas', 'ler', 'empresas'],
-          ['/processos/:id/credores', 'ler', 'credores'],
-          ['/processos/:id/prazos', 'ler', 'prazos'],
-          ['/processos/:id/agc', 'ler', 'agc'],
-          ['/processos/:id/informes', 'ler', 'informes'],
-          ['/processos/:id/historico', 'ler', 'logs'],
-          ['/processos/:id/agc/:agcId', 'ler', 'agc'],
-          ['/empresas', 'ler', 'empresas'],
-          ['/empresas/novo', 'editar', 'empresas'],
-          ['/empresas/:id', 'ler', 'empresas'],
-          ['/informes', 'ler', 'informes'],
-          ['/informes/novo', 'editar', 'informes'],
-          ['/informes/:id', 'ler', 'informes'],
-          ['/agenda', 'ler', 'prazos'],
-          ['/usuarios', 'ler', 'usuarios'],
-          ['/logs', 'ler', 'logs'],
-        ].map(([caminho, acao, modulo]) => ({ caminho, acao, modulo }) as DefinicaoRota),
-      ),
-    )
-    expect(resumo(ROTAS_SEM_LAYOUT)).toEqual([['/processos/:id/qgc', 'ler', 'credores']])
-  })
-
-  it('AJ-05 · toda aba de ABAS tem rota', () => {
-    for (const aba of ABAS) expect(rotaDe(`/processos/prc-001/${aba}`)?.caminho).toContain(aba)
   })
 
   it('"novo" casa com o formulário, não com o detalhe', () => {

@@ -53,7 +53,7 @@ Depois do lote 8 vêm o lote 9 (DMO-17, votação, que depende da DMO-16 e da DM
 
 - Este `docs/handoff.md` fica sem commit na `main`. Commite junto com a primeira branch da próxima sessão (a do AJ-05).
 - O revisor que sobe `vite preview` pode esquecer o servidor no ar: nesta sessão sobrou um na porta 4312. No fim do lote, rode `pgrep -fl preview`.
-- O conflito em `rotas.tsx` continua até o AJ-05 entrar. Resolva mantendo os dois imports na ordem do Biome e confira `grep -o "rota('[^']*'" src/rotas.tsx | sort | uniq -d` vazio.
+- Depois do AJ-05, cada módulo declara as rotas e o conteúdo das abas no seu `src/modulos/<m>/rotas.tsx`, e o `src/rotas.tsx` não é mais editado à mão. Rota duplicada ou aba sem dono (ou com dois) quebra a suíte.
 - `biome migrate` desliga o linter (há teste-guarda em `src/biome.test.ts`). Markdown fica fora do Biome.
 - O build avisa chunk > 500 kB. É candidato a um AJ de carregamento sob demanda.
 
