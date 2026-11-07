@@ -208,7 +208,7 @@ export function Agenda() {
       </Filtros>
 
       <AvisoDaAcao aviso={acoes.aviso} />
-      {exportacao.erro}
+      {vista === 'lista' && exportacao.erro}
 
       {falhou ? (
         <Erro mensagem="Não foi possível carregar a agenda." />
