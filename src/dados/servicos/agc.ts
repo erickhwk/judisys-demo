@@ -42,13 +42,9 @@ export function salvarAgc(armazenamento: Armazenamento, contexto: ContextoGravac
   return async ({ id, dados }: PedidoSalvarAgc): Promise<Agc> => {
     exigirPermissao(contexto, 'agc')
     return armazenamento.transacao(TABELAS_AGC, async () => {
-      const processo = await buscarOuFalhar(armazenamento, 'processos', dados.processoId)
+      const { processoId, ...campos } = dados
+      const processo = await buscarOuFalhar(armazenamento, 'processos', processoId)
       if (processo.tipo !== 'rj') throw new ErroRegra(ERRO_AGC_SO_RJ)
-      const campos = {
-        dataPrimeira: dados.dataPrimeira,
-        dataSegunda: dados.dataSegunda,
-        pauta: dados.pauta,
-      }
       if (id === undefined) {
         return repo.criar({ processoId: processo.id, ...campos, status: 'agendada' })
       }
@@ -100,6 +96,9 @@ export function marcarPresenca(armazenamento: Armazenamento, contexto: ContextoG
         agcId,
       )
       const presencaPorCredor = new Map(presencas.map((p) => [p.credorId, p]))
+      const votos = presente
+        ? []
+        : await armazenamento.porIndice<Tipos['votos']>('votos', 'agcId', agcId)
 
       for (const credorId of new Set(credorIds)) {
         const credor = credores.get(credorId)
@@ -111,8 +110,7 @@ export function marcarPresenca(armazenamento: Armazenamento, contexto: ContextoG
         if (presente && !atual) await repoPresencas.criar({ agcId, credorId })
         if (!presente && atual) {
           await repoPresencas.excluir(atual.id)
-          const votos = await armazenamento.porIndice<Tipos['votos']>('votos', 'credorId', credorId)
-          for (const voto of votos.filter((v) => v.agcId === agcId)) {
+          for (const voto of votos.filter((v) => v.credorId === credorId)) {
             await repoVotos.excluir(voto.id)
           }
         }
