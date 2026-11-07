@@ -1,6 +1,6 @@
 // Tela do processo (RF-13): cabeçalho com apelido, número, tipo, fase atual e responsável, as
 // ações de editar, excluir, avançar e desfazer fase (só para quem edita processos; PER-03) e as
-// abas. A aba AGC só existe na RJ. O conteúdo de cada aba vem de `abas.tsx`.
+// abas. A aba AGC só existe na RJ. O conteúdo da aba vem do módulo dono, pela rota (src/rotas.tsx).
 import { Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
@@ -14,7 +14,7 @@ import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import { AvancarFase } from './AvancarFase'
-import { ABAS, type Aba, DEFINICOES_ABAS } from './abas'
+import { ABAS, type Aba, type ConteudoAba, DEFINICOES_ABAS } from './abas'
 import { Cabecalho } from './Cabecalho'
 import { DesfazerMarco } from './DesfazerMarco'
 import { useExcluirProcesso } from './ExcluirProcesso'
@@ -23,7 +23,7 @@ import { ProcessoNaoEncontrado } from './ProcessoNaoEncontrado'
 import estilos from './processos.module.css'
 import { ROTULOS_TIPO, TOM_TIPO } from './rotulos'
 
-export function TelaDoProcesso({ aba }: { aba: Aba }) {
+export function TelaDoProcesso({ aba, Conteudo }: { aba: Aba; Conteudo: ConteudoAba }) {
   const { id } = useParams()
   const { sessao } = useSessao()
   const navegar = useNavigate()
@@ -50,7 +50,6 @@ export function TelaDoProcesso({ aba }: { aba: Aba }) {
     const definicao = DEFINICOES_ABAS[chave]
     return (!definicao.soRj || atual.tipo === 'rj') && pode(papel, 'ler', definicao.modulo)
   })
-  const { Conteudo } = DEFINICOES_ABAS[aba]
 
   return (
     <>
