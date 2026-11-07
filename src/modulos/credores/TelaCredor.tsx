@@ -79,7 +79,7 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
       <CabecalhoPagina
         trilha={[
           { rotulo: 'Processos', para: '/processos' },
-          { rotulo: processo.apelido, para: aba },
+          { rotulo: processo.apelido, para: `/processos/${processo.id}/visao-geral` },
           { rotulo: 'Credores', para: aba },
         ]}
         titulo={credor.nome}
