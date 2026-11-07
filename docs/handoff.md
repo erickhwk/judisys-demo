@@ -1,64 +1,97 @@
 # Handoff — Demo do Judisys (código DMO)
 
-Data: 2026-11-07. Responder sempre em pt-BR.
+Data: 2026-11-07 (fim da noite). Responder sempre em pt-BR.
+
+## Foco da próxima sessão
+
+Duas frentes ao mesmo tempo:
+
+1. **Lote 11 em segundo plano:** AJ-07, AJ-08 e AJ-09, com a `execucao-paralela`.
+2. **Na conversa, com o usuário:** o domínio próprio `judisys-demo.draft.dev.br` para a DMO-25.
 
 ## Onde estamos
 
-- Spec: `docs/prd-demo.md`, `docs/sdd-demo.md` (prevalece) e `docs/tasks-demo.md`. O cabeçalho deste último tem os lotes sugeridos e, desde o AJ-06, o bloco **"Execução em paralelo"**, com os args fixos do workflow de lote.
+- Spec: `docs/prd-demo.md`, `docs/sdd-demo.md` (prevalece) e `docs/tasks-demo.md`. O cabeçalho deste último tem os lotes e o bloco **"Execução em paralelo"**, com os args fixos do workflow de lote, já com `--rolagem-interna` nas capturas.
 - Repo público `erickhwk/judisys-demo` (`~/code/judisys`), publicado pelo CI em https://erickhwk.github.io/judisys-demo/ a cada push na `main`.
-- `main` em `ed2dd30`, com 797 testes Vitest e 74 e2e verdes. Não há worktrees nem branches locais além da `main`.
-- No ar: tudo o que havia antes, mais a AGC (cadastro, presença e instalação), o dashboard e as exportações CSV.
+- `main` em `03f6dcf`, com 857 testes Vitest e 90 e2e verdes (suíte pós-merge). Não há worktrees nem branches locais além da `main`.
 - Board: https://trello.com/b/ufNoQ9bK.
-  - Concluído 🎉: DMO-01 a DMO-16, DMO-18 a DMO-22 e AJ-01, AJ-05 e AJ-06.
-  - A Fazer: AJ-02 (componentes repetidos), AJ-03 (CNPJ único entre empresas), AJ-04 (CPF/CNPJ único entre credores do processo) e as DMO-17, DMO-23, DMO-24 e DMO-25.
+  - Concluído 🎉: DMO-01 a DMO-24 e AJ-01 a AJ-06. A DMO-24 tem o item RNF-02 (Firefox e Safari) desmarcado de propósito, com comentário: conferência manual do usuário, pendente.
+  - Backlog: DMO-25.
+  - A Fazer: AJ-07, AJ-08 e AJ-09. A spec de cada um é o próprio card (`trello.sh show AJ-0N`); AJ não tem seção no arquivo de tarefas.
 
-## Feito nesta sessão
+## Frente 1: lote 11 (AJ-07 ∥ AJ-08 ∥ AJ-09)
 
-- **AJ-05 (PR #19):** cada módulo declara as próprias rotas e abas em `src/modulos/<m>/rotas.tsx`. O detalhe está no corpo do PR.
-- **Lote 8 (PRs #20 DMO-22, #21 DMO-18, #22 DMO-16):** ~900 mil tokens de subagentes, ~25 min. É o primeiro lote em que cada agente recebe só o trecho da spec da sua tarefa e roda o ciclo curto de testes.
-- **Retro do lote 8 e AJ-06 (PR #23):**
-  - o e2e local gera o seed sozinho;
-  - o PRZ-08 deixou de ser instável: era uma corrida no próprio teste;
-  - o bloco "Execução em paralelo" entrou no `docs/tasks-demo.md`.
+| Card | O que é | Arquivos prováveis |
+|---|---|---|
+| AJ-07 https://trello.com/c/TywhVZpA | Busca de Credores perde caracteres (campo controlado pela URL). Bug, achado na DMO-23. | `src/modulos/credores/` (aba e busca), e2e de credores |
+| AJ-08 https://trello.com/c/nwCyZ4cu | Trilha da `TelaCredor` num `nav` "Trilha". Conferir antes se o `CabecalhoPagina` da AJ-02 já resolveu; o card pode fechar sem código. | `src/ui/CabecalhoPagina.tsx`, `src/modulos/credores/TelaCredor.tsx`, `e2e/roteiro.spec.ts` (tirar o `getByRole('main')`) |
+| AJ-09 https://trello.com/c/JyUV6mnp | Specs e2e antigos importam os helpers de `e2e/apoio.ts` (DMO-24). | `e2e/*.spec.ts`, `e2e/apoio.ts` |
 
-## Próximo passo
+- **Conflitos dentro do lote:** AJ-08 e AJ-09 podem se encontrar em `e2e/roteiro.spec.ts`, e AJ-07 e AJ-09 em `e2e/credores.spec.ts`. Fixe no `contexto` quem mexe em quê, ou ponha a AJ-09 em cadeia depois das outras.
+- **Conflito com a frente 2:** se o domínio próprio mudar a base do Vite, ele mexe em `playwright.config.ts` e `e2e/apoio.ts`. A AJ-09 também mexe no `e2e/apoio.ts`. Faça a mudança de base depois do merge do lote, ou na própria sessão, num arquivo que nenhum agente toque.
+- **Workflow:** copie o `workflow-lote.js` da skill para o scratchpad antes de disparar (pegadinha abaixo).
+- **Tamanho:** são tarefas pequenas, de 6 a 9 min cada. Nenhuma precisa de `visual: true`, salvo se a AJ-08 mudar a trilha visualmente.
 
-1. **Lote 9: DMO-17 sozinha** (AGC: votação, painel do art. 45, cram down e registro), com a `execucao-paralela`.
-   - Ela depende da DMO-16 e da DMO-19, já na `main`.
-   - Use o bloco "Execução em paralelo" do `docs/tasks-demo.md` para `teste` e `contexto`. Acrescente só a divisão de arquivos e a nota da tarefa.
-   - Na nota, dizer que ela constrói sobre `src/modulos/agc/` e `src/dados/servicos/agc.ts` (DMO-16). Dizer também que a presença trava na instalação e que a DMO-17 vota sobre os presentes. O "reabrir lista enquanto não houver voto" só entra se a demo pedir (ver abaixo).
-   - É uma tarefa grande (~35–45 min) e tem regra de domínio. O `/code-review` fica no nível high.
-   - Copie de novo o `workflow-lote.js` da skill para o scratchpad e recorte a spec com um script, como no lote 8: seção da tarefa, mais as §2, §4.2, §6, §7.6 e §10 do SDD e a §7.9 do PRD.
-2. Depois: lote 10 (DMO-23 e DMO-24, mais os AJ-02 a AJ-04 se couberem) e, por último, a DMO-25 no `~/code/draft-site`.
+## Frente 2: domínio próprio da demo (DMO-25)
 
-## Decisões da sessão fora da spec
+O que já se sabe (conferido em 2026-11-07):
 
-- **Autonomia (memória `feedback_autonomia_demo`):** eu decido o técnico e registro no PR como "Decidido pelo orquestrador". Levo ao usuário só regra de negócio do produto real, escopo novo e o que for difícil de desfazer.
-- **"A rever na reescrita"** (detalhe nos PRs #21 e #22):
-  - a 2ª convocação é livre na simulação; pela lei, só se a 1ª não instalou;
-  - não há intervalo mínimo de 5 dias entre convocações (art. 36, I);
-  - credor presente que perde o voto só ganha um aviso, e a presença não sai sozinha;
-  - prazos abertos de processo encerrado continuam nos números do dashboard.
-- **Lista de presença travada depois da instalação, sem desfazer:** decidido com o usuário.
-- **Dashboard:** título "Dashboard" e 4 cartões, em vez de "Painel de Controle" e 5 cartões do guia. Decidido pelo orquestrador.
-- **AJ-05:** a tabela de `src/rotas.test.ts` confere só as rotas antigas. Rota nova leva teste de permissão no próprio módulo, regra que está no bloco do `docs/tasks-demo.md`.
+- **O botão já existe no site:** "Quero testar o Judisys" está em `~/code/draft-site/index.html`, apontando para `https://judisys-demo.draft.dev.br`.
+  - Está **sem commit**, na branch `ajustes-conteudo`, junto com outras mudanças de conteúdo do usuário.
+  - O commit e o deploy do site são do usuário.
+- **`judisys-demo.draft.dev.br` não tem DNS:** nem CNAME, nem A.
+- **O GitHub Pages não tem domínio próprio:** `gh api repos/erickhwk/judisys-demo/pages` dá `cname: null`.
+- **A demo só roda sob `/judisys-demo/`:** o caminho está fixo em vários lugares:
+  - `vite.config.ts` (`base`);
+  - `playwright.config.ts` (`baseURL` e `webServer.url`);
+  - `e2e/apoio.ts` (a checagem da INV-09 aceita só o que está sob a base);
+  - `README.md`;
+  - `src/ui/catalogo/Catalogo.tsx` (comentário);
+  - o SDD, na T-15 e na §5.1.
+
+Passos, a confirmar com o usuário (o DNS é com ele):
+
+1. Saber em que provedor está o DNS de `draft.dev.br` e criar o **CNAME** `judisys-demo` → `erickhwk.github.io`.
+2. Num AJ novo (próximo número livre: `trello.sh next AJ`, provavelmente AJ-10), mudar a base para `/`:
+   - `base: '/'` no `vite.config.ts`;
+   - `public/CNAME` com `judisys-demo.draft.dev.br`;
+   - `playwright.config.ts` e `e2e/apoio.ts` acompanhando;
+   - README;
+   - SDD (T-15 e §5.1), num commit `docs`.
+3. Configurar o domínio no Pages (`gh api -X PUT repos/erickhwk/judisys-demo/pages -f cname=judisys-demo.draft.dev.br`) e ligar o HTTPS depois que o certificado sair. É ação externa: confirmar com o usuário antes.
+4. Conferir que `https://judisys-demo.draft.dev.br` abre a demo. O endereço antigo do github.io passa a redirecionar.
+5. DMO-25: marcar os itens do card quando o botão do site estiver no ar e abrindo a demo. Mover para Concluído 🎉 com o ok do usuário.
+
+Se o DNS demorar a propagar, a alternativa já discutida é trocar o link do botão pelo endereço do github.io.
+
+## Decisões anteriores que continuam valendo
+
+O detalhe está nos corpos dos PRs #24 a #31 e no SDD (T-40):
+
+- AGC encerrada recalcula o resultado na tela, e a ata é o registro oficial.
+- O documento do credor é único por processo e classe.
+- RNF-03 vale no Fast 4G.
+- Os itens marcados "a rever na reescrita" estão nos PRs.
+- Sem meta de cobertura de testes no CI (memória `feedback_cobertura`).
 
 ## Pegadinhas
 
+- **PR empilhado:** mergear o de baixo **apagando a branch**, senão o de cima entra nela, e não na `main`. Aconteceu com o #28 e o #29; os PRs #30 e #31 corrigiram.
 - Este `docs/handoff.md` fica sem commit na `main`. Commite junto com a primeira branch da próxima sessão.
-- O `capturar.sh` da `comparacao-visual` não desliga animações: duas capturas do mesmo código podem diferir na faixa do menu lateral.
-  - Pendente da retro: ajustar no `~/code/claude-setup`, com `reducedMotion: 'reduce'` e CSS que zere `animation` e `transition`.
-  - Até lá, diferença só no menu lateral é ruído.
-- O `/code-review` em fork pode voltar vazio (no AJ-06 voltou em 4 s, com uma única ferramenta chamada). Nesse caso, revise à mão ou rode de novo; não trate como "sem achados".
-- No fim de cada lote, rode `pgrep -fl preview` e derrube o que sobrou. Remova também os worktrees e as branches `worktree-wf_*` (passo 7 da `execucao-paralela`).
-- O build avisa chunk > 500 kB. É candidato a um AJ de carregamento sob demanda (tirar o `eager` do glob e usar `React.lazy` nos `rotas.tsx`).
+- Copie o `workflow-lote.js` da skill para o scratchpad **de novo** a cada lote. O primeiro disparo do lote 10 usou uma cópia velha.
+- **Teste intermitente:** uma falha em 821 apareceu uma vez na `main` e não voltou em 10 rodadas. A suíte pós-merge agora grava log; se repetir, o log diz qual é.
+- O `/code-review` em fork pode voltar vazio. Nesse caso revise à mão ou rode de novo; não trate como "sem achados".
+- No fim do lote: `pgrep -fl preview`, `git worktree prune` e remover as branches `worktree-wf_*`. Os `http.server` nas portas 8000 e 8765 não são do judisys; não derrube.
 
 ## Skills sugeridas
 
 Leia este arquivo no início da sessão.
 
-- `execucao-paralela`: lote 9 (DMO-17) e lote 10.
-- `sdd-para-trello`: mover cards (Concluído com o ok do usuário, Em andamento, Em revisão) e anexar PRs.
-- `simplify`, `revisao-spec`, `code-review`, `security-review`: checklist antes de qualquer PR feito fora do workflow.
-- `comparacao-visual`: tarefas com `visual: true` (a DMO-17 é uma).
-- `retro` ao fim do lote 9 ou 10; `handoff` ao encerrar.
+- `execucao-paralela`: lote 11 (AJ-07 a AJ-09).
+- `sdd-para-trello`:
+  - mover os cards dos AJ;
+  - criar o AJ do domínio;
+  - atualizar a DMO-25 (Concluído com o ok do usuário).
+- `simplify`, `revisao-spec`, `code-review`, `security-review`: checklist antes do PR do AJ do domínio, que é feito na sessão, fora do workflow. Diff pequeno, então os passos 1, 2 e 4 podem ir numa passada só.
+- `comparacao-visual`: só se a AJ-08 mudar a trilha visualmente (com `--rolagem-interna`).
+- `retro` ao fim do lote 11; `handoff` ao encerrar.
