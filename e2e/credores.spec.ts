@@ -131,3 +131,49 @@ test('aba Credores dentro da tela do processo (RF-13)', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Novo credor' })).toBeVisible()
   await expect(page.locator('tbody tr').first()).toBeVisible()
 })
+
+/** A busca da aba Credores como está no hash da URL (o app usa HashRouter). */
+function buscaNaUrl(page: Page): string | null {
+  const consulta = new URL(page.url()).hash.split('?')[1] ?? ''
+  return new URLSearchParams(consulta).get('busca')
+}
+
+test('AJ-07 · digitação rápida na busca de Credores não perde caracteres; a URL guarda o filtro', async ({
+  page,
+}) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  await page.goto('#/processos/prc-001/credores')
+  const campo = page.getByRole('searchbox', { name: 'Buscar por nome ou CPF/CNPJ' })
+  const isadora = page.getByRole('link', { name: 'Isadora Costa Batista' })
+  const linhas = page.getByRole('region', { name: 'Credores', exact: true }).locator('tbody tr')
+  await expect(linhas.first()).toBeVisible()
+
+  // Sem atraso entre as teclas: é o caso que perdia letras com o campo preso à URL.
+  await campo.click()
+  await page.keyboard.type('Isadora Costa Batista')
+  await expect(campo).toHaveValue('Isadora Costa Batista')
+  await expect.poll(() => buscaNaUrl(page)).toBe('Isadora Costa Batista')
+  await expect(linhas).toHaveCount(1)
+  await expect(isadora).toBeVisible()
+
+  // Atualizar a página mantém o filtro.
+  await page.reload()
+  await expect(campo).toHaveValue('Isadora Costa Batista')
+  await expect(linhas).toHaveCount(1)
+
+  // Ir ao credor e voltar também.
+  await isadora.click()
+  await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
+  await page.goBack()
+  await expect(campo).toHaveValue('Isadora Costa Batista')
+  await expect(linhas).toHaveCount(1)
+
+  // Trocar o texto rápido também chega à URL, e "Limpar busca" esvazia o campo.
+  await campo.press('ControlOrMeta+a')
+  await page.keyboard.type('Maria Helena')
+  await expect(campo).toHaveValue('Maria Helena')
+  await expect.poll(() => buscaNaUrl(page)).toBe('Maria Helena')
+  await page.getByRole('button', { name: 'Limpar busca' }).click()
+  await expect(campo).toHaveValue('')
+  await expect.poll(() => buscaNaUrl(page)).toBeNull()
+})
