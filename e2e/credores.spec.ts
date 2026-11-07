@@ -191,6 +191,7 @@ test('AJ-13 · na trilha do credor, o processo leva à visão geral e Credores �
   ).toHaveAttribute('aria-current', 'page')
 
   await page.goBack()
+  await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome, level: 1 })).toBeVisible()
   await credores.click()
   await expect(page).toHaveURL(/#\/processos\/prc-001\/credores$/)
 })
