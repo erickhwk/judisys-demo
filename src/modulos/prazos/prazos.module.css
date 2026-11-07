@@ -1,0 +1,410 @@
+/* Aba Prazos, agenda e calendário mensal (RF-23 a RF-25). Cores de situação do RF-24:
+   vencido em vermelho, urgente em dourado, cumprido sem destaque. */
+
+/* Cabeçalho da agenda, como em processos-lista.html */
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cabecalhoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.subtitulo {
+  font-size: var(--tamanho-texto);
+  color: var(--cor-texto-muted);
+}
+
+.cabecalhoAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Alternância Lista / Calendário */
+.vistas {
+  display: inline-flex;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  min-inline-size: 0;
+}
+
+.vista {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font-weight: 600;
+  color: var(--cor-texto-forte);
+  cursor: pointer;
+}
+
+.vista:hover {
+  background: var(--cor-hover-fantasma);
+}
+
+.vistaAtiva,
+.vistaAtiva:hover {
+  background: var(--cor-azul-900);
+  color: var(--cor-texto-invertido);
+}
+
+/* Aba do processo */
+.aba {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cabecalhoAba {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tituloAba {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+/* Mensagem da última ação */
+.regiaoAviso:empty {
+  display: none;
+}
+
+.aviso {
+  padding: 12px 16px;
+  border-radius: var(--raio-campo);
+  font-weight: 600;
+}
+
+.avisoSucesso {
+  background: var(--cor-sucesso-claro);
+  color: var(--cor-sucesso);
+}
+
+.avisoErro {
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+/* Células da lista */
+.data_vencido {
+  font-weight: 700;
+  color: var(--cor-perigo);
+}
+
+.data_urgente {
+  font-weight: 700;
+  color: var(--cor-dourado-700);
+}
+
+.data_cumprido {
+  color: var(--cor-texto-muted);
+}
+
+.titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scroll-margin: 120px;
+}
+
+.baseLegal {
+  font-size: var(--tamanho-rotulo);
+  font-weight: 400;
+  color: var(--cor-texto-muted);
+}
+
+.destacado {
+  margin: -6px -10px;
+  padding: 6px 10px;
+  border-radius: var(--raio-etiqueta);
+  background: var(--cor-dourado-claro);
+  box-shadow: inset 3px 0 0 var(--cor-dourado-500);
+}
+
+/* Formulário do diálogo */
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 20px 16px;
+}
+
+.nota {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie-suave);
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-forte);
+}
+
+.erroGeral {
+  grid-column: 1 / -1;
+  font-weight: 600;
+  color: var(--cor-perigo);
+}
+
+.formulario input[readonly] {
+  background: var(--cor-superficie-suave);
+  color: var(--cor-texto-forte);
+}
+
+/* Calendário mensal. `position: relative` prende aqui os textos só para leitor de tela (absolutos):
+   sem isso eles escapam da coluna que rola e a janela ganha uma segunda barra de rolagem. */
+.calendario {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.calendarioTopo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.navegacaoMes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tituloMes {
+  min-width: 200px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.tituloMes::first-letter {
+  text-transform: uppercase;
+}
+
+.contagemMes {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--cor-borda);
+  background: var(--cor-cabecalho-tabela);
+}
+
+.semana span {
+  padding: 10px 12px;
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: var(--espacamento-caixa-alta);
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dia {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 118px;
+  min-width: 0;
+  padding: 8px;
+  border-right: 1px solid var(--cor-borda-linha);
+  border-bottom: 1px solid var(--cor-borda-linha);
+}
+
+.dia:nth-child(7n) {
+  border-right: 0;
+}
+
+.foraDoMes {
+  background: var(--cor-superficie-suave);
+}
+
+.numeroDia {
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 700;
+  color: var(--cor-texto-forte);
+}
+
+.foraDoMes .numeroDia {
+  color: var(--cor-texto-desabilitado);
+}
+
+.dataPorExtenso {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.hoje .numeroDia > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--cor-azul-900);
+  color: var(--cor-texto-invertido);
+}
+
+.prazosDoDia {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prazoDoDia {
+  display: flex;
+  flex-direction: column;
+  min-height: 44px;
+  justify-content: center;
+  padding: 4px 8px;
+  border-left: 3px solid var(--cor-azul-700);
+  border-radius: var(--raio-etiqueta);
+  background: var(--cor-azul-claro);
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--cor-azul-900);
+}
+
+.prazoDoDia:hover {
+  text-decoration: none;
+  filter: brightness(0.97);
+}
+
+.prazoTitulo,
+.prazoProcesso {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prazoTitulo {
+  font-weight: 700;
+}
+
+.semPrazosNoMes {
+  display: none;
+}
+
+.prazo_vencido {
+  border-left-color: var(--cor-perigo);
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+.prazo_urgente {
+  border-left-color: var(--cor-dourado-500);
+  background: var(--cor-dourado-claro);
+  color: var(--cor-dourado-700);
+}
+
+.prazo_cumprido {
+  border-left-color: var(--cor-borda-campo);
+  background: var(--cor-superficie-suave);
+  color: var(--cor-texto-muted);
+}
+
+@media (max-width: 640px) {
+  .formulario > * {
+    grid-column: 1 / -1;
+  }
+
+  .tituloMes {
+    min-width: 0;
+    flex: 1;
+    font-size: 18px;
+  }
+
+  .calendarioTopo,
+  .navegacaoMes:first-child {
+    width: 100%;
+  }
+
+  /* No celular o calendário vira lista: só os dias do mês que têm prazo, com a data por extenso */
+  .semana {
+    display: none;
+  }
+
+  .grade {
+    display: block;
+  }
+
+  .dia {
+    min-height: 0;
+    padding: 12px 16px;
+    border-right: 0;
+  }
+
+  .diaVazio,
+  .foraDoMes {
+    display: none;
+  }
+
+  .semPrazosNoMes {
+    display: block;
+    padding: 24px 16px;
+    color: var(--cor-texto-muted);
+  }
+
+  .numeroDia > span:first-child {
+    display: none;
+  }
+
+  .hoje .numeroDia > span:first-child {
+    display: none;
+  }
+
+  .dataPorExtenso {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+/* Âncora do título "Ações" só para leitor: sem ela o texto absoluto escapa da rolagem da tabela e
+   a página ganha rolagem horizontal no celular. */
+.ancoraLeitor {
+  position: relative;
+}
