@@ -119,6 +119,15 @@ describe('número CNJ', () => {
   })
 })
 
+describe('completar* recusam base com tamanho errado', () => {
+  it('lança erro em vez de gerar NaN ou verificador inválido', () => {
+    expect(() => completarCpf('1234567')).toThrow()
+    expect(() => completarCnpj('1122233300')).toThrow()
+    expect(() => completarCnj('1000123')).toThrow()
+    expect(() => completarCpf('12345678a')).toThrow()
+  })
+})
+
 describe('formatarDocumento e somenteDigitos', () => {
   it('escolhe CPF ou CNPJ pelo tamanho', () => {
     expect(formatarDocumento('01234567890')).toBe('012.345.678-90')

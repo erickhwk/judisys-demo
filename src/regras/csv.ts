@@ -67,7 +67,7 @@ export function nomeArquivoCsv(modulo: string, hoje: DataIso, apelido?: string):
   const partes = ['judisys', modulo]
   if (apelido)
     partes.push(
-      normalizar(apelido)
+      normalizar(apelido.replace(/[.\-/]/g, ' '))
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, ''),
     )

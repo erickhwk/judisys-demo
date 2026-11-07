@@ -20,11 +20,18 @@ function pesosDecrescentes(de: number, quantidade: number): number[] {
   return Array.from({ length: quantidade }, (_, i) => de - i)
 }
 
+function exigirDigitos(base: string, quantidade: number): void {
+  if (!new RegExp(`^\\d{${quantidade}}$`).test(base)) {
+    throw new Error(`Esperados ${quantidade} dígitos: ${base}`)
+  }
+}
+
 const PESOS_CNPJ_1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 const PESOS_CNPJ_2 = [6, ...PESOS_CNPJ_1]
 
 /** Recebe os 9 primeiros dígitos e devolve o CPF com os 2 verificadores (11 dígitos). */
 export function completarCpf(base: string): string {
+  exigirDigitos(base, 9)
   const d1 = dvModulo11(base, pesosDecrescentes(10, 9))
   const comD1 = `${base}${d1}`
   return `${comD1}${dvModulo11(comD1, pesosDecrescentes(11, 10))}`
@@ -32,6 +39,7 @@ export function completarCpf(base: string): string {
 
 /** Recebe os 12 primeiros dígitos e devolve o CNPJ com os 2 verificadores (14 dígitos). */
 export function completarCnpj(base: string): string {
+  exigirDigitos(base, 12)
   const d1 = dvModulo11(base, PESOS_CNPJ_1)
   const comD1 = `${base}${d1}`
   return `${comD1}${dvModulo11(comD1, PESOS_CNPJ_2)}`
@@ -48,6 +56,7 @@ function resto97(digitos: string): number {
  * 20 dígitos na ordem oficial (NNNNNNN DD AAAA J TR OOOO). Módulo 97 (Resolução CNJ 65/2008).
  */
 export function completarCnj(base: string): string {
+  exigirDigitos(base, 18)
   const dv = 98 - resto97(`${base}00`)
   return `${base.slice(0, 7)}${dv.toString().padStart(2, '0')}${base.slice(7)}`
 }

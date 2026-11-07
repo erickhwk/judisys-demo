@@ -54,4 +54,11 @@ describe('pode (RF-39)', () => {
   it('ninguém edita logs (o log é gravado pelo repositório)', () => {
     for (const papel of PAPEIS) expect(pode(papel, 'editar', 'logs')).toBe(false)
   })
+
+  it('papel ou módulo fora da tabela nega tudo', () => {
+    expect(pode('admin' as Papel, 'ler', 'usuarios')).toBe(false)
+    expect(pode('' as Papel, 'ler', 'dashboard')).toBe(false)
+    expect(pode('aj', 'ler', 'relatorios' as Modulo)).toBe(false)
+    expect(pode('aj', 'editar', 'relatorios' as Modulo)).toBe(false)
+  })
 })

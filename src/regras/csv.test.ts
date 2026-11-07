@@ -87,4 +87,13 @@ describe('nomeArquivoCsv', () => {
       'judisys-credores-grupo-aurora-textil-2026-11-07.csv',
     )
   })
+
+  it('pontuação do apelido vira hífen, sem colar palavras', () => {
+    expect(nomeArquivoCsv('credores', '2026-11-07', 'Aurora-Têxtil')).toBe(
+      'judisys-credores-aurora-textil-2026-11-07.csv',
+    )
+    expect(nomeArquivoCsv('credores', '2026-11-07', 'Aurora/Têxtil S.A.')).toBe(
+      'judisys-credores-aurora-textil-s-a-2026-11-07.csv',
+    )
+  })
 })

@@ -41,7 +41,8 @@ export const PERMISSOES: Readonly<Record<Modulo, Readonly<Record<Papel, Nivel>>>
 }
 
 export function pode(papel: Papel, acao: Acao, modulo: Modulo): boolean {
-  const nivel = PERMISSOES[modulo][papel]
+  // Papel ou módulo fora da tabela (ex.: sessão adulterada) nega tudo.
+  const nivel = PERMISSOES[modulo]?.[papel]
   if (acao === 'editar') return nivel === 'editar'
-  return nivel !== 'nenhum'
+  return nivel === 'ler' || nivel === 'editar'
 }
