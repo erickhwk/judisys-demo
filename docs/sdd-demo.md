@@ -98,6 +98,10 @@ Nenhuma bloqueia a implementação.
 | T-31 | Requisito 1 do cram down (art. 58, §1º, I): a base é o valor dos votos sim + não dos presentes; abstenções e presentes sem voto ficam fora, como no art. 45 da demo (D-16). Decidido com o usuário em 2026-11-07 (DMO-05). | Coerência com a D-16; a letra do inciso ("todos os créditos presentes") incluiria as abstenções. |
 | T-32 | Em 2ª convocação a AGC instala com qualquer número de presentes votantes, mas não com zero (DMO-05). | Sem presentes não há votação a registrar. |
 | T-33 | Presente sem voto conta como abstenção nas regras puras (`resultadoAgc`); a tela bloqueia "Registrar resultado" enquanto houver presente sem voto (DMO-17). | Painel ao vivo continua simples e uma votação incompleta não vira aprovação. |
+| T-34 | Na carga (DMO-08), depois de converter as datas relativas, o vencimento de cada RMA aberto é recalculado com `proximoRma` a partir do último RMA cumprido (ou do marco de deferimento), para cair sempre no dia 15 qualquer que seja o "hoje" (DMO-07, 2026-11-07). | O deslocamento fixo do T-24 só acerta o dia 15 quando a demo é aberta na data-base do seed. |
+| T-35 | "Toda fase de cada tipo aparece" (RF-46, SED-03) vale para o histórico de marcos: com 8 RJs e 4 falências, algumas fases ficam sem processo parado nelas e aparecem com zero no funil do dashboard (DMO-07). | 19 fases para 12 processos. |
+| T-36 | Revisão da T-23 (DMO-11, 2026-11-07): credor com **presença ou voto** em AGC encerrada não pode ser excluído; ao excluir um credor, os pedidos de crédito ligados a ele saem junto, cada um com seu log; quem não edita AGC (analista) não exclui credor com presença ou voto em AGC aberta ("Seu papel não permite esta ação"). | Excluir um presente mudaria a instalação de uma ata registrada; pedido sem credor ficaria órfão; INV-02. |
+| T-37 | Título de prazo automático não é editável (só o vencimento, C-05/PRZ-11); o RMA é reconhecido por origem `automatico` + título. Desfazer "encerrada" recria o RMA no mês seguinte ao último vencimento, mesmo que já vencido (DMO-11). | Renomear um RMA quebraria a INV-05; RMA vencido mostra pendência real. |
 
 ---
 
