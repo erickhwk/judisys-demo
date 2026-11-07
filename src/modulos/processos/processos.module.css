@@ -102,8 +102,15 @@
 
 .abas {
   display: flex;
-  flex-wrap: wrap;
   column-gap: 28px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .abas {
+    column-gap: 16px;
+  }
 }
 
 .aba {
@@ -151,10 +158,6 @@
   background: var(--cor-superficie);
   box-shadow: var(--sombra-card);
   overflow-x: auto;
-}
-
-.cartaoAbas .abas {
-  flex-wrap: nowrap;
 }
 
 /* Confirmações e diálogos */
