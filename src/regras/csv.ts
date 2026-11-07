@@ -20,6 +20,14 @@ export type FormatoCelula = 'texto' | 'centavos' | 'data' | 'documento' | 'cnj'
 
 export type Valor = string | number | boolean | null | undefined
 
+/** Arquivo pronto para baixar. */
+export interface ArquivoCsv {
+  /** `judisys-<módulo>-aaaa-mm-dd.csv` (`nomeArquivoCsv`). */
+  nome: string
+  /** Conteúdo de `gerarCsv`. */
+  conteudo: string
+}
+
 export interface ColunaCsv<T> {
   titulo: string
   valor: (linha: T) => Valor
@@ -47,7 +55,7 @@ export function escaparCelula(texto: string): string {
 }
 
 /** Conteúdo do arquivo: BOM, cabeçalho e uma linha por item, com `\r\n` entre linhas. */
-export function gerarCsv<T>(colunas: ColunaCsv<T>[], linhas: T[]): string {
+export function gerarCsv<T>(colunas: ColunaCsv<T>[], linhas: readonly T[]): string {
   const cabecalho = colunas.map((coluna) => escaparCelula(coluna.titulo)).join(SEPARADOR)
   const corpo = linhas.map((linha) =>
     colunas
