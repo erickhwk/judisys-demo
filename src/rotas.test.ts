@@ -1,10 +1,10 @@
 // Rotas da SDD §5.6 e a permissão de cada uma (RF-40, PER-04, PER-06, PER-07).
 import { matchRoutes } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import type { DefinicaoRota } from './definicaoRotas'
+import { type DefinicaoRota, type RegistroDoModulo, rota } from './definicaoRotas'
 import { ABAS } from './modulos/processos/abas'
 import { type Papel, pode } from './regras/permissoes'
-import { juntarConteudosDasAbas, ROTAS, ROTAS_SEM_LAYOUT } from './rotas'
+import { juntarRegistros, ROTAS, ROTAS_SEM_LAYOUT } from './rotas'
 
 const TODAS = [...ROTAS, ...ROTAS_SEM_LAYOUT]
 
@@ -107,32 +107,70 @@ describe('rotas (SDD §5.6)', () => {
 
 const Vazio = () => null
 
-describe('juntarConteudosDasAbas (AJ-05)', () => {
+describe('juntarRegistros (AJ-05)', () => {
   const todas = Object.fromEntries(ABAS.map((aba) => [aba, Vazio]))
+  const lista = rota('/lista', 'ler', 'processos', null)
 
-  it('junta o conteúdo das abas declaradas pelos módulos', () => {
+  it('junta as rotas dos módulos e gera uma rota por aba, com o conteúdo do módulo dono', () => {
     const { credores, ...resto } = todas
-    const conteudos = juntarConteudosDasAbas([
-      ['a/rotas.tsx', { abas: resto }],
-      ['b/rotas.tsx', { abas: { credores } }],
-      ['c/rotas.tsx', {}],
+    const { rotas, rotasSemLayout } = juntarRegistros([
+      ['a/rotas.tsx', { abas: resto, rotas: [lista] }],
+      [
+        'b/rotas.tsx',
+        { abas: { credores }, rotasSemLayout: [rota('/imp', 'ler', 'credores', null)] },
+      ],
+      ['c/rotas.ts', {}],
     ])
-    expect(Object.keys(conteudos).sort()).toEqual([...ABAS].sort())
+    expect(rotas.map((r) => r.caminho)).toEqual([
+      '/lista',
+      ...ABAS.map((aba) => `/processos/:id/${aba}`),
+    ])
+    expect(rotasSemLayout.map((r) => r.caminho)).toEqual(['/imp'])
+  })
+
+  it('arquivo sem o export `registro` é erro, com o nome do arquivo', () => {
+    expect(() =>
+      juntarRegistros([
+        ['a/rotas.tsx', { abas: todas }],
+        ['b/rotas.tsx', undefined],
+      ]),
+    ).toThrow('b/rotas.tsx não exporta `registro`')
   })
 
   it('aba sem conteúdo é erro', () => {
     const { agc: _, ...semAgc } = todas
-    expect(() => juntarConteudosDasAbas([['a/rotas.tsx', { abas: semAgc }]])).toThrow(
+    expect(() => juntarRegistros([['a/rotas.tsx', { abas: semAgc }]])).toThrow(
       'abas sem conteúdo: agc',
+    )
+  })
+
+  it('aba fora de ABAS é erro', () => {
+    const abas = { ...todas, credor: Vazio } as RegistroDoModulo['abas']
+    expect(() => juntarRegistros([['a/rotas.tsx', { abas }]])).toThrow(
+      'aba "credor" de a/rotas.tsx não está em ABAS',
     )
   })
 
   it('aba declarada por dois módulos é erro', () => {
     expect(() =>
-      juntarConteudosDasAbas([
+      juntarRegistros([
         ['a/rotas.tsx', { abas: todas }],
         ['b/rotas.tsx', { abas: { agc: Vazio } }],
       ]),
     ).toThrow('aba "agc" declarada em a/rotas.tsx e em b/rotas.tsx')
+  })
+
+  it('caminho registrado duas vezes é erro, inclusive contra a rota de uma aba', () => {
+    expect(() =>
+      juntarRegistros([
+        ['a/rotas.tsx', { abas: todas, rotas: [lista] }],
+        ['b/rotas.tsx', { rotasSemLayout: [lista] }],
+      ]),
+    ).toThrow('rota "/lista" registrada duas vezes')
+    expect(() =>
+      juntarRegistros([
+        ['a/rotas.tsx', { abas: todas, rotas: [rota('/processos/:id/agc', 'ler', 'agc', null)] }],
+      ]),
+    ).toThrow('rota "/processos/:id/agc" registrada duas vezes')
   })
 })

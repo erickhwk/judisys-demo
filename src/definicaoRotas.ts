@@ -16,7 +16,10 @@ export function rota(caminho: string, acao: Acao, modulo: Modulo, tela: ReactNod
   return { caminho, acao, modulo, tela }
 }
 
-/** O export `registro` de cada `src/modulos/<m>/rotas.tsx`. */
+/**
+ * O export `registro` de cada `src/modulos/<m>/rotas.tsx`. A permissão de rota nova é testada no
+ * módulo dono (a tabela de `src/rotas.test.ts` guarda só as rotas de antes do AJ-05).
+ */
 export interface RegistroDoModulo {
   /** Telas dentro do layout (faixa, menu lateral, rodapé). */
   rotas?: DefinicaoRota[]
@@ -24,7 +27,7 @@ export interface RegistroDoModulo {
   rotasSemLayout?: DefinicaoRota[]
   /**
    * Conteúdo das abas do processo que são deste módulo. A ordem, o rótulo e a permissão de cada aba
-   * ficam em `modulos/processos/abas.tsx`; a rota `/processos/:id/<aba>` sai de lá.
+   * ficam em `modulos/processos/abas.ts`; a rota `/processos/:id/<aba>` sai de lá.
    */
   abas?: Partial<Record<Aba, ConteudoAba>>
 }
