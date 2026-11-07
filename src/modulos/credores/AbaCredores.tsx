@@ -17,6 +17,7 @@ import { CampoSelecao } from '../../ui/Campo'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { Tabela } from '../../ui/Tabela'
+import { useBuscaAdiada } from '../../ui/useBuscaAdiada'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
@@ -78,6 +79,16 @@ function ConteudoAba({ processo }: { processo: Processo }) {
     )
   }
 
+  // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07).
+  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) =>
+    mudar({ busca: texto, pagina: '' }),
+  )
+
+  function limpar() {
+    setTextoBusca('')
+    mudar({ busca: '', classe: '', pagina: '' })
+  }
+
   const foraDaLista = (pedidos.data ?? []).filter((pedido) => !pedido.credorId)
 
   return (
@@ -113,13 +124,13 @@ function ConteudoAba({ processo }: { processo: Processo }) {
 
       <Filtros
         titulo="Buscar credores"
-        aoLimpar={busca || classe ? () => mudar({ busca: '', classe: '', pagina: '' }) : undefined}
+        aoLimpar={textoBusca || busca || classe ? limpar : undefined}
       >
         <CampoBusca
           rotulo="Buscar por nome ou CPF/CNPJ"
           placeholder="Buscar por nome ou CPF/CNPJ"
-          value={busca}
-          onChange={(evento) => mudar({ busca: evento.target.value, pagina: '' })}
+          value={textoBusca}
+          onChange={(evento) => setTextoBusca(evento.target.value)}
         />
         <CampoSelecao
           rotulo="Classe"
