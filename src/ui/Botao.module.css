@@ -1,0 +1,96 @@
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--altura-campo);
+  padding: 0 20px;
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-campo);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font-size: var(--tamanho-texto);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.botao span {
+  display: inline-flex;
+}
+
+.botao:disabled,
+.icone:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.primario {
+  padding: 0 22px;
+  border-color: var(--cor-azul-900);
+  background: var(--cor-azul-900);
+  color: var(--cor-texto-invertido);
+}
+
+.primario:hover:not(:disabled) {
+  border-color: var(--cor-azul-700);
+  background: var(--cor-azul-700);
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--cor-hover-fantasma);
+}
+
+.fantasma {
+  border-color: transparent;
+  background: transparent;
+  color: var(--cor-texto-forte);
+}
+
+.fantasma:hover:not(:disabled) {
+  background: var(--cor-hover-fantasma);
+}
+
+.perigo {
+  border-color: var(--cor-perigo);
+  background: var(--cor-perigo);
+  color: var(--cor-texto-invertido);
+}
+
+.perigo:hover:not(:disabled) {
+  border-color: var(--cor-perigo-hover);
+  background: var(--cor-perigo-hover);
+}
+
+.icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--alvo-minimo);
+  height: var(--alvo-minimo);
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio-campo);
+  background: transparent;
+  color: var(--cor-texto-forte);
+  cursor: pointer;
+}
+
+.icone span {
+  display: inline-flex;
+}
+
+.icone:hover:not(:disabled) {
+  background: var(--cor-hover-botao);
+}
+
+.iconePerigo {
+  color: var(--cor-perigo);
+}
+
+.iconePerigo:hover:not(:disabled) {
+  background: var(--cor-perigo-claro);
+}

@@ -1,0 +1,90 @@
+/*
+ * Tokens do guia de design do Judisys (DESIGN.md e telas/LEIAME.md).
+ * Os pares de texto e fundo usados nos componentes têm contraste de pelo menos 4,5:1 (RNF-01).
+ */
+:root {
+  /* Azul */
+  --cor-azul-900: #0a1f4d;
+  --cor-azul-800: #0b2a5e;
+  --cor-azul-700: #123a7a;
+  --cor-azul-login: #081a3d;
+  --cor-azul-claro: #e4eaf6;
+
+  /* Dourado */
+  --cor-dourado-500: #c8993f;
+  --cor-dourado-degrade: linear-gradient(135deg, #d9ac55, #b8872f);
+  --cor-dourado-200: #f0cf8e;
+  --cor-dourado-700: #7f5a17;
+  --cor-dourado-600: #a9791f;
+  --cor-dourado-claro: #fbf1da;
+
+  /* Fundos e superfícies */
+  --cor-fundo: #f4f6fb;
+  --cor-fundo-login: #fbfaf6;
+  --cor-superficie: #ffffff;
+  --cor-superficie-suave: #f9fafd;
+  --cor-cabecalho-tabela: #f7f9fc;
+  --cor-hover-linha: #f7f9fd;
+  --cor-hover-botao: #eef1f8;
+  --cor-hover-fantasma: #f1f4fa;
+  --cor-trilho: #e8ecf4;
+
+  /* Bordas */
+  --cor-borda: #e3e8f2;
+  --cor-borda-linha: #eef1f7;
+  --cor-borda-campo: #cbd5e8;
+  --cor-borda-suave: #dce3f0;
+
+  /* Texto */
+  --cor-texto: #0a1f4d;
+  --cor-texto-forte: #33405a;
+  --cor-texto-muted: #5b6780;
+  --cor-texto-placeholder: #6b778c;
+  --cor-texto-desabilitado: #9aa5ba;
+  --cor-texto-invertido: #ffffff;
+
+  /* Estados */
+  --cor-perigo: #b4232f;
+  --cor-perigo-claro: #fdecee;
+  --cor-perigo-hover: #8f1b25;
+  --cor-perigo-borda: #f3c4c9;
+  --cor-sucesso: #1e6b3c;
+  --cor-sucesso-claro: #e6f4ea;
+  --cor-alerta: #9a3d00;
+  --cor-alerta-claro: #ffeddd;
+
+  /* Foco */
+  --foco-contorno: 2px solid var(--cor-dourado-500);
+  --foco-anel-interno: 0 0 0 2px var(--cor-azul-900);
+  --foco-sombra: 0 0 0 3px rgba(200, 153, 63, 0.35);
+
+  /* Raios */
+  --raio-card: 18px;
+  --raio-linha: 14px;
+  --raio-item-menu: 12px;
+  --raio-campo: 10px;
+  --raio-etiqueta: 6px;
+  --raio-pilula: 999px;
+
+  /* Sombras */
+  --sombra-card: 0 1px 2px rgba(10, 31, 77, 0.04);
+  --sombra-dialogo: 0 24px 64px rgba(10, 31, 77, 0.24);
+
+  /* Tipografia */
+  --fonte-titulo: "Poppins", "Inter", system-ui, sans-serif;
+  --fonte-texto: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tamanho-h1: 34px;
+  --tamanho-numero: 48px;
+  --tamanho-texto: 15px;
+  --tamanho-texto-pequeno: 14px;
+  --tamanho-rotulo: 13.5px;
+  --tamanho-caixa-alta: 12px;
+  --espacamento-titulo: -0.02em;
+  --espacamento-caixa-alta: 0.14em;
+
+  /* Medidas */
+  --alvo-minimo: 44px;
+  --altura-campo: 48px;
+  --altura-botao-grande: 52px;
+  --largura-menu: 280px;
+}

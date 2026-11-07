@@ -1,0 +1,95 @@
+.etiqueta {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: var(--raio-etiqueta);
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.neutro {
+  background: var(--cor-trilho);
+  color: var(--cor-texto-forte);
+}
+
+.azul {
+  background: var(--cor-azul-claro);
+  color: var(--cor-azul-900);
+}
+
+.dourado {
+  background: var(--cor-dourado-claro);
+  color: var(--cor-dourado-700);
+}
+
+.sucesso {
+  background: var(--cor-sucesso-claro);
+  color: var(--cor-sucesso);
+}
+
+.alerta {
+  background: var(--cor-alerta-claro);
+  color: var(--cor-alerta);
+}
+
+.perigo {
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--cor-borda-suave);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie-suave);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto);
+  white-space: nowrap;
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.ponto_neutro {
+  background: var(--cor-texto-muted);
+}
+
+.ponto_azul {
+  background: var(--cor-azul-900);
+}
+
+.ponto_dourado {
+  background: var(--cor-dourado-500);
+}
+
+.ponto_sucesso {
+  background: var(--cor-sucesso);
+}
+
+.ponto_alerta {
+  background: var(--cor-alerta);
+}
+
+.ponto_perigo {
+  background: var(--cor-perigo);
+}
+
+@media print {
+  .etiqueta,
+  .pilula {
+    border: 1px solid #000000;
+    background: none;
+    color: #000000;
+  }
+}

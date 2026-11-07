@@ -1,0 +1,86 @@
+.catalogo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 44px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apoio {
+  font-size: var(--tamanho-texto-pequeno);
+  color: var(--cor-texto-muted);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tituloSecao {
+  font-family: var(--fonte-texto);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.pilha {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fundoEscuro {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 24px;
+  border-radius: var(--raio-card);
+  background: var(--cor-azul-900);
+}
+
+.cores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.amostra {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-campo);
+}
+
+@media (max-width: 640px) {
+  .catalogo {
+    padding: 24px 16px 48px;
+  }
+}
