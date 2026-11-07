@@ -1,4 +1,6 @@
 .campo {
+  /* Bloco de contenção do rótulo `.somente-leitor`: sem ele, escapa da rolagem e alonga a página */
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

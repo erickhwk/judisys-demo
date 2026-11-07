@@ -6,7 +6,7 @@ import { useId, useState } from 'react'
 import { useServico } from '../../dados/contexto'
 import { instalarAgc, marcarClasse, motivoSemInstalacao } from '../../dados/servicos/agc'
 import { formatarData, formatarMoeda } from '../../regras/datas'
-import { formatarCentesimos, rotuloClasse } from '../../regras/qgc'
+import { rotuloClasse } from '../../regras/qgc'
 import {
   type Convocacao,
   type InstalacaoClasse,
@@ -20,21 +20,13 @@ import { Selo, type TomSelo } from '../../ui/Selo'
 import { Tabela } from '../../ui/Tabela'
 import { mensagemDeErro } from '../credores/erros'
 import { plural } from '../processos/rotulos'
-import type { Agc } from './agc'
+import { type Agc, percentualDe } from './agc'
 import estilos from './agc.module.css'
 
 const SITUACOES: Record<SituacaoInstalacaoClasse, { rotulo: string; tom: TomSelo }> = {
   atinge: { rotulo: 'Acima de 50%', tom: 'sucesso' },
   'nao-atinge': { rotulo: 'Não passa de 50%', tom: 'alerta' },
   'sem-credores': { rotulo: 'Sem credores', tom: 'neutro' },
-}
-
-/** Percentual do valor votante presente, truncado em centésimos (50,004% não vira 50,01%). */
-function percentual(classe: InstalacaoClasse): string {
-  if (classe.valorTotal === 0) return '—'
-  // Em BigInt: centavos × 10.000 passa do inteiro seguro em classes de bilhões.
-  const centesimos = (BigInt(classe.valorPresente) * BigInt(10000)) / BigInt(classe.valorTotal)
-  return `${formatarCentesimos(Number(centesimos))}%`
 }
 
 export function PainelInstalacao({
@@ -157,7 +149,8 @@ export function PainelInstalacao({
             largura: '150px',
             alinhar: 'direita',
             numerica: true,
-            celula: percentual,
+            // Truncado em centésimos (50,004% não vira 50,01%).
+            celula: (linha) => percentualDe(linha.valorPresente, linha.valorTotal),
           },
           {
             chave: 'situacao',

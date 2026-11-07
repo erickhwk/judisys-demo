@@ -1,8 +1,8 @@
-// Tela da AGC (#/processos/:id/agc/:agcId, RF-31 a RF-33): dados da AGC, aviso de simulação para
-// data futura (AGC-01), painel de instalação e lista de presença. A mesa de votação, o painel do
-// art. 45, o cram down e o registro do resultado (DMO-17) entram na seção reservada no fim.
-import { Construction, Pencil, TriangleAlert } from 'lucide-react'
-import { useId, useMemo, useState } from 'react'
+// Tela da AGC (#/processos/:id/agc/:agcId, RF-31 a RF-37): dados da AGC, aviso de simulação para
+// data futura (AGC-01), painel de instalação, lista de presença e, no fim, a votação: mesa, painel
+// do art. 45, cram down e registro do resultado (DMO-17).
+import { Pencil, TriangleAlert } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router'
 import { formatarData } from '../../regras/datas'
 import { pode } from '../../regras/permissoes'
@@ -12,7 +12,6 @@ import { Botao } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
-import { Vazio } from '../../ui/Vazio'
 import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import { useCredoresDoProcesso, useProcesso } from '../credores/consultas'
 import { useSessao } from '../entrada/sessao'
@@ -28,7 +27,9 @@ import estilos from './agc.module.css'
 import { useAgc, usePresentes } from './consultas'
 import { DialogoAgc } from './DialogoAgc'
 import { ListaPresenca } from './ListaPresenca'
+import { linhasDaMesa } from './mesa'
 import { PainelInstalacao } from './PainelInstalacao'
+import { SecaoVotacao } from './SecaoVotacao'
 
 type Processo = { id: string; apelido: string }
 
@@ -52,15 +53,19 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
   const podeEditar = sessao ? pode(sessao.papel, 'editar', 'agc') : false
   const editavel = podeEditar && agc.status === 'agendada'
   const [editando, setEditando] = useState(false)
-  const idVotacao = useId()
   const credores = useCredoresDoProcesso(processo.id)
   const presentes = usePresentes(agc.id)
   const dataDeHoje = hoje()
 
   const votantes = useMemo(() => credoresVotantes(credores.data ?? []), [credores.data])
+  const conjuntoPresentes = useMemo(() => presentes.data ?? new Set<string>(), [presentes.data])
   const linhas = useMemo(
-    () => linhasDePresenca(credores.data ?? [], presentes.data ?? new Set()),
-    [credores.data, presentes.data],
+    () => linhasDePresenca(credores.data ?? [], conjuntoPresentes),
+    [credores.data, conjuntoPresentes],
+  )
+  const linhasMesa = useMemo(
+    () => linhasDaMesa(credores.data ?? [], votantes, conjuntoPresentes),
+    [credores.data, votantes, conjuntoPresentes],
   )
   const aba = `/processos/${processo.id}/agc`
   const situacao = SITUACOES_AGC[agc.status]
@@ -118,27 +123,20 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
           <PainelInstalacao
             agc={agc}
             votantes={votantes}
-            presentes={presentes.data ?? new Set()}
+            presentes={conjuntoPresentes}
             convocacaoInicial={convocacaoSugerida(agc, dataDeHoje)}
             editavel={editavel}
           />
           <ListaPresenca agc={agc} linhas={linhas} editavel={editavel} />
+          <SecaoVotacao
+            agc={agc}
+            linhas={linhasMesa}
+            votantes={votantes}
+            presentes={conjuntoPresentes}
+            podeEditar={podeEditar}
+          />
         </>
       )}
-
-      {/* Reservado para a DMO-17: mesa de votação, painel do art. 45, cram down e registro. */}
-      <section className={estilos.secao} aria-labelledby={idVotacao}>
-        <h2 id={idVotacao} className={estilos.tituloSecao}>
-          Votação
-        </h2>
-        <div className={estilos.cartao}>
-          <Vazio
-            icone={<Construction size={24} />}
-            titulo="Mesa de votação em construção"
-            descricao="Votos, painel do art. 45, cram down e registro do resultado chegam numa próxima etapa da demo."
-          />
-        </div>
-      </section>
 
       {editavel && (
         <DialogoAgc
