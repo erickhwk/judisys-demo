@@ -236,7 +236,7 @@ function dependencias(parciais: Partial<DependenciasCarga>): DependenciasCarga {
     hoje: hojeDoRelogio,
     baixar: baixarDoSite,
     localStorage: localStorageDoNavegador,
-    banco: parciais.banco ?? bancoDexie(),
+    banco: bancoDexie(),
     ...parciais,
   }
 }
