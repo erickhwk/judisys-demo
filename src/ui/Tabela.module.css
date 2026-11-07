@@ -20,6 +20,8 @@
 }
 
 .rolagem {
+  /* Bloco de contenção dos `.somente-leitor` das células: sem ele, escapam da rolagem e alargam a página */
+  position: relative;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }

@@ -212,3 +212,13 @@ test('LOG-03 · registro excluído: "Registro não existe mais", sem erro', asyn
   await expect(page.getByRole('link', { name: 'Abrir usuário' })).toHaveCount(0)
   expect(erros).toEqual([])
 })
+
+test('logs no celular (390px): a tabela rola por dentro, sem rolagem horizontal da página', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await entrarComo(page, /Entrar como Advogado/)
+  await page.goto('./#/logs')
+  await expect(logs(page)).toHaveCount(50)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+})
