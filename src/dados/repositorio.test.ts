@@ -271,6 +271,12 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
       expect(vazia).toEqual({ itens: [], total: 0, pagina: 1, paginas: 1 })
     })
 
+    it('página ou porPagina inválidos (NaN) valem o padrão', async () => {
+      const pagina = await repo().listar({ pagina: Number.NaN, porPagina: Number.NaN })
+      expect(pagina).toMatchObject({ pagina: 1, paginas: 2, total: CREDORES_RJ + 1 })
+      expect(pagina.itens).toHaveLength(50)
+    })
+
     it('porPagina customizado', async () => {
       const pagina = await repo().listar({ porPagina: 10, pagina: 3 })
       expect(pagina).toMatchObject({ total: CREDORES_RJ + 1, paginas: 6, pagina: 3 })

@@ -279,10 +279,12 @@ export function criarRepositorio<K extends Tabela>(
   return {
     async listar(filtro = {}) {
       const { pagina = 1, porPagina = POR_PAGINA, ...resto } = filtro
-      const tamanho = Math.max(1, Math.floor(porPagina))
+      // Número inválido (ex.: `Number('abc')` vindo da URL) vale o padrão.
+      const tamanho = Number.isFinite(porPagina) ? Math.max(1, Math.floor(porPagina)) : POR_PAGINA
       const todos = await filtrar(resto)
       const paginas = Math.max(1, Math.ceil(todos.length / tamanho))
-      const atual = Math.min(Math.max(1, Math.floor(pagina)), paginas)
+      const pedida = Number.isFinite(pagina) ? Math.floor(pagina) : 1
+      const atual = Math.min(Math.max(1, pedida), paginas)
       return {
         itens: todos.slice((atual - 1) * tamanho, atual * tamanho),
         total: todos.length,
