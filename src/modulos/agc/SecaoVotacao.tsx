@@ -45,6 +45,10 @@ export function SecaoVotacao({
   const votosGravados = useVotos(agc.id)
   // Id da ata criada nesta visita, para o link depois do registro.
   const [ataId, setAtaId] = useState<string | null>(null)
+  const votosDaMesa = useMemo(
+    () => mapaDeVotos(votosGravados.data ?? [], linhas),
+    [votosGravados.data, linhas],
+  )
 
   let conteudo: ReactNode
   if (votosGravados.isError) {
@@ -58,7 +62,7 @@ export function SecaoVotacao({
         linhas={linhas}
         votantes={votantes}
         presentes={presentes}
-        votos={mapaDeVotos(votosGravados.data ?? [], linhas)}
+        votos={votosDaMesa}
         ataId={ataId}
       />
     )
@@ -69,7 +73,7 @@ export function SecaoVotacao({
         linhas={linhas}
         votantes={votantes}
         presentes={presentes}
-        votosIniciais={mapaDeVotos(votosGravados.data ?? [], linhas)}
+        votosIniciais={votosDaMesa}
         podeEditar={podeEditar}
         aoRegistrar={setAtaId}
       />
@@ -104,7 +108,13 @@ function Aberta({
   aoRegistrar: (ataId: string) => void
 }) {
   const idMotivo = useId()
-  const [votos, setVotos] = useState<ReadonlyMap<string, OpcaoVoto>>(votosIniciais)
+  const [votosLancados, setVotos] = useState<ReadonlyMap<string, OpcaoVoto>>(votosIniciais)
+  // Só valem os votos de quem está na mesa: com a AGC agendada, desmarcar um presente tira a linha,
+  // mas o voto dele continuaria no estado e iria para o registro.
+  const votos = useMemo(
+    () => mapaDeVotos(listaDeVotos(votosLancados), linhas),
+    [votosLancados, linhas],
+  )
   const [avisoCenario, setAvisoCenario] = useState<string | null>(null)
   const [confirmando, setConfirmando] = useState(false)
   const [ocupado, setOcupado] = useState(false)
