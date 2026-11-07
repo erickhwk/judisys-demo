@@ -75,6 +75,15 @@ describe('variacao', () => {
     expect(formatarVariacao(v.ajParaQgc)).toBe('+0,01%')
   })
 
+  it('arredondamento simétrico em ,5 para aumento e redução', () => {
+    expect(formatarVariacao(variacao({ valorDevedor: 20000, valorAj: 20001 }).devedorParaAj)).toBe(
+      '+0,01%',
+    )
+    expect(formatarVariacao(variacao({ valorDevedor: 20000, valorAj: 19999 }).devedorParaAj)).toBe(
+      '-0,01%',
+    )
+  })
+
   it('sem mudança: 0,00%; devedor zero: diferença sem percentual', () => {
     expect(formatarVariacao(variacao({ valorDevedor: 500, valorAj: 500 }).devedorParaAj)).toBe(
       '0,00%',

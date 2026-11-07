@@ -198,7 +198,9 @@ function variacaoEntre(de: number, para: number): Variacao {
  * de fronteira (votação, instalação) usam produtos inteiros em `votacao.ts`.
  */
 function razaoEmCentesimos(parte: number, todo: number): number {
-  return Math.round((parte / todo) * 10000)
+  // Arredonda pela magnitude, para que +x% e -x% saiam simétricos (Math.round puxa .5 para cima).
+  const razao = (parte / todo) * 10000
+  return Math.sign(razao) * Math.round(Math.abs(razao)) || 0
 }
 
 /** `+20,00%`, `-5,50%`, `0,00%`; `—` sem variação calculável. */
