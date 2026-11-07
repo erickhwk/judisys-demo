@@ -112,6 +112,26 @@ test('CNPJ inválido recusado; empresa válida criada e excluída', async ({ pag
   await expect(page.getByText('Nenhuma empresa encontrada')).toBeVisible()
 })
 
+test('AJ-03 · CNPJ de outra empresa recusado, com o erro no campo', async ({ page }) => {
+  await entrarComo(page, /Entrar como Administrador/)
+  await abrirEmpresas(page)
+  await page.getByRole('button', { name: 'Nova empresa' }).click()
+  await expect(page.getByRole('heading', { name: 'Nova empresa', level: 1 })).toBeVisible()
+
+  await page.getByLabel('Razão social').fill('Arara Vermelha Comércio Ltda.')
+  // CNPJ da Lontra Azul Alimentos, sem pontuação.
+  await page.getByLabel('CNPJ').fill('26682973000141')
+  await page.getByLabel('Cidade').fill('Sorocaba')
+  await page.getByLabel('UF').selectOption('SP')
+  await page.getByRole('button', { name: 'Salvar' }).click()
+
+  await expect(page.getByLabel('CNPJ')).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.getByText('Já existe empresa com este CNPJ')).toBeVisible()
+  await expect(page).toHaveURL(/#\/empresas\/novo$/)
+  await abrirEmpresas(page)
+  await expect(page.getByText('40 empresas cadastradas')).toBeVisible()
+})
+
 test('T-23 · empresa sem processo excluída pelo formulário volta à lista', async ({ page }) => {
   await entrarComo(page, /Entrar como Administrador/)
   await page.goto('./#/empresas/novo')
