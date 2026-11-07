@@ -203,7 +203,7 @@ Valores monetários em centavos (inteiros), para os totais não acumularem erro 
 
 ### 7.10 Busca global
 
-- **RF-38** Atalho **Ctrl/⌘+K** e ícone no topo. Busca processos (apelido, número CNJ), empresas (razão social, CNPJ) e credores (nome, CPF/CNPJ); resultados agrupados por tipo, até 5 por grupo, navegação por teclado. A busca ignora acentos, maiúsculas e pontuação de documentos.
+- **RF-38** Atalho **Ctrl/⌘+K** e ícone no topo. Busca processos (apelido, número CNJ), empresas (razão social, nome fantasia, CNPJ) e credores (nome, CPF/CNPJ); resultados agrupados por tipo, até 5 por grupo, navegação por teclado. A busca ignora acentos, maiúsculas e pontuação de documentos.
 
 ### 7.11 Usuários e permissões
 
