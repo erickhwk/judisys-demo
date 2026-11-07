@@ -4,6 +4,7 @@
 import type { ReactNode } from 'react'
 import { TelaCredor, TelaQgc } from './modulos/credores'
 import { ListaEmpresas, NovaEmpresa, TelaEmpresa } from './modulos/empresas'
+import { ListaInformes, NovoInforme, TelaInforme } from './modulos/informes'
 import { TelaLogs } from './modulos/logs'
 import { Agenda } from './modulos/prazos/Agenda'
 import {
@@ -46,9 +47,9 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/empresas', 'ler', 'empresas', <ListaEmpresas />),
   rota('/empresas/novo', 'editar', 'empresas', <NovaEmpresa />),
   rota('/empresas/:id', 'ler', 'empresas', <TelaEmpresa />),
-  rota('/informes', 'ler', 'informes', <EmConstrucao titulo="Informes" />),
-  rota('/informes/novo', 'editar', 'informes', <EmConstrucao titulo="Novo informe" />),
-  rota('/informes/:id', 'ler', 'informes', <EmConstrucao titulo="Informe" />),
+  rota('/informes', 'ler', 'informes', <ListaInformes />),
+  rota('/informes/novo', 'editar', 'informes', <NovoInforme />),
+  rota('/informes/:id', 'ler', 'informes', <TelaInforme />),
   rota('/agenda', 'ler', 'prazos', <Agenda />),
   rota('/usuarios', 'ler', 'usuarios', <TelaUsuarios />),
   rota('/logs', 'ler', 'logs', <TelaLogs />),
