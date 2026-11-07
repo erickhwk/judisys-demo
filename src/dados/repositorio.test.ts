@@ -8,10 +8,11 @@ import {
   cpfDoCredor,
   ESCRITORIO_ID,
 } from '../../tests/fixtures/seed-mini'
-import { formatarCnj, formatarCpf } from '../regras/documentos'
+import { completarCnpj, formatarCnj, formatarCnpj, formatarCpf } from '../regras/documentos'
 import type { Papel } from '../regras/permissoes'
 import type { Armazenamento } from './armazenamento'
 import {
+  COLECOES,
   type ContextoGravacao,
   criarRepositorio,
   ErroNaoEncontrado,
@@ -195,6 +196,85 @@ describe.each(IMPLEMENTACOES)('repositório sobre %s', (_nome, criar) => {
       const prazos = criarRepositorio(armazenamento, 'prazos', contexto())
       await expect(prazos.excluir('nao-existe')).rejects.toBeInstanceOf(ErroNaoEncontrado)
       expect(await logsNovos()).toEqual([])
+    })
+  })
+
+  describe('unicidade (AJ-03)', () => {
+    const NOVA_EMPRESA: Novo<Tipos['empresas']> = {
+      razaoSocial: 'Arara Vermelha Comércio Ltda.',
+      nomeFantasia: 'Arara',
+      cnpj: completarCnpj('778889990001'),
+      porte: 'me',
+      cidade: 'Sorocaba',
+      uf: 'SP',
+      cnae: '',
+    }
+    const cnpjDe = async (id: string) =>
+      (await armazenamento.get<Tipos['empresas']>('empresas', id))?.cnpj ?? ''
+
+    it('AJ-03 · criar empresa com CNPJ de outra (com pontuação): recusado no campo, nada gravado', async () => {
+      const empresas = criarRepositorio(armazenamento, 'empresas', contexto())
+      const erro = await empresas
+        .criar({ ...NOVA_EMPRESA, cnpj: formatarCnpj(await cnpjDe('emp-01')) })
+        .catch((e: unknown) => e)
+      expect(erro).toBeInstanceOf(ErroValidacao)
+      expect((erro as ErroValidacao).problemas).toEqual([
+        { campo: 'cnpj', mensagem: 'Já existe empresa com este CNPJ' },
+      ])
+      expect(await empresas.todos({ onde: { razaoSocial: NOVA_EMPRESA.razaoSocial } })).toEqual([])
+      expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-03 · criar empresa com CNPJ novo continua permitido', async () => {
+      const empresas = criarRepositorio(armazenamento, 'empresas', contexto())
+      const criada = await empresas.criar(NOVA_EMPRESA)
+      expect(criada.cnpj).toBe(NOVA_EMPRESA.cnpj)
+    })
+
+    it('AJ-03 · editar empresa para o CNPJ de outra: recusado no campo, nada gravado', async () => {
+      const empresas = criarRepositorio(armazenamento, 'empresas', contexto())
+      const antes = await empresas.buscar('emp-02')
+      const erro = await empresas
+        .atualizar('emp-02', { cnpj: await cnpjDe('emp-01'), cidade: 'Itu' })
+        .catch((e: unknown) => e)
+      expect(erro).toBeInstanceOf(ErroValidacao)
+      expect((erro as ErroValidacao).problemas).toEqual([
+        { campo: 'cnpj', mensagem: 'Já existe empresa com este CNPJ' },
+      ])
+      expect(await empresas.buscar('emp-02')).toEqual(antes)
+      expect(await logsNovos()).toEqual([])
+    })
+
+    it('AJ-03 · editar a própria empresa sem mudar o CNPJ continua permitido', async () => {
+      const empresas = criarRepositorio(armazenamento, 'empresas', contexto())
+      const cnpj = await cnpjDe('emp-01')
+      const atualizada = await empresas.atualizar('emp-01', {
+        cnpj: formatarCnpj(cnpj),
+        cidade: 'Jundiaí',
+      })
+      expect(atualizada).toMatchObject({ cnpj, cidade: 'Jundiaí' })
+    })
+
+    it('escopo: o mesmo valor só conflita dentro do escopo', async () => {
+      const config = COLECOES.credores
+      const original = config.unicos
+      config.unicos = [{ campo: 'documento', escopo: 'processoId', mensagem: 'Repetido' }]
+      try {
+        const credores = criarRepositorio(armazenamento, 'credores', contexto())
+        const documento = (await credores.buscar('crd-0001'))?.documento ?? ''
+        const erro = await credores.criar({ ...NOVO_CREDOR, documento }).catch((e: unknown) => e)
+        expect((erro as ErroValidacao).problemas).toEqual([
+          { campo: 'documento', mensagem: 'Repetido' },
+        ])
+        const outroProcesso = await credores.criar({
+          ...NOVO_CREDOR,
+          processoId: 'prc-002',
+          documento,
+        })
+        expect(outroProcesso.documento).toBe(documento)
+      } finally {
+        config.unicos = original
+      }
     })
   })
 

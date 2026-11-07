@@ -6,6 +6,7 @@
 import type { z } from 'zod'
 import type { Carimbo } from '../regras/datas'
 import { diferencas, type Mudanca } from '../regras/diff'
+import { somenteDigitos } from '../regras/documentos'
 import { normalizar } from '../regras/normalizar'
 import { type Modulo, type Papel, pode } from '../regras/permissoes'
 import { type Armazenamento, compararIds, type Id, indicesDe, type Tabela } from './armazenamento'
@@ -106,12 +107,37 @@ interface ConfigColecao {
    * (SDD §5.4); `arquivos` é o conteúdo do anexo, registrado no log do informe.
    */
   log: boolean
+  /** Campos que não se repetem na coleção (AJ-03); gravação que repete vira `ErroValidacao`. */
+  unicos?: Unicidade[]
+}
+
+/** Um campo único na coleção, ou dentro de um escopo (ex.: por `processoId`). */
+export interface Unicidade {
+  /** Caminho com pontos; valor vazio não é comparado. */
+  campo: string
+  /** Campo que delimita a unicidade: só conflitam registros com o mesmo valor nele. */
+  escopo?: string
+  /** Forma comparada; padrão `String(valor)`. Documentos usam `somenteDigitos`. */
+  chave?: (valor: unknown) => string
+  /** Vai para o campo no `ErroValidacao`. */
+  mensagem: string
 }
 
 export const COLECOES: Record<Tabela, ConfigColecao> = {
   escritorios: { modulo: 'usuarios', busca: ['nome'], log: true },
   usuarios: { modulo: 'usuarios', busca: ['nome', 'email'], log: true },
-  empresas: { modulo: 'empresas', busca: ['razaoSocial', 'nomeFantasia', 'cnpj'], log: true },
+  empresas: {
+    modulo: 'empresas',
+    busca: ['razaoSocial', 'nomeFantasia', 'cnpj'],
+    log: true,
+    unicos: [
+      {
+        campo: 'cnpj',
+        chave: (valor) => somenteDigitos(String(valor)),
+        mensagem: 'Já existe empresa com este CNPJ',
+      },
+    ],
+  },
   processos: { modulo: 'processos', busca: ['apelido', 'numeroCnj'], log: true },
   processoEmpresas: { modulo: 'processos', busca: [], log: false },
   marcosDeFase: { modulo: 'processos', busca: [], log: true },
@@ -240,6 +266,33 @@ export function criarRepositorio<K extends Tabela>(
     return resultado.data
   }
 
+  /** Recusa o registro que repete um campo único de outro da coleção (AJ-03). */
+  async function exigirUnicidade(linha: Linha): Promise<void> {
+    for (const { campo, escopo, chave = String, mensagem } of config.unicos ?? []) {
+      const valor = valorEm(linha, campo)
+      if (valor === undefined || valor === null) continue
+      const procurada = chave(valor)
+      if (!procurada) continue
+      const valorDoEscopo = escopo === undefined ? undefined : valorEm(linha, escopo)
+      // O índice casa o valor como gravado (já passado pelo schema); a comparação usa a chave.
+      const vizinhos =
+        !campo.includes('.') && indicesDe(tabela).includes(campo) && ehChaveSimples(valor)
+          ? await armazenamento.porIndice<Linha>(tabela, campo, valor)
+          : await armazenamento.todos<Linha>(tabela)
+      const repetido = vizinhos.some((outra) => {
+        if (outra.id === linha.id) return false
+        if (escopo !== undefined && valorEm(outra, escopo) !== valorDoEscopo) return false
+        const valorOutro = valorEm(outra, campo)
+        return valorOutro !== undefined && valorOutro !== null && chave(valorOutro) === procurada
+      })
+      if (repetido) {
+        throw new ErroValidacao([
+          { code: 'custom', path: campo.split('.'), message: mensagem, input: valor },
+        ])
+      }
+    }
+  }
+
   async function processoDoLog(linha: Linha): Promise<Id | undefined> {
     if (tabela === 'processos') return linha.id as Id
     if (typeof linha.processoId === 'string') return linha.processoId
@@ -311,6 +364,7 @@ export function criarRepositorio<K extends Tabela>(
       })
       const linha = registro as Linha
       await armazenamento.transacao(tabelasDaGravacao, async () => {
+        await exigirUnicidade(linha)
         await armazenamento.put(tabela, registro)
         await gravarLog('criou', linha, diferencas({}, semCamposDoRegistro(linha)), carimbo)
       })
@@ -334,6 +388,7 @@ export function criarRepositorio<K extends Tabela>(
         const diferencasDoRegistro = diferencas(antigo, novo as Linha)
         // Sem mudança, nada é gravado e não há log (LOG-02).
         if (diferencasDoRegistro.length === 0) return antigo as T
+        await exigirUnicidade(novo as Linha)
         await armazenamento.put(tabela, novo)
         await gravarLog('editou', novo as Linha, diferencasDoRegistro, carimbo)
         return novo
