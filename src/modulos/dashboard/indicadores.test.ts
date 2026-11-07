@@ -2,7 +2,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Tipos } from '../../dados/schemas'
 import {
-  atividadeRecente,
   funilPorFase,
   numerosDoTopo,
   passivoPorClasse,
@@ -212,7 +211,7 @@ describe('proximasAgcs (RF-10)', () => {
   })
 })
 
-describe('ultimosInformes e atividadeRecente (RF-10)', () => {
+describe('ultimosInformes (RF-10)', () => {
   it('informes do mais novo ao mais antigo, 5 no máximo', () => {
     const informes = [
       '2026-10-01',
@@ -241,27 +240,5 @@ describe('ultimosInformes e atividadeRecente (RF-10)', () => {
       '2026-10-01',
       '2026-09-01',
     ])
-  })
-
-  it('logs do mais novo ao mais antigo, 8 no máximo, mantendo a ordem recebida no empate', () => {
-    const logs = Array.from(
-      { length: 10 },
-      (_, i) =>
-        ({
-          ...base,
-          id: `log-${i}`,
-          usuarioId: 'usr-aj',
-          acao: 'editou',
-          colecao: 'credores',
-          registroId: 'c1',
-          mudancas: [],
-          data: i < 2 ? '2026-11-07T09:00:00' : `2026-11-0${(i % 6) + 1}T08:00:00`,
-        }) satisfies Tipos['logs'],
-    )
-    const recentes = atividadeRecente(logs)
-    expect(recentes).toHaveLength(8)
-    expect(recentes.slice(0, 2).map((l) => l.id)).toEqual(['log-0', 'log-1'])
-    const datas = recentes.map((l) => l.data)
-    expect(datas).toEqual([...datas].sort().reverse())
   })
 })

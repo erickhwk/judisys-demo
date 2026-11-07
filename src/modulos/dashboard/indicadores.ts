@@ -17,7 +17,6 @@ type Credor = Tipos['credores']
 type Prazo = Tipos['prazos']
 type Agc = Tipos['agcs']
 type Informe = Tipos['informes']
-type Log = Tipos['logs']
 
 /** Quantos itens cada lista mostra. Prazos: 8 (RF-10); as outras seguem o tamanho do guia. */
 export const LIMITE_PRAZOS = 8
@@ -118,10 +117,11 @@ export function passivoPorClasse(
 
 /** Os 8 prazos em aberto mais próximos: vencidos primeiro, depois por data (DSH-03). */
 export function proximosPrazos(prazos: readonly Prazo[], hoje: DataIso): Prazo[] {
-  const abertos = prazos.filter((p) => p.status === 'aberto')
-  const vencidos = abertos.filter((p) => p.vencimento < hoje).sort(compararPrazos)
-  const aVencer = abertos.filter((p) => p.vencimento >= hoje).sort(compararPrazos)
-  return [...vencidos, ...aVencer].slice(0, LIMITE_PRAZOS)
+  // Por vencimento, os vencidos (antes de hoje) já vêm na frente.
+  return prazos
+    .filter((p) => noPeriodo(p, 'abertos', hoje))
+    .sort(compararPrazos)
+    .slice(0, LIMITE_PRAZOS)
 }
 
 export interface ProximaAgc {
@@ -153,9 +153,4 @@ export function ultimosInformes(informes: readonly Informe[]): Informe[] {
   return [...informes]
     .sort((a, b) => b.data.localeCompare(a.data) || b.criadoEm.localeCompare(a.criadoEm))
     .slice(0, LIMITE_INFORMES)
-}
-
-/** Logs mais novos; no mesmo carimbo fica a ordem recebida (a do repositório, como nos logs). */
-export function atividadeRecente(logs: readonly Log[]): Log[] {
-  return [...logs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, LIMITE_ATIVIDADE)
 }

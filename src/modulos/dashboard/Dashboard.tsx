@@ -16,7 +16,7 @@ import {
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import type { Id } from '../../dados/armazenamento'
-import { useRepo, useTodos } from '../../dados/contexto'
+import { useListar, useRepo, useTodos } from '../../dados/contexto'
 import { COLECOES, type Repositorio } from '../../dados/repositorio'
 import { CATEGORIAS_INFORME, type Log, type Registro } from '../../dados/schemas'
 import { formatarData, formatarDataHora, formatarMoeda } from '../../regras/datas'
@@ -36,13 +36,14 @@ import {
 } from '../logs/consulta'
 import { rotuloSituacao, TOM_SITUACAO } from '../prazos/regras'
 import { ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
+import { ROTULOS_TIPO } from '../processos/rotulos'
 import estilos from './dashboard.module.css'
 import { formatarMoedaCurta } from './formato'
 import { GraficoPassivo } from './GraficoPassivo'
 import {
-  atividadeRecente,
   type EtapaDoFunil,
   funilPorFase,
+  LIMITE_ATIVIDADE,
   numerosDoTopo,
   passivoPorClasse,
   proximasAgcs,
@@ -50,12 +51,11 @@ import {
   ultimosInformes,
 } from './indicadores'
 
-const LOGS_MAIS_NOVOS = { ordem: { campo: 'data', direcao: 'desc' } } as const
-
-const ROTULOS_TIPO: Record<TipoProcesso, string> = {
-  rj: 'Recuperação judicial',
-  falencia: 'Falência',
-}
+/** Só os logs mostrados, do mais novo ao mais antigo (a ordem do repositório, como na TelaLogs). */
+const LOGS_RECENTES = {
+  ordem: { campo: 'data', direcao: 'desc' },
+  porPagina: LIMITE_ATIVIDADE,
+} as const
 
 export function Dashboard() {
   const hoje = hojeDoRelogio()
@@ -67,11 +67,11 @@ export function Dashboard() {
   const prazos = useTodos('prazos')
   const agcs = useTodos('agcs')
   const informes = useTodos('informes')
-  const logs = useTodos('logs', LOGS_MAIS_NOVOS)
+  const logs = useListar('logs', LOGS_RECENTES)
   const usuarios = useTodos('usuarios')
 
   const consultas = [processos, credores, prazos, agcs, informes, logs, usuarios]
-  const recentes = logs.data ? atividadeRecente(logs.data) : []
+  const recentes = logs.data?.itens ?? []
   const registros = useRegistrosDosLogs(recentes)
 
   if (consultas.some((c) => c.isError)) {
