@@ -4,12 +4,13 @@
 import { createHash } from 'node:crypto'
 import { base, Faker, pt_BR } from '@faker-js/faker'
 import type { Tabela } from '../../src/dados/armazenamento'
+import { COLECOES } from '../../src/dados/repositorio'
 import { CAMPOS_REGISTRO, type CategoriaInforme, type Tipos } from '../../src/dados/schemas'
-import { type Carimbo, type DataIso, diasEntre } from '../../src/regras/datas'
+import { type Carimbo, type DataIso, somarDias } from '../../src/regras/datas'
 import { diferencas, type Mudanca } from '../../src/regras/diff'
 import { completarCnj, completarCnpj, completarCpf } from '../../src/regras/documentos'
 import { ehFaseFinal, type Fase, fasesSeguintes, validarDataDoMarco } from '../../src/regras/fases'
-import { type Modulo, pode } from '../../src/regras/permissoes'
+import { pode } from '../../src/regras/permissoes'
 import {
   type NovoPrazoAutomatico,
   novoRma,
@@ -55,20 +56,6 @@ export interface ArquivoSeed {
 /** Conteúdo de public/seed-versao.json (SDD §5.5, passo 2). */
 export interface ArquivoVersao {
   versao: string
-}
-
-/** Módulo de permissão de cada coleção com log (o mesmo de `COLECOES` em dados/repositorio.ts). */
-const MODULO_DA_TABELA: Partial<Record<Tabela, Modulo>> = {
-  empresas: 'empresas',
-  processos: 'processos',
-  marcosDeFase: 'processos',
-  prazos: 'prazos',
-  credores: 'credores',
-  pedidosDeCredito: 'credores',
-  agcs: 'agc',
-  presencas: 'agc',
-  votos: 'agc',
-  informes: 'informes',
 }
 
 const RAMOS = [
@@ -263,8 +250,8 @@ class Gerador {
 
   /** Usuário que grava na coleção: o responsável, se o papel permite, ou outro que possa. */
   private autor(tabela: Tabela, responsavelId?: string): string {
-    const modulo = MODULO_DA_TABELA[tabela]
-    const podem = USUARIOS.filter((u) => modulo !== undefined && pode(u.papel, 'editar', modulo))
+    const { modulo } = COLECOES[tabela]
+    const podem = USUARIOS.filter((u) => pode(u.papel, 'editar', modulo))
     const responsavel = podem.find((u) => u.id === responsavelId)
     if (responsavel && this.chance(0.5)) return responsavel.id
     return this.escolher(podem).id
@@ -591,7 +578,7 @@ class Gerador {
         return cumpridos
       }
       // Entregue dois dias antes do vencimento.
-      const entregue = this.noExpediente(dia(diasEntre(DATA_BASE, novo.vencimento) - 2))
+      const entregue = this.noExpediente(somarDias(novo.vencimento, -2))
       const prazo: Prazo = { ...this.registro(id, criadoEm, entregue), ...novo, status: 'cumprido' }
       this.tabelas.prazos.push(prazo)
       cumpridos.push(prazo)
@@ -627,7 +614,7 @@ class Gerador {
     if (edital !== undefined) {
       const quantidade = pendente ? 5 : 6
       for (let i = 0; i < quantidade; i++) {
-        const data = dia(diasEntre(DATA_BASE, edital) + 1 + ((i * 2) % 14))
+        const data = somarDias(edital, 1 + ((i * 2) % 14))
         const credor = this.escolher(credores.filter((c) => c.classe !== 'nao-sujeito'))
         const tipo = i % 3 === 2 ? 'habilitacao' : 'divergencia'
         const valorPedido = Math.round(credor.valorDevedor * (this.inteiro(105, 160) / 100))
@@ -663,7 +650,7 @@ class Gerador {
       const vitrine = especificacao.id === ID_VITRINE
       const quantidade = vitrine ? 3 : especificacao.relacoes === 'qgc' ? 4 : 2
       for (let i = 0; i < quantidade; i++) {
-        const data = dia(diasEntre(DATA_BASE, relacao) + 2 + i * 2)
+        const data = somarDias(relacao, 2 + i * 2)
         // Já decididas quando o QGC saiu ou o processo terminou; pendentes nos demais.
         const decididas = especificacao.relacoes === 'qgc' || ehFaseFinal(ultimaFase)
         const status = vitrine || !decididas ? 'pendente' : i % 2 === 0 ? 'acolhido' : 'rejeitado'
@@ -741,14 +728,12 @@ class Gerador {
     const votantes = credoresVotantes(credores)
     const presentes = this.presentes(votantes)
     const convocacao = instalacao(votantes, presentes, 1).instalada ? 1 : 2
-    const dataPrimeira =
-      convocacao === 1 ? marcoAgc.data : dia(diasEntre(DATA_BASE, marcoAgc.data) - 7)
-    const dataSegunda =
-      convocacao === 1 ? dia(diasEntre(DATA_BASE, marcoAgc.data) + 7) : marcoAgc.data
+    const dataPrimeira = convocacao === 1 ? marcoAgc.data : somarDias(marcoAgc.data, -7)
+    const dataSegunda = convocacao === 1 ? somarDias(marcoAgc.data, 7) : marcoAgc.data
     const votos = this.votos(votantes, presentes, especificacao.agc)
     const resultado = resultadoAgc(votantes, presentes, votos)
 
-    const criadoEm = this.noExpediente(dia(diasEntre(DATA_BASE, dataPrimeira) - 30))
+    const criadoEm = this.noExpediente(somarDias(dataPrimeira, -30))
     const encerradaEm = carimbo(marcoAgc.data, 17, 30)
     this.tabelas.agcs.push({
       ...this.registro(agcId, criadoEm, encerradaEm),
@@ -929,8 +914,7 @@ class Gerador {
     } else {
       const decretada = dataDe('decretada')
       novo('editais', 'Edital da sentença de falência (art. 99, parágrafo único)', decretada)
-      const relatorio =
-        decretada === undefined ? undefined : dia(diasEntre(DATA_BASE, decretada) + 38)
+      const relatorio = decretada === undefined ? undefined : somarDias(decretada, 38)
       if (relatorio !== undefined && relatorio < DATA_BASE) {
         novo(
           'relatorios',
@@ -1012,7 +996,9 @@ class Gerador {
     const processoDaAgc = new Map(this.tabelas.agcs.map((a) => [a.id, a.processoId]))
     const logs: Omit<Tipos['logs'], 'id' | 'escritorioId' | 'criadoEm' | 'atualizadoEm'>[] = []
 
-    for (const tabela of Object.keys(MODULO_DA_TABELA) as Tabela[]) {
+    // Tabelas com log próprio, como no repositório (escritório e usuários caem fora da janela).
+    const comLog = (Object.keys(COLECOES) as Tabela[]).filter((tabela) => COLECOES[tabela].log)
+    for (const tabela of comLog) {
       for (const registro of this.tabelas[tabela] as Record<string, unknown>[]) {
         const criadoEm = registro.criadoEm as Carimbo
         if (!naJanela(criadoEm)) continue

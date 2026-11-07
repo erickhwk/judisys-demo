@@ -3,11 +3,12 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Tabela } from '../../src/dados/armazenamento'
+import { COLECOES } from '../../src/dados/repositorio'
 import { SCHEMAS, type Tipos } from '../../src/dados/schemas'
 import { type DataIso, diasEntre } from '../../src/regras/datas'
 import { validarCnj, validarCnpj, validarCpf } from '../../src/regras/documentos'
 import { ehFaseFinal, fasesDoTipo, fasesSeguintes } from '../../src/regras/fases'
-import { type Modulo, pode } from '../../src/regras/permissoes'
+import { pode } from '../../src/regras/permissoes'
 import { prazosDoMarco, situacao, TITULO_RMA } from '../../src/regras/prazos'
 import { CLASSES_RJ } from '../../src/regras/qgc'
 import { credoresVotantes, resultadoAgc } from '../../src/regras/votacao'
@@ -260,19 +261,6 @@ describe('SED-06 · um RMA aberto por RJ ativa (INV-05)', () => {
 })
 
 describe('SED-07 · logs coerentes', () => {
-  const MODULO: Partial<Record<Tabela, Modulo>> = {
-    empresas: 'empresas',
-    processos: 'processos',
-    marcosDeFase: 'processos',
-    prazos: 'prazos',
-    credores: 'credores',
-    pedidosDeCredito: 'credores',
-    agcs: 'agc',
-    presencas: 'agc',
-    votos: 'agc',
-    informes: 'informes',
-  }
-
   it('referenciam registros existentes e usuários do escritório com permissão', () => {
     const usuarios = porId(t.usuarios)
     const processos = porId(t.processos)
@@ -285,9 +273,9 @@ describe('SED-07 · logs coerentes', () => {
       if (log.processoId !== undefined) expect(processos.has(log.processoId)).toBe(true)
       const usuario = usuarios.get(log.usuarioId)
       expect(usuario?.escritorioId).toBe(t.escritorios[0]?.id)
-      const modulo = MODULO[log.colecao]
-      expect(modulo, log.colecao).toBeDefined()
-      if (usuario && modulo) expect(pode(usuario.papel, 'editar', modulo)).toBe(true)
+      const { modulo, log: temLog } = COLECOES[log.colecao]
+      expect(temLog, log.colecao).toBe(true)
+      if (usuario) expect(pode(usuario.papel, 'editar', modulo)).toBe(true)
     }
   })
 

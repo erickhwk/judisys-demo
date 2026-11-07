@@ -108,7 +108,7 @@ interface ConfigColecao {
   log: boolean
 }
 
-const COLECOES: Record<Tabela, ConfigColecao> = {
+export const COLECOES: Record<Tabela, ConfigColecao> = {
   escritorios: { modulo: 'usuarios', busca: ['nome'], log: true },
   usuarios: { modulo: 'usuarios', busca: ['nome', 'email'], log: true },
   empresas: { modulo: 'empresas', busca: ['razaoSocial', 'nomeFantasia', 'cnpj'], log: true },
