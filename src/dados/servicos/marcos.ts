@@ -4,9 +4,10 @@ import type { DataIso } from '../../regras/datas'
 import { type Fase, fasesSeguintes, validarDataDoMarco } from '../../regras/fases'
 import { prazosDoMarco } from '../../regras/prazos'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
-import { type ContextoGravacao, criarRepositorio, ErroNaoEncontrado } from '../repositorio'
+import { type ContextoGravacao, criarRepositorio } from '../repositorio'
 import type { Tipos } from '../schemas'
 import {
+  buscarOuFalhar,
   ErroRegra,
   ehRjAtiva,
   ehRma,
@@ -14,6 +15,7 @@ import {
   exigirPermissao,
   garantirRmaAberto,
   ordenarMarcos,
+  temRmaAberto,
 } from './comum'
 
 type Processo = Tipos['processos']
@@ -50,7 +52,7 @@ export function avancarFase(armazenamento: Armazenamento, contexto: ContextoGrav
   return async (processoId: Id, { fase, data }: Avanco): Promise<ResultadoAvanco> => {
     exigirPermissao(contexto, 'processos')
     return armazenamento.transacao(TABELAS_MARCOS, async () => {
-      const processo = await buscarProcesso(armazenamento, processoId)
+      const processo = await buscarOuFalhar(armazenamento, 'processos', processoId)
       if (!fasesSeguintes(processo.tipo, processo.faseAtual as Fase).includes(fase)) {
         throw erroDeCampo('fase', ERRO_FASE_INDISPONIVEL, fase)
       }
@@ -62,9 +64,9 @@ export function avancarFase(armazenamento: Armazenamento, contexto: ContextoGrav
       await repoProcessos.atualizar(processoId, { faseAtual: fase })
 
       const existentes = await armazenamento.porIndice<Prazo>('prazos', 'processoId', processoId)
-      const temRmaAberto = existentes.some((p) => ehRma(p) && p.status === 'aberto')
+      const jaTemRma = temRmaAberto(existentes)
       const novos = prazosDoMarco(processo, marco, [...marcos, marco]).filter(
-        (novo) => !(temRmaAberto && ehRma(novo)),
+        (novo) => !(jaTemRma && ehRma(novo)),
       )
       const prazos: Prazo[] = []
       for (const novo of novos) prazos.push(await repoPrazos.criar(novo))
@@ -117,17 +119,11 @@ export function desfazerMarco(armazenamento: Armazenamento, contexto: ContextoGr
   }
 }
 
-async function buscarProcesso(armazenamento: Armazenamento, processoId: Id): Promise<Processo> {
-  const processo = await armazenamento.get<Processo>('processos', processoId)
-  if (!processo) throw new ErroNaoEncontrado('processos', processoId)
-  return processo
-}
-
 async function planejarDesfazer(
   armazenamento: Armazenamento,
   processoId: Id,
 ): Promise<PlanoDesfazer> {
-  const processo = await buscarProcesso(armazenamento, processoId)
+  const processo = await buscarOuFalhar(armazenamento, 'processos', processoId)
   const marcos = ordenarMarcos(
     processo.tipo,
     await armazenamento.porIndice<Marco>('marcosDeFase', 'processoId', processoId),

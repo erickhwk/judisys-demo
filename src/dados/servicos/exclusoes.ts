@@ -1,9 +1,9 @@
 // Exclusões com cascata ou bloqueio (T-23). O `excluir` genérico do repositório apaga só o
 // registro; aqui ficam as regras de processo, empresa, credor e usuário, cada uma numa transação.
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
-import { type ContextoGravacao, criarRepositorio, ErroNaoEncontrado } from '../repositorio'
+import { type ContextoGravacao, criarRepositorio } from '../repositorio'
 import { CAMPOS_REGISTRO, type Tipos } from '../schemas'
-import { ErroRegra, exigirPermissao, gravarLogDireto, type Vinculo } from './comum'
+import { buscarOuFalhar, ErroRegra, exigirPermissao, gravarLogDireto, type Vinculo } from './comum'
 
 type Processo = Tipos['processos']
 
@@ -77,9 +77,7 @@ function contar(cascata: Cascata): ContagemCascata {
 /** O que sairia com o processo, para a confirmação (PRC-13). Só lê. */
 export function contarExclusaoProcesso(armazenamento: Armazenamento) {
   return async (processoId: Id): Promise<ContagemCascata> => {
-    if (!(await armazenamento.get('processos', processoId))) {
-      throw new ErroNaoEncontrado('processos', processoId)
-    }
+    await buscarOuFalhar(armazenamento, 'processos', processoId)
     return contar(await coletarCascata(armazenamento, processoId))
   }
 }
@@ -95,8 +93,7 @@ export function excluirProcesso(armazenamento: Armazenamento, contexto: Contexto
     exigirPermissao(contexto, 'processos')
     const carimbo = contexto.agora()
     return armazenamento.transacao(['processos', ...TABELAS_CASCATA, 'logs'], async () => {
-      const processo = await armazenamento.get<Processo>('processos', processoId)
-      if (!processo) throw new ErroNaoEncontrado('processos', processoId)
+      const processo = await buscarOuFalhar(armazenamento, 'processos', processoId)
       const cascata = await coletarCascata(armazenamento, processoId)
       for (const tabela of TABELAS_CASCATA) {
         for (const id of cascata[tabela]) await armazenamento.delete(tabela, id)
@@ -188,9 +185,7 @@ export function excluirCredor(armazenamento: Armazenamento, contexto: ContextoGr
   return async (credorId: Id): Promise<void> => {
     exigirPermissao(contexto, 'credores')
     await armazenamento.transacao(tabelas, async () => {
-      if (!(await armazenamento.get('credores', credorId))) {
-        throw new ErroNaoEncontrado('credores', credorId)
-      }
+      await buscarOuFalhar(armazenamento, 'credores', credorId)
       const presencas = await armazenamento.porIndice<Tipos['presencas']>(
         'presencas',
         'credorId',

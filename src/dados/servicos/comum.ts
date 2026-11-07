@@ -12,6 +12,7 @@ import type { Armazenamento, Id, Tabela } from '../armazenamento'
 import {
   type ContextoGravacao,
   criarRepositorio,
+  ErroNaoEncontrado,
   ErroPermissao,
   ErroValidacao,
 } from '../repositorio'
@@ -44,6 +45,17 @@ export function exigirPermissao(contexto: ContextoGravacao, modulo: Modulo): voi
 export function erroDeCampo(campo: string, mensagem: string, valor: unknown): ErroValidacao {
   const issue = { code: 'custom', message: mensagem, path: [campo], input: valor }
   return new ErroValidacao([issue as z.core.$ZodIssue])
+}
+
+/** Lê o registro ou lança `ErroNaoEncontrado`, como o repositório. */
+export async function buscarOuFalhar<K extends Tabela>(
+  armazenamento: Armazenamento,
+  tabela: K,
+  id: Id,
+): Promise<Tipos[K]> {
+  const registro = await armazenamento.get<Tipos[K]>(tabela, id)
+  if (!registro) throw new ErroNaoEncontrado(tabela, id)
+  return registro
 }
 
 /** Grava um log montado pelo serviço (validado pelo schema, como no repositório). */
@@ -95,6 +107,11 @@ export function ehRma(prazo: Pick<Tipos['prazos'], 'origem' | 'titulo'>): boolea
   return prazo.origem === 'automatico' && prazo.titulo === TITULO_RMA
 }
 
+/** A RJ já tem um RMA aberto (INV-05: no máximo um). */
+export function temRmaAberto(prazos: readonly Tipos['prazos'][]): boolean {
+  return prazos.some((prazo) => ehRma(prazo) && prazo.status === 'aberto')
+}
+
 /** RJ fora das fases finais: a que mantém um RMA aberto (INV-05). */
 export function ehRjAtiva(processo: Tipos['processos']): boolean {
   return processo.tipo === 'rj' && !ehFaseFinal(processo.faseAtual as Fase)
@@ -113,7 +130,7 @@ export async function garantirRmaAberto(
   marcoId: Id | undefined,
 ): Promise<Tipos['prazos'] | undefined> {
   const prazos = await armazenamento.porIndice<Tipos['prazos']>('prazos', 'processoId', processoId)
-  if (prazos.some((prazo) => ehRma(prazo) && prazo.status === 'aberto')) return undefined
+  if (temRmaAberto(prazos)) return undefined
   return criarRepositorio(armazenamento, 'prazos', contexto).criar(
     novoRma(processoId, dataReferencia, marcoId),
   )

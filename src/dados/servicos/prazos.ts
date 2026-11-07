@@ -1,9 +1,16 @@
 // Cumprir prazo (RF-22, PRZ-01 a PRZ-04, INV-05): marca como cumprido e, se for o RMA de uma RJ
 // ativa, cria o seguinte, numa transação.
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
-import { type ContextoGravacao, criarRepositorio, ErroNaoEncontrado } from '../repositorio'
+import { type ContextoGravacao, criarRepositorio } from '../repositorio'
 import type { Tipos } from '../schemas'
-import { ErroRegra, ehRjAtiva, ehRma, exigirPermissao, garantirRmaAberto } from './comum'
+import {
+  buscarOuFalhar,
+  ErroRegra,
+  ehRjAtiva,
+  ehRma,
+  exigirPermissao,
+  garantirRmaAberto,
+} from './comum'
 
 type Prazo = Tipos['prazos']
 
@@ -29,8 +36,7 @@ export function cumprirPrazo(armazenamento: Armazenamento, contexto: ContextoGra
   return async (prazoId: Id): Promise<ResultadoCumprimento> => {
     exigirPermissao(contexto, 'prazos')
     return armazenamento.transacao(TABELAS_PRAZOS, async () => {
-      const atual = await armazenamento.get<Prazo>('prazos', prazoId)
-      if (!atual) throw new ErroNaoEncontrado('prazos', prazoId)
+      const atual = await buscarOuFalhar(armazenamento, 'prazos', prazoId)
       if (atual.status === 'cumprido') throw new ErroRegra(ERRO_PRAZO_JA_CUMPRIDO)
       const prazo = await repoPrazos.atualizar(prazoId, { status: 'cumprido' })
       if (!ehRma(prazo)) return { prazo }
