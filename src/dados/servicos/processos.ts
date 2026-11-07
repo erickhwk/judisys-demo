@@ -55,7 +55,7 @@ export function criarProcesso(armazenamento: Armazenamento, contexto: ContextoGr
     exigirPermissao(contexto, 'processos')
     return armazenamento.transacao(TABELAS, async () => {
       const processo = await repoProcessos.criar({ ...dados, faseAtual: FASE_INICIAL[dados.tipo] })
-      await vincularEmpresas(armazenamento, contexto, processo.id, empresaIds)
+      await vincularEmpresas(armazenamento, contexto, processo.id, empresaIds, 'criou')
       const marco = await repoMarcos.criar({
         processoId: processo.id,
         fase: processo.faseAtual,
@@ -88,13 +88,16 @@ export function editarProcesso(armazenamento: Armazenamento, contexto: ContextoG
 
 /**
  * Deixa o processo ligado exatamente a `empresaIds`: cria os vínculos que faltam e remove os
- * que sobram. Se o conjunto mudou, grava no log do processo a mudança do campo `empresas`.
+ * que sobram. Se o conjunto mudou, grava no log do processo a mudança do campo `empresas`, com a
+ * ação de quem chama: 'criou' na criação (não parece uma edição que o usuário não fez), 'editou' na
+ * edição.
  */
 async function vincularEmpresas(
   armazenamento: Armazenamento,
   contexto: ContextoGravacao,
   processoId: Id,
   empresaIds: Id[],
+  acao: 'criou' | 'editou' = 'editou',
 ): Promise<void> {
   if (new Set(empresaIds).size !== empresaIds.length) {
     throw erroDeCampo('empresaIds', ERRO_EMPRESA_REPETIDA, empresaIds)
@@ -121,7 +124,7 @@ async function vincularEmpresas(
     armazenamento,
     contexto,
     {
-      acao: 'editou',
+      acao,
       colecao: 'processos',
       registroId: processoId,
       processoId,

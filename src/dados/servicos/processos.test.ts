@@ -112,12 +112,14 @@ describe.each(IMPLEMENTACOES)('serviços de processo sobre %s', (_nome, criar) =
         expect.arrayContaining([
           ['criou', 'processos'],
           ['criou', 'marcosDeFase'],
-          ['editou', 'processos'],
         ]),
       )
+      // As empresas da criação vão num log 'criou', não numa edição que o usuário não fez.
+      expect(logs.some((l) => l.acao === 'editou')).toBe(false)
       // processoEmpresas não tem log próprio: a mudança vai para o log do processo (SDD §5.4).
       expect(logs.some((l) => l.colecao === 'processoEmpresas')).toBe(false)
       const empresas = logs.find((l) => l.mudancas.some((m) => m.campo === CAMPO_EMPRESAS))
+      expect(empresas?.acao).toBe('criou')
       expect(empresas?.mudancas).toEqual([{ campo: CAMPO_EMPRESAS, de: [], para: ['emp-01'] }])
       expect(logs.every((l) => l.processoId === processo.id)).toBe(true)
     })
