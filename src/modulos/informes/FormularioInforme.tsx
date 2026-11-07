@@ -136,7 +136,14 @@ function Campos({
     const escolhidos = [...(evento.target.files ?? [])]
     const erros = escolhidos.map(erroDoArquivo)
     setErroArquivo(erros.find((erro) => erro !== null) ?? null)
-    setNovos((atuais) => [...atuais, ...escolhidos.filter((_, indice) => erros[indice] === null)])
+    // O mesmo arquivo escolhido de novo não entra duas vezes (nem vira dois uploads iguais).
+    setNovos((atuais) => {
+      const jaEscolhidos = new Set(atuais.map(chaveDoArquivo))
+      const aceitos = escolhidos.filter(
+        (arquivo, indice) => erros[indice] === null && !jaEscolhidos.has(chaveDoArquivo(arquivo)),
+      )
+      return [...atuais, ...aceitos]
+    })
     // Permite escolher o mesmo arquivo de novo depois de removê-lo.
     evento.target.value = ''
   }
@@ -286,7 +293,12 @@ function Campos({
                 onChange={escolherArquivos}
                 {...controle}
               />
-              <Botao icone={<Upload size={18} />} onClick={() => entradaArquivo.current?.click()}>
+              {/* O erro do arquivo é anunciado no botão, que é o que recebe o foco. */}
+              <Botao
+                icone={<Upload size={18} />}
+                aria-describedby={controle['aria-describedby']}
+                onClick={() => entradaArquivo.current?.click()}
+              >
                 Escolher arquivos
               </Botao>
             </div>
@@ -304,7 +316,7 @@ function Campos({
             ))}
             {novos.map((arquivo) => (
               <ItemAnexo
-                key={`novo-${arquivo.name}-${arquivo.size}-${arquivo.lastModified}`}
+                key={chaveDoArquivo(arquivo)}
                 nome={arquivo.name}
                 tamanho={arquivo.size}
                 aoRemover={() => setNovos((atuais) => atuais.filter((a) => a !== arquivo))}
@@ -315,6 +327,10 @@ function Campos({
       </SecaoFormulario>
     </Formulario>
   )
+}
+
+function chaveDoArquivo(arquivo: File): string {
+  return `${arquivo.name}-${arquivo.size}-${arquivo.lastModified}`
 }
 
 function ItemAnexo({

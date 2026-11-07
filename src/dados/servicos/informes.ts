@@ -67,7 +67,13 @@ export function salvarInforme(armazenamento: Armazenamento, contexto: ContextoGr
 
       const ficam = new Set(mantidos.map(chaveAnexo))
       for (const anexo of antigo.anexos) {
-        if (anexo.origem === 'local' && !ficam.has(chaveAnexo(anexo))) {
+        // O arquivo pode já não estar no navegador ("Arquivo indisponível"): tirar o anexo
+        // quebrado do informe não pode falhar por isso.
+        if (
+          anexo.origem === 'local' &&
+          !ficam.has(chaveAnexo(anexo)) &&
+          (await armazenamento.get('arquivos', anexo.arquivoId))
+        ) {
           await repoArquivos.excluir(anexo.arquivoId)
         }
       }

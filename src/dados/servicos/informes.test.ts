@@ -153,6 +153,21 @@ describe.each(IMPLEMENTACOES)('salvarInforme sobre %s', (_nome, criar) => {
     expect(comSeed.anexos).toEqual(seed.anexos)
   })
 
+  it('edição: anexo local cujo arquivo já sumiu sai do informe sem erro', async () => {
+    const salvar = salvarInforme(armazenamento, contexto())
+    const informe = await salvar({
+      dados: DADOS,
+      anexos: [],
+      novos: [{ nome: 'relatorio.pdf', tipo: 'application/pdf', conteudo: pdf(10) }],
+    })
+    const upload = informe.anexos[0]
+    if (upload?.origem !== 'local') throw new Error('esperava anexo local')
+    await armazenamento.delete('arquivos', upload.arquivoId)
+
+    const editado = await salvar({ id: informe.id, dados: DADOS, anexos: [], novos: [] })
+    expect(editado.anexos).toEqual([])
+  })
+
   it('PER-05 · analista não grava informe', async () => {
     await expect(
       salvarInforme(armazenamento, contexto('analista'))({ dados: DADOS, anexos: [], novos: [] }),
