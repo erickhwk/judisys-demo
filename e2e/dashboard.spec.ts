@@ -1,0 +1,60 @@
+// Dashboard no navegador (SDD §7.7, DMO-18): números, listas com link, gráfico e a volta ao
+// dashboard depois de editar (T-22). Os casos com contagem exata ficam em
+// src/modulos/dashboard/dashboard.test.tsx.
+import { expect, type Page, test } from '@playwright/test'
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-07T10:00:00'))
+})
+
+async function entrarComo(page: Page, papel: RegExp): Promise<void> {
+  await page.goto('./#/entrar')
+  await page.getByRole('button', { name: papel }).click()
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+}
+
+test('DSH-01/DSH-02 · números do topo e AGC do vitrine em D+6, com link', async ({ page }) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  for (const nome of ['processos-ativos', 'credores', 'prazos-vencidos', 'prazos-7-dias']) {
+    const texto = await page.locator(`[data-stat="${nome}"]`).textContent()
+    expect(Number(texto?.replace(/\D/g, '')), nome).toBeGreaterThan(0)
+  }
+  expect(
+    Number(await page.locator('[data-stat="passivo"]').getAttribute('data-valor')),
+  ).toBeGreaterThan(0)
+  await expect(page.locator('.recharts-bar-rectangle').first()).toBeVisible()
+
+  const agcs = page.getByRole('region', { name: 'Próximas AGCs' })
+  const vitrine = agcs.getByRole('link', { name: /Grupo Lontra Azul/ })
+  await expect(vitrine).toContainText('13/11/2026')
+  await vitrine.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-001\/agc\/agc-\d+$/)
+})
+
+test('DSH-03 · 8 próximos prazos; o link leva à aba Prazos do processo', async ({ page }) => {
+  await entrarComo(page, /Entrar como Analista/)
+  const prazos = page.getByRole('region', { name: 'Próximos prazos' }).getByRole('link')
+  await expect(prazos).toHaveCount(8)
+  await expect(prazos.first()).toContainText('Vencido')
+  await prazos.first().click()
+  await expect(page).toHaveURL(/#\/processos\/prc-\d+\/prazos$/)
+})
+
+test('DSH-04 · editar um credor aparece na atividade recente ao voltar', async ({ page }) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  const antes = Number(await page.locator('[data-stat="passivo"]').getAttribute('data-valor'))
+
+  await page.goto('./#/processos/prc-001/credores/crd-0001')
+  await page.getByRole('button', { name: 'Editar' }).click()
+  const dialogo = page.getByRole('dialog', { name: 'Editar credor' })
+  await dialogo.getByLabel('Relação do AJ (R$)').fill('9.999.999,00')
+  await dialogo.getByRole('button', { name: 'Salvar' }).click()
+  await expect(dialogo).toBeHidden()
+
+  await page.goto('./#/')
+  const atividade = page.getByRole('region', { name: 'Atividade recente' }).getByRole('listitem')
+  await expect(atividade.first()).toContainText('Editou credor')
+  await expect(atividade.first()).toContainText('Grupo Lontra Azul')
+  const depois = Number(await page.locator('[data-stat="passivo"]').getAttribute('data-valor'))
+  expect(depois).not.toBe(antes)
+})
