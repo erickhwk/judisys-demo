@@ -104,3 +104,11 @@ test('CRD-12 · QGC para impressão: grupos, subtotais e total geral iguais ao q
   await expect(page.getByRole('link', { name: 'Voltar ao processo' })).toBeHidden()
   await expect(page.locator('[data-total="geral"]')).toBeVisible()
 })
+
+test('aba Credores dentro da tela do processo (RF-13)', async ({ page }) => {
+  await entrarComo(page, /Entrar como Advogado/)
+  await page.goto('#/processos/prc-001/credores')
+  await expect(page.getByRole('navigation', { name: 'Seções do processo' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Novo credor' })).toBeVisible()
+  await expect(page.locator('tbody tr').first()).toBeVisible()
+})

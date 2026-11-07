@@ -3,6 +3,7 @@
 import type { JSX } from 'react'
 import type { Modulo } from '../../regras/permissoes'
 import { EmConstrucao } from '../../ui/TelasDeAviso'
+import { AbaCredores } from '../credores/AbaCredores'
 import { AbaEmpresas } from './AbaEmpresas'
 import { AbaHistorico } from './AbaHistorico'
 import { AbaVisaoGeral } from './AbaVisaoGeral'
@@ -31,12 +32,8 @@ export interface DefinicaoAba {
 export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = {
   'visao-geral': { rotulo: 'Visão geral', modulo: 'processos', Conteudo: AbaVisaoGeral },
   empresas: { rotulo: 'Empresas', modulo: 'empresas', Conteudo: AbaEmpresas },
-  // TEMPORÁRIO (lote 7a): trocar por AbaPrazos (DMO-14) e AbaCredores (DMO-15)
-  credores: {
-    rotulo: 'Credores',
-    modulo: 'credores',
-    Conteudo: () => <EmConstrucao titulo="Credores" />,
-  },
+  // TEMPORÁRIO (lote 7a): trocar por AbaPrazos (DMO-14)
+  credores: { rotulo: 'Credores', modulo: 'credores', Conteudo: AbaCredores },
   prazos: { rotulo: 'Prazos', modulo: 'prazos', Conteudo: () => <EmConstrucao titulo="Prazos" /> },
   // AGC e Informes chegam com DMO-16 e DMO-19.
   agc: {
