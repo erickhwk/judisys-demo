@@ -80,7 +80,7 @@ export function fasesSeguintes(tipo: TipoProcesso, faseAtual: Fase): Fase[] {
   const posicao = sequencia.indexOf(faseAtual)
   if (posicao === -1) return []
   const posteriores = sequencia.slice(posicao + 1)
-  return tipo === 'rj' ? [...posteriores, ...FASES_FINAIS_ALTERNATIVAS_RJ] : [...posteriores]
+  return tipo === 'rj' ? [...posteriores, ...FASES_FINAIS_ALTERNATIVAS_RJ] : posteriores
 }
 
 /** Mensagem de PRC-08 (T-27). */
