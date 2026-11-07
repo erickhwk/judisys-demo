@@ -320,6 +320,31 @@ describe('CAR-10 · sem IndexedDB usa memória', () => {
     expect((await b.abrir({ banco })).modoMemoria).toBe(true)
   })
 
+  it('versão igual mas o banco não lê mais: recria o banco em vez de travar na tela de erro', async () => {
+    const b = navegador({ seed: arquivoMini() })
+    await b.abrir()
+    const real = b.deps.banco
+    let aberturas = 0
+    const banco: Banco = {
+      apagar: () => real.apagar(),
+      abrir: async () => {
+        const armazenamento = await real.abrir()
+        abertos.push(armazenamento)
+        aberturas++
+        if (aberturas > 1) return armazenamento
+        return {
+          ...comFalhaEm(armazenamento, 'put', 'escritorios'),
+          todos: () => Promise.reject(new Error('UnknownError')),
+        }
+      },
+    }
+    const carga = await b.abrir({ banco })
+    expect(carga).toMatchObject({ avisoVersao: false, modoMemoria: false })
+    expect(aberturas).toBe(2)
+    expect(b.baixados).toEqual(['seed-versao.json', 'seed.json'])
+    expect(await carga.armazenamento.todos('escritorios')).toHaveLength(1)
+  })
+
   it('versão igual mas o banco não abre mais: memória com o seed', async () => {
     const b = navegador({ seed: arquivoMini() })
     await b.abrir()

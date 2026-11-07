@@ -286,9 +286,16 @@ async function abrirOuNulo(banco: Banco): Promise<Armazenamento | null> {
   }
 }
 
-/** O banco tem o seed gravado (o marcador pode ter sobrevivido a uma limpeza do IndexedDB). */
-async function temDados(armazenamento: Armazenamento): Promise<boolean> {
-  return (await armazenamento.todos('escritorios')).length > 0
+/**
+ * O banco tem o seed gravado (o marcador pode ter sobrevivido a uma limpeza do IndexedDB). `null`
+ * quando nem a leitura funciona: o banco é recriado, como numa versão diferente.
+ */
+async function temDados(armazenamento: Armazenamento): Promise<boolean | null> {
+  try {
+    return (await armazenamento.todos('escritorios')).length > 0
+  } catch {
+    return null
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -317,10 +324,12 @@ export async function carregar(parciais: Partial<DependenciasCarga> = {}): Promi
   // Versão igual: não baixa o seed (CAR-02).
   let armazenamento: Armazenamento | null = null
   if (gravada === alvo) {
-    armazenamento = await abrirOuNulo(d.banco)
-    if (armazenamento !== null && (await temDados(armazenamento))) {
-      return { armazenamento, avisoVersao: false, modoMemoria: false }
+    const aberto = await abrirOuNulo(d.banco)
+    const dados = aberto === null ? null : await temDados(aberto)
+    if (aberto !== null && dados === true) {
+      return { armazenamento: aberto, avisoVersao: false, modoMemoria: false }
     }
+    if (dados === false) armazenamento = aberto
   }
 
   // Baixa e valida antes de apagar: seed inválido ou rede fora não destroem o banco (CAR-08/09).
@@ -337,8 +346,9 @@ export async function carregar(parciais: Partial<DependenciasCarga> = {}): Promi
         avisoVersao: gravada !== null && gravada !== alvo,
         modoMemoria: false,
       }
-    } catch {
+    } catch (erro) {
       // Banco abriu mas não grava: segue em memória, como se não abrisse.
+      console.warn('IndexedDB não gravou o seed; a demo segue em memória.', erro)
     }
   }
 
