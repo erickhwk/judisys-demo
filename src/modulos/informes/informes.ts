@@ -43,11 +43,6 @@ export function ehPdf(anexo: Anexo): boolean {
   return nome.toLowerCase().endsWith('.pdf')
 }
 
-/** Chave estável do anexo na lista (caminho do site ou id do arquivo). */
-export function chaveDoAnexo(anexo: Anexo): string {
-  return anexo.origem === 'publico' ? anexo.caminho : anexo.arquivoId
-}
-
 /** `2,0 MB`, `512 KB`, `800 B`. */
 export function formatarTamanho(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`

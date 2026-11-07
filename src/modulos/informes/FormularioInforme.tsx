@@ -10,7 +10,7 @@ import { ehErroDeCota, MENSAGEM_COTA } from '../../dados/carga'
 import { useServico, useTodos } from '../../dados/contexto'
 import { ErroValidacao } from '../../dados/repositorio'
 import { type Anexo, CATEGORIAS_INFORME, type Tipos } from '../../dados/schemas'
-import { salvarInforme } from '../../dados/servicos/informes'
+import { chaveAnexo, salvarInforme } from '../../dados/servicos/informes'
 import { fasesDoTipo, ROTULOS_FASE } from '../../regras/fases'
 import { hoje } from '../../regras/relogio'
 import { Botao, BotaoIcone } from '../../ui/Botao'
@@ -21,7 +21,6 @@ import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import {
   CAMPOS_FORMULARIO,
   CATEGORIAS,
-  chaveDoAnexo,
   dadosDoFormulario,
   erroDoArquivo,
   formatarTamanho,
@@ -135,9 +134,9 @@ function Campos({
 
   function escolherArquivos(evento: ChangeEvent<HTMLInputElement>) {
     const escolhidos = [...(evento.target.files ?? [])]
-    const grande = escolhidos.find((arquivo) => erroDoArquivo(arquivo))
-    setErroArquivo(grande ? erroDoArquivo(grande) : null)
-    setNovos((atuais) => [...atuais, ...escolhidos.filter((arquivo) => !erroDoArquivo(arquivo))])
+    const erros = escolhidos.map(erroDoArquivo)
+    setErroArquivo(erros.find((erro) => erro !== null) ?? null)
+    setNovos((atuais) => [...atuais, ...escolhidos.filter((_, indice) => erros[indice] === null)])
     // Permite escolher o mesmo arquivo de novo depois de removê-lo.
     evento.target.value = ''
   }
@@ -297,7 +296,7 @@ function Campos({
           <ul className={estilos.anexosFormulario} aria-label="Anexos do informe">
             {mantidos.map((anexo) => (
               <ItemAnexo
-                key={chaveDoAnexo(anexo)}
+                key={chaveAnexo(anexo)}
                 nome={anexo.nome}
                 tamanho={anexo.origem === 'local' ? anexo.tamanho : undefined}
                 aoRemover={() => setMantidos((atuais) => atuais.filter((a) => a !== anexo))}

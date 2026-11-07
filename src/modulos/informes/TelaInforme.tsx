@@ -6,6 +6,7 @@ import { useId, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useRegistro } from '../../dados/contexto'
 import { type Anexo, CATEGORIAS_INFORME } from '../../dados/schemas'
+import { chaveAnexo } from '../../dados/servicos/informes'
 import { formatarData } from '../../regras/datas'
 import { ROTULOS_FASE } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
@@ -18,7 +19,7 @@ import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import { useSessao } from '../entrada/sessao'
 import { useUrlDoAnexo } from './anexos'
 import { CamposInforme, Voltar } from './FormularioInforme'
-import { chaveDoAnexo, ehPdf, formatarTamanho, type Informe } from './informes'
+import { ehPdf, formatarTamanho, type Informe } from './informes'
 import estilos from './informes.module.css'
 import { SELO_PUBLICADO } from './TabelaInformes'
 
@@ -177,9 +178,9 @@ function Anexos({ anexos }: { anexos: Anexo[] }) {
   const idTitulo = useId()
   const pdfs = anexos.filter(ehPdf)
   const [escolhido, setEscolhido] = useState<string | undefined>(
-    pdfs[0] ? chaveDoAnexo(pdfs[0]) : undefined,
+    pdfs[0] ? chaveAnexo(pdfs[0]) : undefined,
   )
-  const aberto = pdfs.find((anexo) => chaveDoAnexo(anexo) === escolhido)
+  const aberto = pdfs.find((anexo) => chaveAnexo(anexo) === escolhido)
 
   return (
     <section className={juntarClasses(estilos.cartao, estilos.secao)} aria-labelledby={idTitulo}>
@@ -192,10 +193,10 @@ function Anexos({ anexos }: { anexos: Anexo[] }) {
         <ul className={estilos.listaAnexos} aria-label="Anexos">
           {anexos.map((anexo) => (
             <LinhaAnexo
-              key={chaveDoAnexo(anexo)}
+              key={chaveAnexo(anexo)}
               anexo={anexo}
               aberto={anexo === aberto}
-              aoAbrir={() => setEscolhido(chaveDoAnexo(anexo))}
+              aoAbrir={() => setEscolhido(chaveAnexo(anexo))}
             />
           ))}
         </ul>
@@ -214,7 +215,6 @@ function LinhaAnexo({
   aberto: boolean
   aoAbrir: () => void
 }) {
-  const url = useUrlDoAnexo(anexo)
   return (
     <li className={estilos.itemAnexo}>
       <span className={estilos.nomeAnexo}>
@@ -234,23 +234,34 @@ function LinhaAnexo({
         >
           Visualizar
         </Botao>
-      ) : url ? (
-        // Outros tipos são baixados (RF-21, INF-05), sem rede além do próprio site (INV-09).
-        <a
-          className={estilos.baixar}
-          href={url}
-          download={anexo.nome}
-          aria-label={`Baixar ${anexo.nome}`}
-        >
-          <Download size={18} aria-hidden="true" />
-          Baixar
-        </a>
       ) : (
-        <span className={estilos.tamanho}>
-          {url === null ? 'Arquivo indisponível' : 'Carregando…'}
-        </span>
+        <Baixar anexo={anexo} />
       )}
     </li>
+  )
+}
+
+/** Outros tipos são baixados (RF-21, INF-05), sem rede além do próprio site (INV-09). */
+function Baixar({ anexo }: { anexo: Anexo }) {
+  // Só aqui a URL é criada: o PDF da lista usa a do visualizador.
+  const url = useUrlDoAnexo(anexo)
+  if (!url) {
+    return (
+      <span className={estilos.tamanho}>
+        {url === null ? 'Arquivo indisponível' : 'Carregando…'}
+      </span>
+    )
+  }
+  return (
+    <a
+      className={estilos.baixar}
+      href={url}
+      download={anexo.nome}
+      aria-label={`Baixar ${anexo.nome}`}
+    >
+      <Download size={18} aria-hidden="true" />
+      Baixar
+    </a>
   )
 }
 

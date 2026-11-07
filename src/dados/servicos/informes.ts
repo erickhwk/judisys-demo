@@ -27,8 +27,8 @@ export interface PedidoSalvarInforme {
 
 const TABELAS_INFORME = ['informes', 'arquivos', 'logs'] as const
 
-/** Mesmo anexo, pela referência (caminho público ou arquivo local). */
-function chaveAnexo(anexo: Anexo): string {
+/** Mesmo anexo, pela referência (caminho público ou arquivo local); serve também de `key` na tela. */
+export function chaveAnexo(anexo: Anexo): string {
   return anexo.origem === 'publico' ? `publico:${anexo.caminho}` : `local:${anexo.arquivoId}`
 }
 
