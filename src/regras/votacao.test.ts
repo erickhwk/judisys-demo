@@ -291,6 +291,17 @@ describe('cramDown (art. 58, §1º, C-08)', () => {
     ).toBe(true)
   })
 
+  it('sem classe que rejeitou, requisito 3 não tem o que conferir e fica cumprido', () => {
+    const r = cramDown([classe('trabalhista', 's'), classe('me-epp', 's')])
+    expect(r.requisitos[2]).toMatchObject({ cumprido: true, detalhe: 'Nenhuma classe rejeitou' })
+  })
+
+  it('menos de 2 classes votaram: detalhe do requisito 2', () => {
+    expect(cramDown([classe('me-epp', 'aa')]).requisitos[1].detalhe).toBe(
+      'Menos de 2 classes votaram (0)',
+    )
+  })
+
   it('AGC-17 · classe II com > 1/3 por cabeça e ≤ 1/3 por valor: requisito 3 não cumprido', () => {
     const ii = resultadoClasse('garantia-real', [
       { valor: 100, voto: 'sim' },

@@ -259,7 +259,7 @@ export function cramDown(resultados: readonly ResultadoClasse[]): CramDown {
     cumprido: exigidas !== null && aprovaram >= exigidas,
     detalhe:
       exigidas === null
-        ? `Só ${votaram.length} classe votou`
+        ? `Menos de 2 classes votaram (${votaram.length})`
         : `${aprovaram} de ${votaram.length} classes aprovaram; exigidas ${exigidas}`,
   }
 
@@ -269,7 +269,7 @@ export function cramDown(resultados: readonly ResultadoClasse[]): CramDown {
     numero: 3,
     descricao:
       'Em cada classe que rejeitou, voto favorável de mais de 1/3 dos credores, computados como no art. 45',
-    cumprido: rejeitaram.length > 0 && falharam.length === 0,
+    cumprido: falharam.length === 0,
     detalhe:
       rejeitaram.length === 0
         ? 'Nenhuma classe rejeitou'
@@ -476,7 +476,7 @@ function* candidatosCramDown(presentes: readonly Votante[], rng: Rng): Generator
   for (const classe of PREFERENCIA_REJEICAO) {
     const daClasse = presentes
       .filter((p) => p.classe === classe)
-      .sort((a, b) => b.valor - a.valor || a.credorId.localeCompare(b.credorId))
+      .sort((a, b) => b.valor - a.valor || compararIds(a.credorId, b.credorId))
     if (daClasse.length === 0) continue
     const montar = (sim: ReadonlySet<string>) =>
       presentes.map((p) => votoDe(p, p.classe !== classe || sim.has(p.credorId) ? 'sim' : 'nao'))
@@ -488,6 +488,11 @@ function* candidatosCramDown(presentes: readonly Votante[], rng: Rng): Generator
       yield montar(new Set(daClasse.filter(() => rng() < 0.5).map((p) => p.credorId)))
     }
   }
+}
+
+/** Ordem por código de caractere, igual em qualquer runtime (sem depender do locale). */
+function compararIds(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0
 }
 
 /** RNG determinístico (mulberry32) para testes e para sortear com semente conhecida. */
