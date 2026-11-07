@@ -24,6 +24,7 @@ import {
   ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO,
   ERRO_TIPO_PARA_CREDOR,
   ERRO_TIPO_PARA_REQUERENTE,
+  erroJaTemCreditoNaClasse,
   type NovoPedido,
   registrarPedido,
   relacaoAjPublicada,
@@ -262,12 +263,12 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
       expect(await logsNovos()).toHaveLength(logs)
     })
 
-    it('requerente cujo CPF/CNPJ virou credor do processo até a decisão: vale para esse credor', async () => {
-      // CPF do crd-0004 (ME/EPP, AJ 440,00) no requerente da impugnação.
+    it('requerente cujo CPF/CNPJ virou credor do processo na classe pedida até a decisão: vale para esse credor', async () => {
+      // CPF do crd-0004 (ME/EPP, AJ 440,00) no requerente da impugnação, na mesma classe.
       await pedidoPendente({
         tipo: 'impugnacao',
-        requerente: { nome: 'Débora Lima', documento: cpfDoCredor(4) },
-        classePedida: 'quirografario',
+        requerente: { nome: 'Carla Nunes', documento: cpfDoCredor(4) },
+        classePedida: 'me-epp',
       })
       const total = (await credoresDoRj()).length
       const resultado = await decidirPedido(armazenamento, contexto())('ped-100', 'acolhido')
@@ -275,6 +276,76 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
       expect(await credoresDoRj()).toHaveLength(total)
       expect(await credor('crd-0004')).toMatchObject({ valorAj: 440_00, valorQgc: 4_321_00 })
       expect((await pedido('ped-100'))?.credorId).toBe('crd-0004')
+    })
+
+    it('AJ-04 · acolher pega o credor do documento na classe pedida, não o de outra classe', async () => {
+      // O CPF do crd-0004 (ME/EPP) passa a ter também um credor quirografário no processo.
+      const quirografario: Tipos['credores'] = {
+        ...((await credor('crd-0004')) as Tipos['credores']),
+        id: 'crd-0900',
+        classe: 'quirografario',
+        valorAj: 10_00,
+      }
+      await armazenamento.put('credores', quirografario)
+      await pedidoPendente({
+        tipo: 'impugnacao',
+        requerente: { nome: 'Carla Nunes', documento: cpfDoCredor(4) },
+        classePedida: 'quirografario',
+      })
+      const antes = await credor('crd-0004')
+      const resultado = await decidirPedido(armazenamento, contexto())('ped-100', 'acolhido')
+      expect(resultado.credorCriado).toBe(false)
+      expect(resultado.credor?.id).toBe('crd-0900')
+      expect(await credor('crd-0900')).toMatchObject({
+        classe: 'quirografario',
+        valorQgc: 4_321_00,
+      })
+      expect(await credor('crd-0004')).toEqual(antes)
+    })
+
+    it('AJ-04 · reclassificar para a classe em que o documento já tem linha: recusado com mensagem própria, nada gravado', async () => {
+      await antesDaRelacao()
+      // O CPF do crd-0004 (ME/EPP) já tem também uma linha quirografária no processo.
+      const quirografario: Tipos['credores'] = {
+        ...((await credor('crd-0004')) as Tipos['credores']),
+        id: 'crd-0900',
+        classe: 'quirografario',
+        valorAj: 10_00,
+      }
+      await armazenamento.put('credores', quirografario)
+      await pedidoPendente({ credorId: 'crd-0004', classePedida: 'quirografario' })
+      const antes = await credor('crd-0004')
+      const logs = (await logsNovos()).length
+      const erro = await erroDe(decidirPedido(armazenamento, contexto())('ped-100', 'acolhido'))
+      expect(erro).toBeInstanceOf(ErroRegra)
+      expect(erro.message).toBe(erroJaTemCreditoNaClasse('quirografario'))
+      expect(erro.message).toContain('Quirografário')
+      expect(await credor('crd-0004')).toEqual(antes)
+      expect(await credor('crd-0900')).toEqual(quirografario)
+      expect((await pedido('ped-100'))?.status).toBe('pendente')
+      expect(await logsNovos()).toHaveLength(logs)
+    })
+
+    it('AJ-04 · documento só em outra classe: acolher cria o credor da classe pedida', async () => {
+      // CPF do crd-0004 (ME/EPP) pedindo crédito quirografário: é outro crédito, outra linha.
+      await pedidoPendente({
+        tipo: 'impugnacao',
+        requerente: { nome: 'Carla Nunes', documento: cpfDoCredor(4) },
+        classePedida: 'quirografario',
+      })
+      const antes = await credor('crd-0004')
+      const total = (await credoresDoRj()).length
+      const resultado = await decidirPedido(armazenamento, contexto())('ped-100', 'acolhido')
+      expect(resultado.credorCriado).toBe(true)
+      expect(await credoresDoRj()).toHaveLength(total + 1)
+      expect(resultado.credor).toMatchObject({
+        documento: cpfDoCredor(4),
+        classe: 'quirografario',
+        valorDevedor: 0,
+        valorAj: 0,
+        valorQgc: 4_321_00,
+      })
+      expect(await credor('crd-0004')).toEqual(antes)
     })
 
     it('analista decide (credores: editar, RF-39); sem permissão de credores, nada é gravado', async () => {
@@ -355,26 +426,49 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
       expect(await logsNovos()).toHaveLength(2)
     })
 
-    it('CRD-08 · requerente com CPF de credor do processo: recusado com o credor para vincular', async () => {
+    it('CRD-08 · requerente com CPF de credor do processo na mesma classe: recusado com o credor para vincular', async () => {
+      // crd-0005 (Débora Lima) é da classe "não sujeito".
       const documento = cpfDoCredor(5)
-      expect((await credorComDocumento(armazenamento)('prc-001', documento))?.id).toBe('crd-0005')
+      const porDocumento = credorComDocumento(armazenamento)
+      expect((await porDocumento('prc-001', documento, 'nao-sujeito'))?.id).toBe('crd-0005')
       // Com pontuação, compara só os dígitos.
       const formatado = `${documento.slice(0, 3)}.${documento.slice(3, 6)}.${documento.slice(6, 9)}-${documento.slice(9)}`
-      expect((await credorComDocumento(armazenamento)('prc-001', formatado))?.id).toBe('crd-0005')
-      // Em outro processo, o mesmo CPF não conta.
-      expect(await credorComDocumento(armazenamento)('prc-002', documento)).toBeUndefined()
+      expect((await porDocumento('prc-001', formatado, 'nao-sujeito'))?.id).toBe('crd-0005')
+      // Em outro processo ou em outra classe, o mesmo CPF não conta.
+      expect(await porDocumento('prc-002', documento, 'nao-sujeito')).toBeUndefined()
+      expect(await porDocumento('prc-001', documento, 'quirografario')).toBeUndefined()
 
       const erro = await erroDe(
         registrarPedido(
           armazenamento,
           contexto(),
-        )({ ...base, requerente: { nome: 'Débora', documento }, tipo: 'impugnacao' }),
+        )({
+          ...base,
+          classePedida: 'nao-sujeito',
+          requerente: { nome: 'Débora', documento },
+          tipo: 'impugnacao',
+        }),
       )
       expect(erro.message).toBe(AVISO_DOCUMENTO_EXISTENTE)
       expect(erro.vinculos).toEqual([
         { colecao: 'credores', id: 'crd-0005', rotulo: 'Débora Lima' },
       ])
       expect(await logsNovos()).toHaveLength(0)
+    })
+
+    it('AJ-04 · requerente com CPF de credor do processo só em outra classe: o pedido é registrado', async () => {
+      // crd-0005 é "não sujeito"; o pedido é quirografário (art. 41: um crédito por classe).
+      const criado = await registrarPedido(
+        armazenamento,
+        contexto(),
+      )({
+        ...base,
+        requerente: { nome: 'Débora Lima', documento: cpfDoCredor(5) },
+        tipo: 'impugnacao',
+      })
+      expect(criado).toMatchObject({ status: 'pendente', classePedida: 'quirografario' })
+      expect(criado.credorId).toBeUndefined()
+      expect(await logsNovos()).toHaveLength(1)
     })
 
     it('classe que o tipo do processo não tem é recusada (C-01)', async () => {

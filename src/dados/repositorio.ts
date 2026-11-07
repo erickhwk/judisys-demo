@@ -111,12 +111,15 @@ interface ConfigColecao {
   unicos?: Unicidade[]
 }
 
-/** Um campo único na coleção, ou dentro de um escopo (ex.: por `processoId`). */
+/** Um campo único na coleção, ou dentro de um escopo (ex.: por `processoId` e `classe`). */
 interface Unicidade {
   /** Caminho com pontos de um campo escalar; valor vazio não é comparado. */
   campo: string
-  /** Campo que delimita a unicidade: só conflitam registros com o mesmo valor nele. */
-  escopo?: string
+  /**
+   * Campo ou campos que delimitam a unicidade: só conflitam registros com o mesmo valor em todos
+   * eles.
+   */
+  escopo?: string | readonly string[]
   /**
    * Forma comparada; padrão `String(valor)`. Documentos usam `somenteDigitos`. Com ela, a busca
    * não usa o índice do campo (que casa o valor exato), só o do escopo, se houver.
@@ -125,6 +128,10 @@ interface Unicidade {
   /** Vai para o campo no `ErroValidacao`. */
   mensagem: string
 }
+
+/** Credor com CPF/CNPJ repetido na classe do processo (AJ-04, e CRD-08 no registro de pedido). */
+export const AVISO_DOCUMENTO_EXISTENTE =
+  'Já existe credor com este CPF/CNPJ nesta classe do processo'
 
 export const COLECOES: Record<Tabela, ConfigColecao> = {
   escritorios: { modulo: 'usuarios', busca: ['nome'], log: true },
@@ -145,7 +152,21 @@ export const COLECOES: Record<Tabela, ConfigColecao> = {
   processoEmpresas: { modulo: 'processos', busca: [], log: false },
   marcosDeFase: { modulo: 'processos', busca: [], log: true },
   prazos: { modulo: 'prazos', busca: ['titulo', 'baseLegal'], log: true },
-  credores: { modulo: 'credores', busca: ['nome', 'documento'], log: true },
+  credores: {
+    modulo: 'credores',
+    busca: ['nome', 'documento'],
+    log: true,
+    // AJ-04: o documento já é gravado só com dígitos (schema), então dispensa `chave` e usa o
+    // índice 'documento'. O mesmo CPF/CNPJ vale em outro processo e em outra classe do mesmo
+    // processo: o credor pode ter créditos em classes diferentes, uma linha por classe (art. 41).
+    unicos: [
+      {
+        campo: 'documento',
+        escopo: ['processoId', 'classe'],
+        mensagem: AVISO_DOCUMENTO_EXISTENTE,
+      },
+    ],
+  },
   pedidosDeCredito: {
     modulo: 'credores',
     busca: ['requerente.nome', 'requerente.documento'],
@@ -280,27 +301,25 @@ export function criarRepositorio<K extends Tabela>(
    * a regra cujo valor (pela chave) ou escopo mudou: registro que já repetia continua editável.
    */
   async function exigirUnicidade(linha: Linha, antigo?: Linha): Promise<void> {
-    for (const { campo, escopo, chave, mensagem } of config.unicos ?? []) {
+    for (const { campo, escopo = [], chave, mensagem } of config.unicos ?? []) {
       const procurada = chaveEm(linha, campo, chave)
       if (!procurada) continue
-      const valorDoEscopo = escopo === undefined ? undefined : valorEm(linha, escopo)
-      if (
-        antigo &&
-        chaveEm(antigo, campo, chave) === procurada &&
-        (escopo === undefined || valorEm(antigo, escopo) === valorDoEscopo)
-      ) {
-        continue
-      }
+      const camposDoEscopo: readonly string[] = typeof escopo === 'string' ? [escopo] : escopo
+      const mesmoEscopo = (outra: Linha) =>
+        camposDoEscopo.every(
+          (campoDoEscopo) => valorEm(outra, campoDoEscopo) === valorEm(linha, campoDoEscopo),
+        )
+      if (antigo && chaveEm(antigo, campo, chave) === procurada && mesmoEscopo(antigo)) continue
       // O índice do campo casa o valor como gravado: com `chave`, a busca fica só no escopo.
       const vizinhos = await candidatos({
         ...(chave ? {} : { [campo]: valorEm(linha, campo) }),
-        ...(escopo === undefined ? {} : { [escopo]: valorDoEscopo }),
+        ...Object.fromEntries(
+          camposDoEscopo.map((campoDoEscopo) => [campoDoEscopo, valorEm(linha, campoDoEscopo)]),
+        ),
       })
       const repetido = vizinhos.some(
         (outra) =>
-          outra.id !== linha.id &&
-          (escopo === undefined || valorEm(outra, escopo) === valorDoEscopo) &&
-          chaveEm(outra, campo, chave) === procurada,
+          outra.id !== linha.id && mesmoEscopo(outra) && chaveEm(outra, campo, chave) === procurada,
       )
       if (repetido) {
         throw new ErroValidacao([
