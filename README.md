@@ -2,7 +2,7 @@
 
 Demonstração estática do painel administrativo do Judisys. Roda só no navegador, sem backend: os dados vêm de um seed gerado no build e ficam no IndexedDB de quem abre a página.
 
-**Endereço publicado:** https://erickhwk.github.io/judisys-demo/
+**Endereço publicado:** https://judisys-demo.draft.dev.br (domínio próprio; o endereço antigo, https://erickhwk.github.io/judisys-demo/, redireciona para ele)
 
 ## Desenvolvimento
 
@@ -10,7 +10,7 @@ Requisitos: Node 22 (`.nvmrc`) e pnpm (versão fixada em `packageManager` no `pa
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev          # servidor local em http://localhost:5173/judisys-demo/
+pnpm dev          # servidor local em http://localhost:5173/
 ```
 
 | Comando | O que faz |
@@ -40,3 +40,5 @@ Só no push na `main`, se tudo passou, o `dist/` é publicado no GitHub Pages (`
 ### Passo manual (uma vez)
 
 No GitHub, em **Settings → Pages** do repositório `erickhwk/judisys-demo`, escolha a fonte **GitHub Actions** em "Build and deployment". Sem isso o job de publicação falha.
+
+Na mesma tela, em **Custom domain**, fica `judisys-demo.draft.dev.br`, com **Enforce HTTPS** ligado. O DNS do `draft.dev.br` (registro.br) tem o CNAME `judisys-demo` → `erickhwk.github.io`. Com publicação por Actions, quem vale é essa configuração, não o arquivo `public/CNAME`, que fica no repositório só como registro. Por isso a base do Vite é `/`.

@@ -129,7 +129,7 @@ const HOSTS_PERMITIDOS = new Set([
 
 /**
  * INV-09: registra toda requisição da página e devolve as que saem do permitido. Do próprio site
- * vale só o que está sob a base do Vite (`/judisys-demo/`: bundle, `seed.json`,
+ * vale só o que está sob a base do Vite (`/`: bundle, `seed.json`,
  * `seed-versao.json`, `anexos/`); `data:` e `blob:` não vão à rede.
  *
  * O Google Fonts é respondido com um CSS vazio: a requisição continua registrada (e permitida),
