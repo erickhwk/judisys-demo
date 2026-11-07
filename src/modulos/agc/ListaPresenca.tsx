@@ -142,20 +142,23 @@ export function ListaPresenca({
             titulo: 'Presente',
             largura: '100px',
             alinhar: 'centro',
+            // O rótulo em volta dá o alvo de 44px à caixa de 20px (RNF-01; DMO-23).
             celula: (linha) => (
-              <input
-                type="checkbox"
-                className={estilos.caixa}
-                checked={presenteEm(linha)}
-                disabled={
-                  !editavel ||
-                  (linha.motivo !== null && !presenteEm(linha)) ||
-                  otimistas.has(linha.credor.id)
-                }
-                aria-label={`Presente: ${linha.credor.nome}`}
-                aria-describedby={linha.motivo ? `motivo-${linha.credor.id}` : undefined}
-                onChange={() => alternar(linha)}
-              />
+              <label className={estilos.alvoCaixa}>
+                <input
+                  type="checkbox"
+                  className={estilos.caixa}
+                  checked={presenteEm(linha)}
+                  disabled={
+                    !editavel ||
+                    (linha.motivo !== null && !presenteEm(linha)) ||
+                    otimistas.has(linha.credor.id)
+                  }
+                  aria-label={`Presente: ${linha.credor.nome}`}
+                  aria-describedby={linha.motivo ? `motivo-${linha.credor.id}` : undefined}
+                  onChange={() => alternar(linha)}
+                />
+              </label>
             ),
           },
           {

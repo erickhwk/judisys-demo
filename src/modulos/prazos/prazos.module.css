@@ -36,6 +36,13 @@
   color: var(--cor-texto-invertido);
 }
 
+/* Alvo de toque de 44px no celular (RNF-01; DMO-23). No computador fica a altura do guia. */
+@media (max-width: 640px) {
+  .vista {
+    min-height: var(--alvo-minimo);
+  }
+}
+
 /* Aba do processo */
 .aba {
   display: flex;
@@ -236,8 +243,11 @@
   color: var(--cor-texto-forte);
 }
 
+/* Muted, e não desabilitado: o número do dia é texto e precisa de 4,5:1 sobre o fundo suave
+   (RNF-01; DMO-23). O peso menor mantém a diferença para os dias do mês. */
 .foraDoMes .numeroDia {
-  color: var(--cor-texto-desabilitado);
+  font-weight: 500;
+  color: var(--cor-texto-muted);
 }
 
 .dataPorExtenso {

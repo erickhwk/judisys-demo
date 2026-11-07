@@ -4,6 +4,7 @@
 // A faixa fica fora da área que rola, então nunca sai da tela.
 import { Menu } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { BuscaGlobal } from '../modulos/busca/BuscaGlobal'
 import { NOMES_PAPEIS } from '../modulos/entrada/papeis'
@@ -33,8 +34,9 @@ export function Layout() {
   }, [pathname])
 
   // Gaveta aberta: o foco entra no primeiro link e, ao fechar, volta ao botão que a abriu.
+  // O `flushSync` tira o `inert` da coluna antes do foco: sem ele, o botão ainda está inerte.
   const fecharGaveta = useCallback(() => {
-    setGavetaAberta(false)
+    flushSync(() => setGavetaAberta(false))
     botaoMenu.current?.focus()
   }, [])
 
@@ -58,7 +60,11 @@ export function Layout() {
 
   return (
     <div className={estilos.app}>
-      <FaixaDemo />
+      {/* Gaveta aberta: o resto da tela fica inerte, e o Tab não sai do menu para trás do fundo
+          escuro (DMO-23). */}
+      <div className={estilos.faixa} inert={gavetaAberta}>
+        <FaixaDemo />
+      </div>
       <div className={estilos.corpo}>
         <MenuLateral
           id={idMenu}
@@ -71,7 +77,7 @@ export function Layout() {
         {gavetaAberta && (
           <div className={estilos.fundoGaveta} aria-hidden="true" onClick={fecharGaveta} />
         )}
-        <div className={estilos.coluna} ref={coluna}>
+        <div className={estilos.coluna} ref={coluna} inert={gavetaAberta}>
           <header className={`${estilos.topo} nao-imprimir`}>
             <button
               ref={botaoMenu}
