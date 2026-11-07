@@ -34,15 +34,14 @@ export function useExclusaoEmpresa(aoExcluir?: () => void): {
     setOcupado(true)
     try {
       await excluir(alvo.id)
-      setAlvo(null)
       aoExcluir?.()
     } catch (erro) {
-      setAlvo(null)
       setRecusa({
         mensagem: erro instanceof Error ? erro.message : 'Não foi possível excluir a empresa.',
         processos: erro instanceof ErroRegra ? erro.vinculos : [],
       })
     } finally {
+      setAlvo(null)
       setOcupado(false)
     }
   }
