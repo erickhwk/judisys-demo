@@ -1,0 +1,96 @@
+# CI e publicação (SDD §5.8, T-15)
+# Em PR e push na main: install → biome ci → tsc → vitest → seed → build → Playwright (Chromium).
+# Só em push na main: upload-pages-artifact (dist/) → deploy-pages.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Em PR, um push novo cancela a execução anterior; na main cada push tem grupo próprio
+# (run_id), para nenhum commit ficar sem CI. A fila do deploy é o grupo `pages`.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      # Versão do pnpm vem do campo packageManager do package.json
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (Biome)
+        run: pnpm exec biome ci .
+
+      - name: Tipos
+        run: pnpm typecheck
+
+      - name: Vitest
+        run: pnpm test
+
+      # Até a DMO-07 scripts/gerar-seed.ts é um placeholder que só registra no log
+      - name: Gerar seed
+        run: pnpm seed
+
+      - name: Build
+        run: pnpm build
+
+      - name: Instalar Chromium do Playwright
+        run: pnpm exec playwright install --with-deps chromium
+
+      # No CI o playwright.config.ts sobe só o vite preview sobre o dist/ já gerado
+      - name: Playwright
+        id: e2e
+        run: pnpm e2e
+
+      - name: Guardar relatório do Playwright
+        if: failure() && steps.e2e.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: Empacotar dist/ para o Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: Publicar no GitHub Pages
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Publicar
+        id: publicacao
+        uses: actions/deploy-pages@v4
