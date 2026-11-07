@@ -29,24 +29,29 @@ function deslocamento(dias: number): string {
   return dias < 0 ? `-${-dias}` : `+${dias}`
 }
 
-/**
- * Troca, em qualquer profundidade, toda string que é data (`aaaa-mm-dd`) ou carimbo
- * (`aaaa-mm-ddTHH:mm`) pelo formato relativo a `DATA_BASE`. Os demais valores passam iguais.
- */
-export function relativizar<T>(valor: T): T {
-  if (typeof valor === 'string') {
-    const partes = DATA_OU_CARIMBO_ABSOLUTO.exec(valor)
-    if (partes === null) return valor
-    const [, data = '', hora = ''] = partes
-    return `@${deslocamento(diasEntre(DATA_BASE, data))}${hora}` as T
-  }
-  if (Array.isArray(valor)) return valor.map(relativizar) as T
+/** Aplica `trocar` a toda string de `valor`, em qualquer profundidade; o resto passa igual. */
+function mapearStrings<T>(valor: T, trocar: (texto: string) => string): T {
+  if (typeof valor === 'string') return trocar(valor) as T
+  if (Array.isArray(valor)) return valor.map((item) => mapearStrings(item, trocar)) as T
   if (typeof valor === 'object' && valor !== null) {
     return Object.fromEntries(
-      Object.entries(valor).map(([chave, item]) => [chave, relativizar(item)]),
+      Object.entries(valor).map(([chave, item]) => [chave, mapearStrings(item, trocar)]),
     ) as T
   }
   return valor
+}
+
+/**
+ * Troca toda string que é data (`aaaa-mm-dd`) ou carimbo (`aaaa-mm-ddTHH:mm`) pelo formato
+ * relativo a `DATA_BASE`.
+ */
+export function relativizar<T>(valor: T): T {
+  return mapearStrings(valor, (texto) => {
+    const partes = DATA_OU_CARIMBO_ABSOLUTO.exec(texto)
+    if (partes === null) return texto
+    const [, data = '', hora = ''] = partes
+    return `@${deslocamento(diasEntre(DATA_BASE, data))}${hora}`
+  })
 }
 
 /**
@@ -54,17 +59,10 @@ export function relativizar<T>(valor: T): T {
  * CAR-07). Aqui serve aos testes, para validar o seed com os schemas zod.
  */
 export function resolverDatas<T>(valor: T, hoje: DataIso): T {
-  if (typeof valor === 'string') {
-    const partes = FORMATO_DATA_RELATIVA.exec(valor)
-    if (partes === null) return valor
+  return mapearStrings(valor, (texto) => {
+    const partes = FORMATO_DATA_RELATIVA.exec(texto)
+    if (partes === null) return texto
     const [, dias = '0', hora = ''] = partes
-    return `${somarDias(hoje, Number(dias))}${hora}` as T
-  }
-  if (Array.isArray(valor)) return valor.map((item) => resolverDatas(item, hoje)) as T
-  if (typeof valor === 'object' && valor !== null) {
-    return Object.fromEntries(
-      Object.entries(valor).map(([chave, item]) => [chave, resolverDatas(item, hoje)]),
-    ) as T
-  }
-  return valor
+    return `${somarDias(hoje, Number(dias))}${hora}`
+  })
 }

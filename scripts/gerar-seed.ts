@@ -16,5 +16,7 @@ const contagem = Object.entries(seed.tabelas)
   .filter(([, registros]) => registros.length > 0)
   .map(([tabela, registros]) => `${tabela} ${registros.length}`)
   .join(', ')
-console.log(`gerar-seed: versão ${seed.versao} (${Math.round(arquivos.seed.length / 1024)} KB)`)
+console.log(
+  `gerar-seed: versão ${seed.versao} (${Math.round(Buffer.byteLength(arquivos.seed) / 1024)} KB)`,
+)
 console.log(`gerar-seed: ${contagem}`)
