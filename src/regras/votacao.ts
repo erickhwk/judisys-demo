@@ -2,7 +2,6 @@
 // classe e geral (art. 45, RF-35, D-16), cram down (art. 58, §1º, RF-36, C-08) e cenários da mesa
 // (RF-34, T-29). Valores em centavos inteiros (INV-03); toda comparação de fronteira ("mais da
 // metade", "mais de 1/3") é feita com produtos inteiros, sem divisão.
-
 import { formatarMoeda } from './moeda'
 import {
   CLASSES_VOTANTES,
