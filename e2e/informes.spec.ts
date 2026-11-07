@@ -132,6 +132,51 @@ test('INF-04 · arquivo acima de 10 MB é recusado', async ({ page }) => {
   await expect(page.getByRole('list', { name: 'Anexos do informe' })).toHaveCount(0)
 })
 
+test('CAR-11 · cota cheia ao gravar o anexo: só essa gravação falha, com a mensagem', async ({
+  page,
+}) => {
+  // Simula o navegador sem espaço: gravar em `arquivos` falha com QuotaExceededError.
+  await page.addInitScript(() => {
+    const falhar = (original: typeof IDBObjectStore.prototype.put) =>
+      function (this: IDBObjectStore, ...args: Parameters<typeof original>) {
+        if (this.name === 'arquivos' && (window as { cotaCheia?: boolean }).cotaCheia) {
+          throw new DOMException('Sem espaço', 'QuotaExceededError')
+        }
+        return original.apply(this, args)
+      }
+    IDBObjectStore.prototype.put = falhar(IDBObjectStore.prototype.put)
+    IDBObjectStore.prototype.add = falhar(IDBObjectStore.prototype.add)
+  })
+  await entrarComo(page, /Entrar como Administrador/)
+  await abrirNovo(page)
+  await page.evaluate(() => {
+    ;(window as { cotaCheia?: boolean }).cotaCheia = true
+  })
+  await page.getByRole('combobox', { name: 'Categoria' }).selectOption('relatorios')
+  await page.getByLabel('Título').fill('Relatório sem espaço')
+  await page.getByLabel('Anexar arquivos').setInputFiles({
+    name: 'relatorio.pdf',
+    mimeType: 'application/pdf',
+    buffer: await pdfCom(MB),
+  })
+  await page.getByRole('button', { name: 'Salvar' }).click()
+  await expect(
+    page.getByText('Não há espaço no navegador para este anexo. Resetar a demo libera o espaço.'),
+  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Novo informe', level: 1 })).toBeVisible()
+
+  // Nada ficou gravado, e o resto continua gravando.
+  await page.goto('./#/informes')
+  await expect(linhas(page)).toHaveCount(50)
+  await page.getByRole('searchbox', { name: 'Buscar informe por título' }).fill('sem espaço')
+  await expect(page.getByText('Nenhum informe encontrado')).toBeVisible()
+  await abrirNovo(page)
+  await page.getByRole('combobox', { name: 'Categoria' }).selectOption('relatorios')
+  await page.getByLabel('Título').fill('Relatório sem anexo')
+  await page.getByRole('button', { name: 'Salvar' }).click()
+  await expect(page.getByRole('heading', { name: 'Relatório sem anexo', level: 1 })).toBeVisible()
+})
+
 test('INF-05 · anexo .docx é baixado', async ({ page }) => {
   await entrarComo(page, /Entrar como Administrador/)
   await abrirNovo(page)
