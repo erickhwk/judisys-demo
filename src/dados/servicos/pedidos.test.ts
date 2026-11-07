@@ -21,6 +21,7 @@ import {
   ERRO_PEDIDO_JA_DECIDIDO,
   ERRO_SO_ANTES_DA_RELACAO,
   ERRO_SO_IMPUGNACAO,
+  ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO,
   ERRO_TIPO_PARA_CREDOR,
   ERRO_TIPO_PARA_REQUERENTE,
   type NovoPedido,
@@ -158,6 +159,18 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
       const doPedido = logs.find((log) => log.colecao === 'pedidosDeCredito')
       expect(doPedido?.mudancas).toEqual([{ campo: 'status', de: 'pendente', para: 'acolhido' }])
       expect(logs).toHaveLength(2)
+    })
+
+    it('T-39 · divergência pendente depois da relação do AJ publicada: acolher é recusado, rejeitar vale', async () => {
+      // prc-001 já tem a relação do AJ publicada no seed-mini.
+      await pedidoPendente({ credorId: 'crd-0003' })
+      const decidir = decidirPedido(armazenamento, contexto())
+      const erro = await erroDe(decidir('ped-100', 'acolhido'))
+      expect(erro.message).toBe(ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO)
+      expect((await pedido('ped-100'))?.status).toBe('pendente')
+      expect(await logsNovos()).toHaveLength(0)
+      await decidir('ped-100', 'rejeitado')
+      expect((await pedido('ped-100'))?.status).toBe('rejeitado')
     })
 
     it('CRD-04 · acolher impugnação atualiza valor e classe no QGC, com a relação do AJ intacta', async () => {

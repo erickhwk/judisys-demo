@@ -77,6 +77,8 @@ export const ROTULOS_STATUS_PEDIDO: Readonly<Record<Pedido['status'], string>> =
 }
 
 export const ERRO_PEDIDO_JA_DECIDIDO = 'Este pedido já foi decidido.'
+export const ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO =
+  'A relação do AJ já foi publicada: divergência e habilitação pendentes só podem ser rejeitadas.'
 export const ERRO_SO_IMPUGNACAO =
   'A relação do AJ já foi publicada: o pedido agora é impugnação (art. 8º).'
 export const ERRO_SO_ANTES_DA_RELACAO =
@@ -197,6 +199,12 @@ export function decidirPedido(armazenamento: Armazenamento, contexto: ContextoGr
           pedido: await repoPedidos.atualizar(pedidoId, { status: 'rejeitado' }),
           credorCriado: false,
         }
+      }
+      // Depois da relação do AJ publicada, ela não muda (CRD-04, art. 8º, T-39): divergência e
+      // habilitação que ficaram pendentes só podem ser rejeitadas.
+      if (pedido.tipo !== 'impugnacao') {
+        const { publicada } = await situacaoDoProcesso(armazenamento, pedido.processoId)
+        if (publicada) throw new ErroRegra(ERRO_SO_REJEITAR_DEPOIS_DA_RELACAO)
       }
 
       let credor = pedido.credorId

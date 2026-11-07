@@ -154,6 +154,7 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
           tipoProcesso={processo.tipo}
           comRequerente={false}
           podeEditar={podeEditar}
+          relacaoPublicada={publicada.data}
         />
       </section>
 

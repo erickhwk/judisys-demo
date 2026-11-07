@@ -222,6 +222,7 @@ function ConteudoAba({ processoId, tipo }: { processoId: string; tipo: TipoProce
             tipoProcesso={tipo}
             comRequerente
             podeEditar={podeEditar}
+            relacaoPublicada={publicada.data}
           />
         </section>
       )}

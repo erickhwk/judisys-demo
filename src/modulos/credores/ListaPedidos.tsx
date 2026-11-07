@@ -52,6 +52,7 @@ export function ListaPedidos({
   tipoProcesso,
   comRequerente,
   podeEditar,
+  relacaoPublicada,
   rotulo,
 }: {
   pedidos: Pedido[]
@@ -59,6 +60,8 @@ export function ListaPedidos({
   /** Mostra a coluna do requerente (pedidos de quem está fora da lista). */
   comRequerente: boolean
   podeEditar: boolean
+  /** Com a relação do AJ publicada, divergência e habilitação pendentes só se rejeitam (T-39). */
+  relacaoPublicada: boolean | undefined
   rotulo: string
 }) {
   const decidir = useServico(decidirPedido)
@@ -153,17 +156,19 @@ export function ListaPedidos({
                   celula: (pedido: Pedido) =>
                     pedido.status === 'pendente' && (
                       <AcoesLinha>
-                        <Botao
-                          variante="secundario"
-                          icone={<Check size={16} />}
-                          aria-label={`Acolher ${descricao(pedido)}`}
-                          onClick={() => {
-                            setErro(null)
-                            setEmDecisao({ pedido, decisao: 'acolhido' })
-                          }}
-                        >
-                          Acolher
-                        </Botao>
+                        {(pedido.tipo === 'impugnacao' || relacaoPublicada === false) && (
+                          <Botao
+                            variante="secundario"
+                            icone={<Check size={16} />}
+                            aria-label={`Acolher ${descricao(pedido)}`}
+                            onClick={() => {
+                              setErro(null)
+                              setEmDecisao({ pedido, decisao: 'acolhido' })
+                            }}
+                          >
+                            Acolher
+                          </Botao>
+                        )}
                         <Botao
                           variante="fantasma"
                           icone={<X size={16} />}
