@@ -17,7 +17,7 @@ test('CRD-02, CRD-04, CRD-09 · três valores; acolher a impugnação muda só o
 }) => {
   await entrarComo(page, 'aj')
   await page.goto(CREDOR_IMPUGNACAO.rota)
-  await expect(page.getByRole('heading', { name: 'Isadora Costa Batista', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome, level: 1 })).toBeVisible()
   await expect(valor(page, 'devedor')).toContainText('R$ 52.162,86')
   await expect(valor(page, 'aj')).toContainText('R$ 52.162,86')
   await expect(valor(page, 'qgc')).toContainText('—')
