@@ -17,6 +17,11 @@
   text-decoration: none;
 }
 
+/* `BotaoLink`: sem o sublinhado do `a:hover` global. */
+.botao:hover {
+  text-decoration: none;
+}
+
 .botao span {
   display: inline-flex;
 }

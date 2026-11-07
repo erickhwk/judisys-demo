@@ -4,47 +4,9 @@ import type { z } from 'zod'
 import type { camposEmpresa, Tipos } from '../../dados/schemas'
 import type { ColunaCsv } from '../../regras/csv'
 import { formatarCnpj } from '../../regras/documentos'
+import { ROTULOS_PORTE } from '../../regras/empresas'
 
 export type Empresa = Tipos['empresas']
-export type Porte = Empresa['porte']
-
-export const ROTULOS_PORTE: Readonly<Record<Porte, string>> = {
-  me: 'ME',
-  epp: 'EPP',
-  demais: 'Demais',
-}
-
-export const PORTES = Object.keys(ROTULOS_PORTE) as Porte[]
-
-export const UFS = [
-  'AC',
-  'AL',
-  'AM',
-  'AP',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MG',
-  'MS',
-  'MT',
-  'PA',
-  'PB',
-  'PE',
-  'PI',
-  'PR',
-  'RJ',
-  'RN',
-  'RO',
-  'RR',
-  'RS',
-  'SC',
-  'SE',
-  'SP',
-  'TO',
-] as const
 
 /** Colunas do CSV de empresas (RF-44): CNPJ com pontuação, para o Excel não perder zeros. */
 export const COLUNAS_CSV_EMPRESAS: ColunaCsv<Empresa>[] = [

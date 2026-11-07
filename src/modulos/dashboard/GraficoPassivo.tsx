@@ -1,9 +1,8 @@
 // Passivo por classe da RJ (RF-09) em barras horizontais (Recharts). Uma série só: uma cor, sem
 // legenda; o valor de cada classe também fica na tabela logo abaixo (leitor de tela e celular).
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { formatarMoeda } from '../../regras/datas'
+import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
 import estilos from './dashboard.module.css'
-import { formatarMoedaCurta } from './formato'
 import type { PassivoDaClasse } from './indicadores'
 
 const ALTURA_BARRA = 36

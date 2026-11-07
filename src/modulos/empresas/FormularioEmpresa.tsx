@@ -10,24 +10,22 @@ import { useRegistro, useRepo, useTodos } from '../../dados/contexto'
 import { ErroValidacao } from '../../dados/repositorio'
 import { camposEmpresa } from '../../dados/schemas'
 import { formatarCnj, formatarCnpj } from '../../regras/documentos'
+import { PORTES, ROTULOS_PORTE, UFS } from '../../regras/empresas'
 import { ROTULOS_FASE } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
 import { Botao } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
 import { Selo } from '../../ui/Selo'
 import { useSessao } from '../entrada/sessao'
-import { Cabecalho } from './Cabecalho'
 import estilos from './Empresas.module.css'
 import { useExclusaoEmpresa } from './ExclusaoEmpresa'
 import {
   type DadosEmpresa,
   EMPRESA_EM_BRANCO,
   type Empresa,
-  PORTES,
-  ROTULOS_PORTE,
-  UFS,
   type ValoresEmpresa,
   valoresDaEmpresa,
 } from './empresas'
@@ -36,7 +34,11 @@ import {
 export function NovaEmpresa() {
   return (
     <div className={estilos.tela}>
-      <Cabecalho titulo="Nova empresa" caminho="Nova empresa" acoes={<Voltar />} />
+      <CabecalhoPagina
+        titulo="Nova empresa"
+        trilha={[{ rotulo: 'Empresas', para: '/empresas' }, { rotulo: 'Nova empresa' }]}
+        acoes={<Voltar />}
+      />
       <CamposEmpresa />
     </div>
   )
@@ -51,7 +53,11 @@ export function TelaEmpresa() {
   if (consulta.isError || !consulta.data) {
     return (
       <div className={estilos.tela}>
-        <Cabecalho titulo="Empresa" caminho="Empresa" acoes={<Voltar />} />
+        <CabecalhoPagina
+          titulo="Empresa"
+          trilha={[{ rotulo: 'Empresas', para: '/empresas' }, { rotulo: 'Empresa' }]}
+          acoes={<Voltar />}
+        />
         <Erro
           titulo="Registro não existe mais"
           mensagem="A empresa pode ter sido excluída."
@@ -63,7 +69,11 @@ export function TelaEmpresa() {
   const empresa = consulta.data
   return (
     <div className={estilos.tela}>
-      <Cabecalho titulo={empresa.razaoSocial} caminho="Empresa" acoes={<Voltar />} />
+      <CabecalhoPagina
+        titulo={empresa.razaoSocial}
+        trilha={[{ rotulo: 'Empresas', para: '/empresas' }, { rotulo: 'Empresa' }]}
+        acoes={<Voltar />}
+      />
       {/* `key`: outra empresa (ou a mesma regravada) recomeça o formulário com os valores dela. */}
       <CamposEmpresa key={`${empresa.id}-${empresa.atualizadoEm}`} empresa={empresa} />
     </div>

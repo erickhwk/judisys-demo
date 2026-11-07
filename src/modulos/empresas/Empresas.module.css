@@ -4,37 +4,6 @@
   gap: 28px;
 }
 
-.cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.titulos {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.caminho,
-.apoio {
-  color: var(--cor-texto-muted);
-}
-
-.caminho a {
-  font-weight: 500;
-  color: var(--cor-texto-muted);
-}
-
-.acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
 /* Lista: razão social com o nome fantasia embaixo */
 .razao {
   display: flex;

@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
+import { Link } from 'react-router'
 import estilos from './Botao.module.css'
 import { juntarClasses } from './classes'
 
@@ -31,6 +32,26 @@ export function Botao({
       {icone && <span aria-hidden="true">{icone}</span>}
       {children}
     </button>
+  )
+}
+
+/** Link com cara de botão: navega em vez de agir (ex.: "QGC para impressão", "Voltar"). */
+export function BotaoLink({
+  para,
+  variante = 'secundario',
+  icone,
+  children,
+}: {
+  para: string
+  variante?: VarianteBotao
+  icone?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <Link to={para} className={juntarClasses(estilos.botao, estilos[variante])}>
+      {icone && <span aria-hidden="true">{icone}</span>}
+      {children}
+    </Link>
   )
 }
 

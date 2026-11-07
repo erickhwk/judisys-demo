@@ -6,7 +6,7 @@ import { ArmazenamentoMemoria } from '../../dados/memoria'
 import type { Tipos } from '../../dados/schemas'
 import { pode } from '../../regras/permissoes'
 import { credoresVotantes, resultadoAgc } from '../../regras/votacao'
-import { renderizarComDados } from '../credores/renderizarParaTeste'
+import { renderizarComDados } from '../../ui/renderizarParaTeste'
 import { AbaAgc } from './AbaAgc'
 import {
   convocacaoSugerida,

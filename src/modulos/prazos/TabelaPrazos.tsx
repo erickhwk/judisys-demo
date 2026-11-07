@@ -124,11 +124,7 @@ export function TabelaPrazos({
   if (acoes.podeEditar) {
     colunas.push({
       chave: 'acoes',
-      titulo: (
-        <span className={estilos.ancoraLeitor}>
-          <span className="somente-leitor">Ações</span>
-        </span>
-      ),
+      titulo: <span className="somente-leitor">Ações</span>,
       largura: '112px',
       alinhar: 'direita',
       celula: (prazo) =>

@@ -3,13 +3,12 @@ import { Link } from 'react-router'
 import { useTodos } from '../../dados/contexto'
 import type { Tipos } from '../../dados/schemas'
 import { formatarCnpj } from '../../regras/documentos'
+import { ROTULOS_PORTE } from '../../regras/empresas'
 import { type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { plural } from './rotulos'
 
 type Empresa = Tipos['empresas']
-
-const PORTES: Record<Empresa['porte'], string> = { me: 'ME', epp: 'EPP', demais: 'Demais' }
 
 const COLUNAS: ColunaTabela<Empresa>[] = [
   {
@@ -33,7 +32,7 @@ const COLUNAS: ColunaTabela<Empresa>[] = [
     celula: (e) => formatarCnpj(e.cnpj),
   },
   { chave: 'cidade', titulo: 'Cidade', largura: '16%', celula: (e) => `${e.cidade}/${e.uf}` },
-  { chave: 'porte', titulo: 'Porte', largura: '10%', celula: (e) => PORTES[e.porte] },
+  { chave: 'porte', titulo: 'Porte', largura: '10%', celula: (e) => ROTULOS_PORTE[e.porte] },
 ]
 
 export function AbaEmpresas({ processoId }: { processoId: string }) {

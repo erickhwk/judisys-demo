@@ -5,7 +5,8 @@ import { CheckCheck, Gavel, UserMinus } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useServico } from '../../dados/contexto'
 import { instalarAgc, marcarClasse, motivoSemInstalacao } from '../../dados/servicos/agc'
-import { formatarData, formatarMoeda } from '../../regras/datas'
+import { formatarData } from '../../regras/datas'
+import { formatarMoeda } from '../../regras/moeda'
 import { rotuloClasse } from '../../regras/qgc'
 import {
   type Convocacao,

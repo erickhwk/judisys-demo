@@ -2,12 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   diasEntre,
   ehDataIso,
-  formatarCentavos,
   formatarData,
   formatarDataHora,
   formatarDataPorExtenso,
   formatarMesAno,
-  formatarMoeda,
   somarAnos,
   somarDias,
   somarMeses,
@@ -67,30 +65,5 @@ describe('formatação de datas (RNF-04)', () => {
   it('por extenso e mês/ano em pt-BR', () => {
     expect(formatarDataPorExtenso('2026-11-07')).toBe('7 de novembro de 2026')
     expect(formatarMesAno('2026-03-01')).toBe('março de 2026')
-  })
-})
-
-describe('formatação de moeda (RNF-04, INV-03)', () => {
-  it('formatarMoeda → R$ 1.234,56', () => {
-    expect(formatarMoeda(123456)).toBe('R$ 1.234,56')
-    expect(formatarMoeda(0)).toBe('R$ 0,00')
-    expect(formatarMoeda(7)).toBe('R$ 0,07')
-    expect(formatarMoeda(99)).toBe('R$ 0,99')
-    expect(formatarMoeda(100000)).toBe('R$ 1.000,00')
-    expect(formatarMoeda(123456789012)).toBe('R$ 1.234.567.890,12')
-    expect(formatarMoeda(-123456)).toBe('-R$ 1.234,56')
-  })
-
-  it('CRD-13 · soma de centavos é exata', () => {
-    expect(formatarMoeda(10 + 20 + 30)).toBe('R$ 0,60')
-  })
-
-  it('formatarCentavos sem símbolo, com separador configurável', () => {
-    expect(formatarCentavos(123456)).toBe('1.234,56')
-    expect(formatarCentavos(123456, '')).toBe('1234,56')
-  })
-
-  it('recusa valor não inteiro', () => {
-    expect(() => formatarMoeda(12.5)).toThrow('não inteiro')
   })
 })

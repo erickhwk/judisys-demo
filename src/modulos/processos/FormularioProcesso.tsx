@@ -10,13 +10,14 @@ import { useRegistro, useServico, useTodos } from '../../dados/contexto'
 import { ErroValidacao } from '../../dados/repositorio'
 import type { Tipos } from '../../dados/schemas'
 import { criarProcesso, editarProcesso } from '../../dados/servicos/processos'
+import { UFS } from '../../regras/empresas'
 import { hoje } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
 import { useSessao } from '../entrada/sessao'
-import { Cabecalho } from './Cabecalho'
 import {
   type EntradaFormulario,
   paraDadosProcesso,
@@ -27,7 +28,7 @@ import {
 } from './formulario'
 import { mensagemDeErro } from './mensagens'
 import { ProcessoNaoEncontrado } from './ProcessoNaoEncontrado'
-import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO, UFS } from './rotulos'
+import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO } from './rotulos'
 import { SeletorEmpresas } from './SeletorEmpresas'
 
 const ORDEM_USUARIOS = { ordem: { campo: 'nome', direcao: 'asc' } } as const
@@ -35,7 +36,7 @@ const ORDEM_USUARIOS = { ordem: { campo: 'nome', direcao: 'asc' } } as const
 function ErroAoCarregar({ titulo }: { titulo: string }) {
   return (
     <>
-      <Cabecalho titulo={titulo} />
+      <CabecalhoPagina titulo={titulo} />
       <Erro mensagem="Não foi possível carregar o formulário." />
     </>
   )
@@ -51,7 +52,7 @@ export function NovoProcesso() {
     sessao && usuarios.data?.some((u) => u.id === sessao.usuarioId) ? sessao.usuarioId : ''
 
   if (usuarios.isError) return <ErroAoCarregar titulo="Novo processo" />
-  if (!usuarios.isSuccess) return <Cabecalho titulo="Novo processo" />
+  if (!usuarios.isSuccess) return <CabecalhoPagina titulo="Novo processo" />
   return (
     <FormularioProcesso
       titulo="Novo processo"
@@ -94,7 +95,7 @@ export function EditarProcesso() {
 
   if (processo.isError || vinculos.isError) return <ErroAoCarregar titulo="Editar processo" />
   if (processo.data === null) return <ProcessoNaoEncontrado />
-  if (!processo.data || !vinculos.isSuccess) return <Cabecalho titulo="Editar processo" />
+  if (!processo.data || !vinculos.isSuccess) return <CabecalhoPagina titulo="Editar processo" />
   const atual = processo.data
   return (
     <FormularioProcesso
@@ -172,9 +173,9 @@ function FormularioProcesso({
 
   return (
     <>
-      <Cabecalho
+      <CabecalhoPagina
         titulo={titulo}
-        subtitulo={subtitulo}
+        apoio={subtitulo}
         trilha={[{ rotulo: 'Processos', para: '/processos' }, { rotulo: titulo }]}
         acoes={
           <Botao icone={<ArrowLeft size={18} />} onClick={() => navegar(voltarPara)}>

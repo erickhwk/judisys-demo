@@ -2,14 +2,15 @@
 // por classe com subtotais e total geral, iguais ao quadro-resumo (CRD-12). O navegador salva em
 // PDF; impressao.css esconde botões e `nav`, então nenhum dado fica dentro deles.
 import { ArrowLeft, Printer } from 'lucide-react'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import type { Tipos } from '../../dados/schemas'
-import { formatarData, formatarMoeda } from '../../regras/datas'
+import { formatarData } from '../../regras/datas'
 import { formatarCnj, formatarDocumento } from '../../regras/documentos'
 import { ROTULOS_FASE } from '../../regras/fases'
+import { formatarMoeda } from '../../regras/moeda'
 import { rotuloClasse, valorVigente } from '../../regras/qgc'
 import { hoje } from '../../regras/relogio'
-import { Botao } from '../../ui/Botao'
+import { Botao, BotaoLink } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useCredoresDoProcesso, useProcesso } from './consultas'
@@ -53,10 +54,9 @@ export function ConteudoQgc({ processo, credores }: { processo: Processo; credor
   return (
     <main className={impressao.paginaImpressao}>
       <div className={`${impressao.barraImpressao} nao-imprimir`}>
-        <Link to={`/processos/${processo.id}/credores`} className={estilos.botaoLink}>
-          <ArrowLeft size={18} aria-hidden="true" />
+        <BotaoLink para={`/processos/${processo.id}/credores`} icone={<ArrowLeft size={18} />}>
           Voltar ao processo
-        </Link>
+        </BotaoLink>
         <Botao variante="primario" icone={<Printer size={18} />} onClick={() => window.print()}>
           Imprimir ou salvar em PDF
         </Botao>

@@ -6,7 +6,7 @@ import { carregarSeedMini, seedMini } from '../../../tests/fixtures/seed-mini'
 import { ArmazenamentoMemoria } from '../../dados/memoria'
 import type { Anexo, Tipos } from '../../dados/schemas'
 import type { Papel } from '../../regras/permissoes'
-import { renderizarComDados } from '../credores/renderizarParaTeste'
+import { renderizarComDados } from '../../ui/renderizarParaTeste'
 import { AbaInformes } from './AbaInformes'
 import {
   dadosDoFormulario,

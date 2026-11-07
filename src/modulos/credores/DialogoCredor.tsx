@@ -6,6 +6,7 @@ import { ErroValidacao } from '../../dados/repositorio'
 import type { Tipos } from '../../dados/schemas'
 import { formatarDocumento } from '../../regras/documentos'
 import type { TipoProcesso } from '../../regras/fases'
+import { moedaParaCampo } from '../../regras/moeda'
 import { rotuloClasse } from '../../regras/qgc'
 import { Botao } from '../../ui/Botao'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
@@ -19,7 +20,6 @@ import {
   type SaidaCredor,
   schemaFormularioCredor,
 } from './formularios'
-import { moedaParaCampo } from './moeda'
 
 type Credor = Tipos['credores']
 

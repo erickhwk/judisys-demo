@@ -9,10 +9,10 @@ import { pode } from '../../regras/permissoes'
 import { hoje } from '../../regras/relogio'
 import { credoresVotantes } from '../../regras/votacao'
 import { Botao } from '../../ui/Botao'
+import { ApoioEmLinha, CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
-import { CabecalhoPagina } from '../credores/CabecalhoPagina'
 import { useCredoresDoProcesso, useProcesso } from '../credores/consultas'
 import { useSessao } from '../entrada/sessao'
 import {
@@ -73,18 +73,18 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
   return (
     <div className={estilos.tela}>
       <CabecalhoPagina
-        migalhas={[
+        trilha={[
           { rotulo: 'Processos', para: '/processos' },
           { rotulo: processo.apelido, para: aba },
           { rotulo: 'AGC', para: aba },
         ]}
         titulo={`AGC de ${formatarData(agc.dataPrimeira)}`}
-        subtitulo={
-          <>
+        apoio={
+          <ApoioEmLinha>
             <Selo tom={situacao.tom}>{situacao.rotulo}</Selo>
             <span>1ª convocação: {formatarData(agc.dataPrimeira)}</span>
             <span>2ª convocação: {formatarData(agc.dataSegunda)}</span>
-          </>
+          </ApoioEmLinha>
         }
         acoes={
           editavel && (

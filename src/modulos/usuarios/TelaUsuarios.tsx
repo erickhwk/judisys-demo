@@ -10,6 +10,7 @@ import { ErroRegra } from '../../dados/servicos/comum'
 import { excluirUsuario } from '../../dados/servicos/exclusoes'
 import { pode } from '../../regras/permissoes'
 import { Botao, BotaoIcone } from '../../ui/Botao'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Confirmacao } from '../../ui/Confirmacao'
 import { Dialogo } from '../../ui/Dialogo'
 import { Erro } from '../../ui/Erro'
@@ -17,7 +18,6 @@ import { Selo } from '../../ui/Selo'
 import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { mensagemDeErro } from '../credores/erros'
-import { Cabecalho } from '../empresas/Cabecalho'
 import { NOMES_PAPEIS } from '../entrada/papeis'
 import { useSessao } from '../entrada/sessao'
 import { DialogoUsuario } from './DialogoUsuario'
@@ -113,7 +113,7 @@ export function TelaUsuarios() {
   const lista = usuarios.data
   return (
     <div className={estilos.tela}>
-      <Cabecalho
+      <CabecalhoPagina
         titulo="Usuários"
         apoio={
           lista &&

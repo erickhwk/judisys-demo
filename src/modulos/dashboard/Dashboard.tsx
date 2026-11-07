@@ -19,11 +19,13 @@ import type { Id } from '../../dados/armazenamento'
 import { useListar, useRepo, useTodos } from '../../dados/contexto'
 import { COLECOES, type Repositorio } from '../../dados/repositorio'
 import { CATEGORIAS_INFORME, type Log, type Registro } from '../../dados/schemas'
-import { formatarData, formatarDataHora, formatarMoeda } from '../../regras/datas'
+import { formatarData, formatarDataHora } from '../../regras/datas'
 import type { TipoProcesso } from '../../regras/fases'
+import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
 import { type Modulo, pode } from '../../regras/permissoes'
 import { situacao } from '../../regras/prazos'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
+import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
@@ -38,7 +40,6 @@ import { rotuloSituacao, TOM_SITUACAO } from '../prazos/regras'
 import { ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
 import { ROTULOS_TIPO } from '../processos/rotulos'
 import estilos from './dashboard.module.css'
-import { formatarMoedaCurta } from './formato'
 import { GraficoPassivo } from './GraficoPassivo'
 import {
   type EtapaDoFunil,
@@ -77,7 +78,7 @@ export function Dashboard() {
   if (consultas.some((c) => c.isError)) {
     return (
       <div className={estilos.tela}>
-        <h1>Dashboard</h1>
+        <CabecalhoPagina titulo="Dashboard" />
         <Erro mensagem="Não foi possível carregar o dashboard." />
       </div>
     )
@@ -93,7 +94,7 @@ export function Dashboard() {
   ) {
     return (
       <div className={estilos.tela}>
-        <h1>Dashboard</h1>
+        <CabecalhoPagina titulo="Dashboard" />
         <p className={estilos.apoio}>Carregando…</p>
       </div>
     )
@@ -109,7 +110,7 @@ export function Dashboard() {
 
   return (
     <div className={estilos.tela}>
-      <h1>Dashboard</h1>
+      <CabecalhoPagina titulo="Dashboard" />
 
       <section aria-label="Números do escritório" className={estilos.numeros}>
         <Numero

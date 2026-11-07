@@ -1,6 +1,6 @@
 // Classes de credores, valor vigente, quadro-resumo por classe e variação entre as relações
 // (RF-26 a RF-28, RF-30, C-01, T-26). Valores em centavos inteiros (INV-03).
-import { formatarCentavos } from './datas'
+import { formatarCentavos } from './moeda'
 
 /** Classes da RJ (RF-26): I a IV do art. 41 e "Não sujeito" (art. 49, §3º, C-07). */
 export const CLASSES_RJ = [

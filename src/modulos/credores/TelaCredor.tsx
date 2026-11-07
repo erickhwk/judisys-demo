@@ -7,8 +7,8 @@ import { useServico } from '../../dados/contexto'
 import type { Tipos } from '../../dados/schemas'
 import { ErroRegra, type Vinculo } from '../../dados/servicos/comum'
 import { excluirCredor } from '../../dados/servicos/exclusoes'
-import { formatarMoeda } from '../../regras/datas'
 import { formatarDocumento } from '../../regras/documentos'
+import { formatarMoeda, valorOuTraco } from '../../regras/moeda'
 import { pode } from '../../regras/permissoes'
 import {
   CLASSES_A_PARTE,
@@ -18,18 +18,17 @@ import {
   variacao,
 } from '../../regras/qgc'
 import { Botao } from '../../ui/Botao'
+import { ApoioEmLinha, CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Confirmacao } from '../../ui/Confirmacao'
 import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useSessao } from '../entrada/sessao'
-import { CabecalhoPagina } from './CabecalhoPagina'
 import { useCredor, usePedidosDoCredor, useProcesso, useRelacaoPublicada } from './consultas'
 import estilos from './credores.module.css'
 import { DialogoCredor } from './DialogoCredor'
 import { DialogoPedido } from './DialogoPedido'
 import { mensagemDeErro } from './erros'
 import { ListaPedidos } from './ListaPedidos'
-import { valorOuTraco } from './moeda'
 import { NOTA_A_PARTE } from './QuadroResumo'
 
 type Credor = Tipos['credores']
@@ -78,20 +77,20 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
   return (
     <>
       <CabecalhoPagina
-        migalhas={[
+        trilha={[
           { rotulo: 'Processos', para: '/processos' },
           { rotulo: processo.apelido, para: aba },
           { rotulo: 'Credores', para: aba },
         ]}
         titulo={credor.nome}
-        subtitulo={
-          <>
+        apoio={
+          <ApoioEmLinha>
             <span className={estilos.numeroTexto}>{formatarDocumento(credor.documento)}</span>
             <Selo tom={CLASSES_A_PARTE.includes(credor.classe) ? 'neutro' : 'azul'}>
               {rotuloClasse(credor.classe, processo.tipo)}
             </Selo>
             {credor.natureza && <span>{credor.natureza}</span>}
-          </>
+          </ApoioEmLinha>
         }
         acoes={
           podeEditar && (

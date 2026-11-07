@@ -1,33 +1,6 @@
 /* Aba Prazos, agenda e calendário mensal (RF-23 a RF-25). Cores de situação do RF-24:
    vencido em vermelho, urgente em dourado, cumprido sem destaque. */
 
-/* Cabeçalho da agenda, como em processos-lista.html */
-.cabecalho {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.cabecalhoTexto {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.subtitulo {
-  font-size: var(--tamanho-texto);
-  color: var(--cor-texto-muted);
-}
-
-.cabecalhoAcoes {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
 /* Alternância Lista / Calendário */
 .vistas {
   display: inline-flex;
@@ -81,6 +54,11 @@
 .tituloAba {
   font-size: 22px;
   line-height: 1.3;
+}
+
+.subtitulo {
+  font-size: var(--tamanho-texto);
+  color: var(--cor-texto-muted);
 }
 
 /* Mensagem da última ação */
@@ -167,8 +145,8 @@
   color: var(--cor-texto-forte);
 }
 
-/* Calendário mensal. `position: relative` prende aqui os textos só para leitor de tela (absolutos):
-   sem isso eles escapam da coluna que rola e a janela ganha uma segunda barra de rolagem. */
+/* Calendário mensal. `position: relative`: o `overflow: hidden` só recorta os absolutos (textos só
+   para leitor de tela) que têm o calendário como bloco de contenção. */
 .calendario {
   position: relative;
   overflow: hidden;
@@ -401,10 +379,4 @@
     clip: auto;
     white-space: normal;
   }
-}
-
-/* Âncora do título "Ações" só para leitor: sem ela o texto absoluto escapa da rolagem da tabela e
-   a página ganha rolagem horizontal no celular. */
-.ancoraLeitor {
-  position: relative;
 }

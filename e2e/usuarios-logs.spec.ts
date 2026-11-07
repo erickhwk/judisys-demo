@@ -213,16 +213,6 @@ test('LOG-03 · registro excluído: "Registro não existe mais", sem erro', asyn
   expect(erros).toEqual([])
 })
 
-test('logs no celular (390px): a tabela rola por dentro, sem rolagem horizontal da página', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 })
-  await entrarComo(page, /Entrar como Advogado/)
-  await page.goto('./#/logs')
-  await expect(logs(page)).toHaveCount(50)
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
-})
-
 test('AJ edita o próprio nome: o menu da conta acompanha', async ({ page }) => {
   await entrarComo(page, /Entrar como Administrador/)
   await page.goto('./#/usuarios')

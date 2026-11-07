@@ -3,18 +3,13 @@
 import { z } from 'zod'
 import { camposProcesso, type Tipos } from '../../dados/schemas'
 import type { DadosProcesso } from '../../dados/servicos/processos'
-import { ehDataIso, formatarCentavos } from '../../regras/datas'
+import { ehDataIso } from '../../regras/datas'
 import { formatarCnj } from '../../regras/documentos'
+import { formatarCentavos, lerMoeda, moedaParaCampo } from '../../regras/moeda'
 
-/**
- * Texto em reais → centavos, sem ponto flutuante (INV-03). Aceita `1.234,56`, `1234,5`, `1234` e
- * `R$ 1.234,56`. Vazio ou inválido → `null`.
- */
+/** Texto em reais → centavos pelo `lerMoeda` (INV-03). Vazio ou inválido → `null`. */
 export function lerCentavos(texto: string): number | null {
-  const limpo = texto.replace(/^R\$/, '').replace(/\s/g, '')
-  if (!/^(\d{1,3}(\.\d{3})+|\d+)(,\d{1,2})?$/.test(limpo)) return null
-  const [reais = '0', centavos = ''] = limpo.replaceAll('.', '').split(',')
-  return Number(reais) * 100 + Number(centavos.padEnd(2, '0'))
+  return lerMoeda(texto) ?? null
 }
 
 /** Percentual com vírgula (`2,5`) entre 0 e 100. Vazio ou inválido → `null`. */
@@ -131,8 +126,7 @@ export function paraFormulario(
       processo.honorariosPercentual == null
         ? ''
         : formatarPercentual(processo.honorariosPercentual),
-    honorariosValor:
-      processo.honorariosValor == null ? '' : formatarCentavos(processo.honorariosValor),
+    honorariosValor: moedaParaCampo(processo.honorariosValor),
     empresaIds,
   }
 }

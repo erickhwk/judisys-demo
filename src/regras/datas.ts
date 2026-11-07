@@ -1,4 +1,4 @@
-// Cálculo e formatação de datas e moeda (T-05, RNF-04). Funções puras: "hoje" vem por parâmetro.
+// Cálculo e formatação de datas (T-05, RNF-04); a moeda fica em `moeda.ts`. Funções puras: "hoje" vem por parâmetro.
 import {
   addDays,
   addMonths,
@@ -70,24 +70,4 @@ export function formatarDataPorExtenso(data: DataIso | Carimbo): string {
 /** `novembro de 2026`, para o título do calendário. */
 export function formatarMesAno(data: DataIso): string {
   return format(paraDate(data), "MMMM 'de' yyyy", { locale: ptBR })
-}
-
-/**
- * Inteiro em centavos → `1.234,56` (sem símbolo), sem passar por ponto flutuante (INV-03).
- * Com `separadorMilhar = ''` sai `1234,56` (formato do CSV, RF-44).
- */
-export function formatarCentavos(centavos: number, separadorMilhar = '.'): string {
-  if (!Number.isInteger(centavos)) throw new Error(`Valor em centavos não inteiro: ${centavos}`)
-  const sinal = centavos < 0 ? '-' : ''
-  const absoluto = Math.abs(centavos)
-  const reais = Math.floor(absoluto / 100).toString()
-  const resto = (absoluto % 100).toString().padStart(2, '0')
-  const reaisAgrupados = reais.replace(/\B(?=(\d{3})+(?!\d))/g, separadorMilhar)
-  return `${sinal}${reaisAgrupados},${resto}`
-}
-
-/** Inteiro em centavos → `R$ 1.234,56` (negativo: `-R$ 1.234,56`), com espaço comum. */
-export function formatarMoeda(centavos: number): string {
-  const texto = formatarCentavos(centavos)
-  return texto.startsWith('-') ? `-R$ ${texto.slice(1)}` : `R$ ${texto}`
 }
