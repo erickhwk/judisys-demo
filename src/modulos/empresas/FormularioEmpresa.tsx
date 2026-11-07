@@ -10,7 +10,7 @@ import { useRegistro, useRepo, useTodos } from '../../dados/contexto'
 import { ErroValidacao } from '../../dados/repositorio'
 import { camposEmpresa } from '../../dados/schemas'
 import { formatarCnj, formatarCnpj } from '../../regras/documentos'
-import { type Fase, ROTULOS_FASE } from '../../regras/fases'
+import { ROTULOS_FASE } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
 import { Botao } from '../../ui/Botao'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
@@ -254,7 +254,7 @@ function ProcessosDaEmpresa({ empresaId }: { empresaId: string }) {
                 <Selo forma="pilula" tom={processo.tipo === 'rj' ? 'dourado' : 'azul'}>
                   {processo.tipo === 'rj' ? 'Recuperação Judicial' : 'Falência'}
                 </Selo>
-                <Selo>{ROTULOS_FASE[processo.faseAtual as Fase]}</Selo>
+                <Selo>{ROTULOS_FASE[processo.faseAtual]}</Selo>
               </span>
             </li>
           ))}
