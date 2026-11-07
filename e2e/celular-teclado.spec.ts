@@ -39,7 +39,10 @@ async function conferirFoco(page: Page): Promise<string | null> {
       const anel = /0px 0px 0px [1-9]/.test(estilo.boxShadow)
       return contorno || anel
     }
-    if (desenhado(el) || desenhado(el.closest('label')) || desenhado(el.parentElement)) return null
+    if (desenhado(el)) return null
+    // Só caixa e rádio podem ter o foco desenhado em volta: um botão não vale pelo anel do pai.
+    const marcavel = el instanceof HTMLInputElement && ['checkbox', 'radio'].includes(el.type)
+    if (marcavel && (desenhado(el.closest('label')) || desenhado(el.parentElement))) return null
     return `${nome} sem foco visível`
   })
 }
