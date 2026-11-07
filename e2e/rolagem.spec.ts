@@ -1,8 +1,9 @@
 // Guarda de rolagem (AJ-02): o app rola dentro da coluna de conteúdo do Layout, e a página nunca.
 // Abre todas as rotas do registro (as `rotas` de cada `src/modulos/<m>/rotas.tsx` e as abas do
 // processo de `src/modulos/processos/abas.ts`) no computador e no celular e confere que o documento
-// não passa da janela (scrollHeight/scrollWidth ≤ janela). Algo absoluto que escapa da coluna
-// (ex.: um `.somente-leitor`) faz a página rolar e é pego aqui. As telas sem layout (impressão)
+// não passa da janela (scrollHeight/scrollWidth ≤ janela) e que a coluna não rola na horizontal.
+// Algo absoluto que escapa da coluna (ex.: um `.somente-leitor`) faz a página rolar, e um que escapa
+// de uma rolagem interna alarga a coluna: os dois são pegos aqui. As telas sem layout (impressão)
 // rolam como documento comum e ficam de fora.
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -39,8 +40,15 @@ function caminhosDoRegistro(): string[] {
       .find(existsSync)
     if (!arquivo) continue
     const fonte = readFileSync(arquivo, 'utf8')
-    const bloco = /\brotas:\s*\[([\s\S]*?)\]/.exec(fonte)?.[1] ?? ''
-    for (const [, caminho] of bloco.matchAll(/rota\(\s*'([^']+)'/g)) caminhos.push(caminho)
+    // Corta o registro nas chaves de primeiro nível (`  rotas:`, `  rotasSemLayout:`, `  abas:`),
+    // sem contar colchetes: um `[...]` dentro de uma tela não corta a lista de rotas.
+    const partes = fonte.split(/^ {2}(\w+):/m)
+    for (let i = 1; i < partes.length; i += 2) {
+      if (partes[i] !== 'rotas') continue
+      for (const [, caminho] of (partes[i + 1] ?? '').matchAll(/rota\(\s*'([^']+)'/g)) {
+        caminhos.push(caminho)
+      }
+    }
   }
   const abas = readFileSync(join(MODULOS, 'processos', 'abas.ts'), 'utf8')
   const definicoes = /const definicoes = \{([\s\S]*?)\} satisfies/.exec(abas)?.[1] ?? ''
@@ -77,7 +85,11 @@ async function entrarComoAj(page: Page): Promise<void> {
 
 /** Espera a tela assentar: título, nada carregando e o tamanho da página parado por 3 quadros. */
 async function esperarTela(page: Page): Promise<void> {
+  // Id do seed que não bate mais (ex.: AGC de outro processo) abre a tela de aviso, e a guarda
+  // mediria a tela errada.
   await expect(page.locator('main h1').first()).toBeVisible()
+  await expect(page.locator('main h1').first()).not.toHaveText(/não encontrad|Acesso restrito/)
+  await expect(page.locator('main').getByText(/Registro não existe mais/)).toHaveCount(0)
   await expect(page.locator('main').getByText(/Carregando/)).toHaveCount(0)
   await page.waitForFunction(
     () =>
@@ -110,13 +122,23 @@ for (const janela of JANELAS) {
     for (const endereco of ENDERECOS) {
       await page.goto(`./#${endereco}`)
       await esperarTela(page)
-      const documento = await page.evaluate(() => ({
-        largura: document.documentElement.scrollWidth,
-        altura: document.documentElement.scrollHeight,
-      }))
+      const medidas = await page.evaluate(() => {
+        // A coluna do Layout é o pai do <main>: ela rola na vertical, nunca na horizontal.
+        const coluna = document.querySelector('main')?.parentElement
+        return {
+          documento: {
+            largura: document.documentElement.scrollWidth,
+            altura: document.documentElement.scrollHeight,
+          },
+          sobraHorizontalDaColuna: coluna ? coluna.scrollWidth - coluna.clientWidth : -1,
+        }
+      })
       expect
-        .soft(documento, `${endereco} rola a página`)
+        .soft(medidas.documento, `${endereco} rola a página`)
         .toEqual({ largura: janela.width, altura: janela.height })
+      expect
+        .soft(medidas.sobraHorizontalDaColuna, `${endereco} rola a coluna na horizontal`)
+        .toBe(0)
     }
   })
 }
