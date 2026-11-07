@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const porta = 4173
+// Cada agente em paralelo usa a sua porta (PORTA_E2E); com porta fixa e reuseExistingServer,
+// um agente testaria o build do outro.
+const porta = Number(process.env.PORTA_E2E ?? 4173)
+if (!Number.isInteger(porta) || porta < 1024 || porta > 65535) {
+  throw new Error(`PORTA_E2E inválida: ${process.env.PORTA_E2E}`)
+}
 
 export default defineConfig({
   testDir: 'e2e',
