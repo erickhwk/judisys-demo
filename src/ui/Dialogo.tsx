@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { type ReactNode, useEffect, useId, useRef } from 'react'
+import { type ReactNode, useEffect, useId, useReducer, useRef } from 'react'
 import { BotaoIcone } from './Botao'
 import { juntarClasses } from './classes'
 import estilos from './Dialogo.module.css'
@@ -32,7 +32,13 @@ export function Dialogo({
   const ref = useRef<HTMLDialogElement>(null)
   const idTitulo = useId()
   const idConteudo = useId()
+  // O navegador pode fechar o <dialog> sozinho (ex.: Esc repetido no Chrome). Um novo render
+  // ressincroniza com `aberto` e reabre se quem usa recusou fechar (ex.: Confirmacao ocupada).
+  const [, ressincronizar] = useReducer((n: number) => n + 1, 0)
+  // Clique fora só conta se o botão foi apertado e solto no fundo (arrastar de dentro não fecha).
+  const apertouNoFundo = useRef(false)
 
+  // Sem lista de dependências: roda a cada render e só age quando o DOM difere de `aberto`.
   useEffect(() => {
     const dialogo = ref.current
     if (!dialogo) return
@@ -42,7 +48,7 @@ export function Dialogo({
       dialogo.querySelector<HTMLElement>('[data-foco-inicial]')?.focus()
     }
     if (!aberto && dialogo.open) dialogo.close()
-  }, [aberto])
+  })
 
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: o clique fora tem o Esc (evento cancel) como equivalente de teclado
@@ -59,10 +65,17 @@ export function Dialogo({
         aoFechar()
       }}
       onClose={() => {
-        if (aberto) aoFechar()
+        if (!aberto) return
+        aoFechar()
+        ressincronizar()
+      }}
+      onPointerDown={(evento) => {
+        apertouNoFundo.current = evento.target === evento.currentTarget
       }}
       onClick={(evento) => {
-        if (fecharAoClicarFora && evento.target === evento.currentTarget) aoFechar()
+        const noFundo = apertouNoFundo.current && evento.target === evento.currentTarget
+        apertouNoFundo.current = false
+        if (fecharAoClicarFora && noFundo) aoFechar()
       }}
     >
       {aberto && (

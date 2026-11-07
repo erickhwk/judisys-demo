@@ -32,7 +32,7 @@ type PropsComuns = {
 }
 
 export type PropsCampo = PropsComuns & {
-  /** Recebe id, classe e atributos de acessibilidade para pôr no controle. */
+  /** Recebe id, classe e atributos de acessibilidade para pôr no controle, por último (vencem os do chamador). */
   children: (controle: PropsControle) => ReactNode
 }
 
@@ -152,8 +152,8 @@ export function CampoTexto({
                 (posicaoIcone === 'inicio' ? estilos.comIconeInicio : estilos.comIconeFim),
             )}
             required={obrigatorio}
-            {...controle}
             {...entrada}
+            {...controle}
           />
         </div>
       )}
@@ -184,8 +184,8 @@ export function CampoSelecao({
           <select
             className={juntarClasses(className, estilos.selecao)}
             required={obrigatorio}
-            {...controle}
             {...selecao}
+            {...controle}
           >
             {children}
           </select>
@@ -221,8 +221,8 @@ export function CampoAreaTexto({
           className={juntarClasses(className, estilos.areaTexto)}
           required={obrigatorio}
           rows={rows}
-          {...controle}
           {...area}
+          {...controle}
         />
       )}
     </Campo>

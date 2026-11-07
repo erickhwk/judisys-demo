@@ -112,6 +112,11 @@
   border-top: 1px solid var(--cor-borda);
 }
 
+/* Ex.: <Paginacao> com uma página só não renderiza nada. */
+.rodape:empty {
+  display: none;
+}
+
 @media print {
   .card {
     border: 0;

@@ -10,8 +10,10 @@ export type PropsPaginacao = {
 }
 
 /** "Página X de Y" e os botões de página (44px, atual em azul). Some com uma página só. */
-export function Paginacao({ pagina, totalPaginas, aoMudar }: PropsPaginacao) {
+export function Paginacao({ pagina: pedida, totalPaginas, aoMudar }: PropsPaginacao) {
   if (totalPaginas <= 1) return null
+  // Página fora do intervalo (ex.: o filtro reduziu o total) aparece como a mais próxima válida.
+  const pagina = Math.min(Math.max(pedida, 1), totalPaginas)
 
   return (
     <div className={juntarClasses(estilos.paginacao, 'nao-imprimir')}>
