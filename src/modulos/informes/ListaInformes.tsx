@@ -15,6 +15,7 @@ import { CampoSelecao } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
+import { useBuscaAdiada } from '../../ui/useBuscaAdiada'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import { CATEGORIAS, ehCategoria, type Informe, ORDEM_INFORMES } from './informes'
@@ -64,7 +65,12 @@ export function ListaInformes() {
     setParametros(proximos, { replace: true })
   }
 
+  // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07, AJ-12).
+  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) => mudar('busca', texto))
+
   function limpar() {
+    // Zera o campo também quando o texto ainda não chegou à URL.
+    setTextoBusca('')
     const proximos = new URLSearchParams(parametros)
     for (const chave of ['busca', 'categoria', 'processo', 'pagina']) proximos.delete(chave)
     setParametros(proximos, { replace: true })
@@ -94,12 +100,12 @@ export function ListaInformes() {
           )
         }
       />
-      <Filtros aoLimpar={filtrando ? limpar : undefined}>
+      <Filtros aoLimpar={textoBusca || filtrando ? limpar : undefined}>
         <CampoBusca
           rotulo="Buscar informe por título"
           placeholder="Título do informe"
-          value={busca}
-          onChange={(evento) => mudar('busca', evento.target.value)}
+          value={textoBusca}
+          onChange={(evento) => setTextoBusca(evento.target.value)}
         />
         <CampoSelecao
           rotulo="Categoria"

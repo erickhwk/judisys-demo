@@ -17,6 +17,7 @@ import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
+import { useBuscaAdiada } from '../../ui/useBuscaAdiada'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
@@ -55,6 +56,15 @@ export function ListaEmpresas() {
       else proximos.delete('pagina')
     }
     setParametros(proximos, { replace: true })
+  }
+
+  // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07, AJ-12).
+  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) => mudar({ busca: texto }))
+
+  function limparBusca() {
+    // Zera o campo também quando o texto ainda não chegou à URL.
+    setTextoBusca('')
+    mudar({ busca: '' })
   }
 
   const exportacao = useExportarCsv(async () => ({
@@ -146,12 +156,12 @@ export function ListaEmpresas() {
         }
       />
       {exportacao.erro}
-      <Filtros aoLimpar={busca ? () => mudar({ busca: '' }) : undefined}>
+      <Filtros aoLimpar={textoBusca || busca ? limparBusca : undefined}>
         <CampoBusca
           rotulo="Buscar por razão social, nome fantasia ou CNPJ"
           placeholder="Razão social, nome fantasia ou CNPJ"
-          value={busca}
-          onChange={(evento) => mudar({ busca: evento.target.value })}
+          value={textoBusca}
+          onChange={(evento) => setTextoBusca(evento.target.value)}
         />
       </Filtros>
       {consulta.isError ? (

@@ -1,7 +1,7 @@
 // Apoio compartilhado dos testes de ponta a ponta (DMO-24): relógio fixo, entrada por papel,
 // passos da AGC do vitrine, leitura do IndexedDB e as vigias de console e de rede (INV-09).
 // Não é um arquivo de teste (o Playwright só roda `*.spec.ts`).
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 /** O "hoje" de todos os testes (SDD §10, T-19). */
 export const AGORA = new Date('2026-11-07T10:00:00')
@@ -168,4 +168,43 @@ export async function vigiarRede(page: Page, baseURL: string): Promise<string[]>
 export async function abrirAgcDoVitrine(page: Page): Promise<void> {
   await page.goto('./#/processos/prc-001/agc')
   await abrirAgcDaLista(page)
+}
+
+// --- Buscas que não perdem tecla (AJ-12) ---------------------------------------------------------
+
+/** Valor de `busca` na consulta da rota (depois do `#`), ou null se não houver. */
+export function buscaNaUrl(page: Page): string | null {
+  const consulta = new URL(page.url()).hash.split('?')[1] ?? ''
+  return new URLSearchParams(consulta).get('busca')
+}
+
+/** Seleciona o que houver no campo, para o texto digitado em seguida substituí-lo. */
+async function selecionarCampo(campo: Locator): Promise<void> {
+  await campo.click()
+  await campo.press('ControlOrMeta+a')
+}
+
+/**
+ * Troca o texto do campo digitando sem atraso entre as teclas (o caso que perdia letras) e
+ * espera o texto chegar à URL.
+ */
+export async function digitarBusca(page: Page, campo: Locator, texto: string): Promise<void> {
+  await selecionarCampo(campo)
+  await page.keyboard.type(texto)
+  await expect(campo).toHaveValue(texto)
+  await expect.poll(() => buscaNaUrl(page)).toBe(texto)
+}
+
+/**
+ * Digita e clica "Limpar busca" antes de o texto chegar à URL: o campo esvazia e, passada a pausa
+ * da busca adiada (250 ms), nenhuma gravação pendente devolve o texto à URL.
+ */
+export async function limparBuscaPendente(page: Page, campo: Locator): Promise<void> {
+  await selecionarCampo(campo)
+  await page.keyboard.type('xyz')
+  await page.getByRole('button', { name: 'Limpar busca' }).click()
+  await expect(campo).toHaveValue('')
+  await page.waitForTimeout(500)
+  expect(buscaNaUrl(page)).toBeNull()
+  await expect(campo).toHaveValue('')
 }

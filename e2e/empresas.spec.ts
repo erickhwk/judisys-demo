@@ -2,7 +2,7 @@
 // teste começa com o armazenamento limpo (contexto novo do Playwright).
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, digitarBusca, entrarComo, limparBuscaPendente } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -218,4 +218,37 @@ test('PER-03 · analista consulta empresas sem botões de criar, editar ou exclu
   // PER-04: a criação aberta direto continua bloqueada pela rota.
   await page.goto('./#/empresas/novo')
   await expect(page.getByRole('alert')).toContainText('Seu papel não permite esta ação')
+})
+
+test('AJ-12 · digitação rápida na busca de Empresas não perde caracteres; a URL guarda o filtro', async ({
+  page,
+}) => {
+  await entrarComo(page, 'analista')
+  await abrirEmpresas(page)
+  await expect(linhas(page)).toHaveCount(40)
+  const empresa = page.getByRole('link', { name: 'Lontra Azul Alimentos Ltda.' })
+
+  await digitarBusca(page, busca(page), 'Lontra Azul Alimentos')
+  await expect(linhas(page)).toHaveCount(1)
+  await expect(empresa).toBeVisible()
+
+  // Atualizar a página mantém o filtro.
+  await page.reload()
+  await expect(busca(page)).toHaveValue('Lontra Azul Alimentos')
+  await expect(linhas(page)).toHaveCount(1)
+
+  // Ir à empresa e voltar também.
+  await empresa.click()
+  await expect(
+    page.getByRole('heading', { name: 'Lontra Azul Alimentos Ltda.', level: 1 }),
+  ).toBeVisible()
+  await page.goBack()
+  await expect(busca(page)).toHaveValue('Lontra Azul Alimentos')
+  await expect(linhas(page)).toHaveCount(1)
+
+  // Trocar o texto rápido também chega à URL; "Limpar busca" com texto pendente esvazia tudo.
+  await digitarBusca(page, busca(page), 'Fundição Sapo')
+  await expect(linhas(page)).toHaveCount(1)
+  await limparBuscaPendente(page, busca(page))
+  await expect(linhas(page)).toHaveCount(40)
 })
