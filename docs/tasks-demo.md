@@ -20,6 +20,20 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
 | 10 | DMO-23, DMO-24 | Fechamento. |
 | depois | DMO-25 | Outro repo, depois da demo no ar. |
 
+**Execução em paralelo** (args fixos do `workflow-lote.js` da skill `execucao-paralela`; o orquestrador acrescenta só o que é do lote)
+
+- `teste`:
+  - `setup`: `pnpm install --frozen-lockfile`
+  - `run`: `pnpm lint && pnpm typecheck && pnpm test && PORTA_E2E=431{n} pnpm e2e`. O e2e local gera o seed e o build sozinho (AJ-06).
+  - `rapido`: `pnpm lint && pnpm typecheck && pnpm vitest run {arquivos}`
+- `contexto`, a parte fixa (copiar e somar a divisão de arquivos do lote):
+  - pt-BR em commits, comentários e PR; o SDD prevalece sobre o PRD.
+  - Rotas e abas (AJ-05): cada módulo declara as suas no `src/modulos/<m>/rotas.tsx` (`registro: RegistroDoModulo`, tipos em `src/definicaoRotas.ts`). O `src/rotas.tsx` não se edita. **Rota nova leva teste de permissão (`pode(papel, acao, modulo)`, PER-04/PER-07) no próprio módulo**, porque a tabela de `src/rotas.test.ts` guarda só as rotas de antes do AJ-05. A ordem e a permissão das abas ficam em `src/modulos/processos/abas.ts`.
+  - Arquivos que nenhum agente edita sem virar dúvida: `src/dados/contexto.tsx`, `src/regras/permissoes.ts`, `src/ui/MenuLateral.tsx`, o seed (`scripts/`) e `src/rotas.tsx`. Hooks e consultas novas ficam no módulo da tarefa.
+  - Autonomia: o agente decide o que for técnico ou de baixo impacto e registra no rascunho do PR em "Decidido pelo agente"; vira dúvida só regra de negócio do produto real, escopo novo e o que for difícil de desfazer.
+  - Pegadinhas: `biome migrate` desliga o linter (teste-guarda em `src/biome.test.ts`); Markdown fica fora do Biome. O relógio vem de `src/regras/relogio.ts`. Componentes de `src/ui/` antes de criar um novo; CSV com `gerarCsv`/`nomeArquivoCsv` (`src/regras/csv.ts`) e `baixarArquivo` (`src/ui/baixarArquivo.ts`). Capturas: `capturar.sh` com `--login-clique "Entrar como Advogado" --relogio 2026-11-07T10:00:00 --tela nome='#/rota'`, preview na porta 432{n}, derrubado no fim (`pkill -f 'preview --port 432{n}'`).
+  - Guia visual (só leitura, fora do repo): `~/code/mcaa-app/docs/design/judisys/` (`DESIGN.md`, `dashboard.html`, `telas/`).
+
 ---
 
 ## DMO-01 · Montar o projeto

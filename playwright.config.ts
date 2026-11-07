@@ -19,10 +19,11 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    // No CI o build já rodou num passo anterior; localmente o e2e gera o dist/ antes
+    // No CI o seed e o build já rodaram em passos anteriores. Localmente o e2e gera os dois antes:
+    // o public/seed.json não é versionado, e um worktree novo nasce sem ele (AJ-06).
     command: process.env.CI
       ? `pnpm preview --port ${porta} --strictPort`
-      : `pnpm build && pnpm preview --port ${porta} --strictPort`,
+      : `pnpm seed && pnpm build && pnpm preview --port ${porta} --strictPort`,
     url: `http://localhost:${porta}/judisys-demo/`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
