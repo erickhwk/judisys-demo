@@ -1,0 +1,145 @@
+.faixa {
+  flex: none;
+  position: relative;
+  z-index: 30;
+  background: var(--cor-azul-login);
+  color: var(--cor-texto-invertido);
+  border-bottom: 2px solid var(--cor-dourado-500);
+}
+
+.principal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 6px 24px;
+}
+
+.rotulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--cor-dourado-200);
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--cor-dourado-500);
+}
+
+.acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--raio-campo);
+  background: transparent;
+  color: var(--cor-texto-invertido);
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--cor-texto-invertido);
+  text-decoration: none;
+}
+
+.destaque {
+  border-color: transparent;
+  background: var(--cor-dourado-degrade);
+  color: var(--cor-azul-900);
+}
+
+.destaque:hover {
+  background: var(--cor-dourado-200);
+  color: var(--cor-azul-900);
+}
+
+.avisos {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--cor-dourado-claro);
+  color: var(--cor-azul-900);
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 4px 16px 4px 24px;
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 500;
+}
+
+.aviso + .aviso {
+  border-top: 1px solid rgba(10, 31, 77, 0.1);
+}
+
+.dispensar,
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: none;
+  min-width: var(--alvo-minimo);
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--raio-campo);
+  background: transparent;
+  color: var(--cor-azul-900);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dispensar:hover,
+.link:hover {
+  background: rgba(10, 31, 77, 0.08);
+}
+
+@media (max-width: 640px) {
+  .principal {
+    padding: 8px 16px;
+  }
+
+  .rotulo {
+    font-size: 12.5px;
+  }
+
+  .acoes {
+    width: 100%;
+  }
+
+  .botao {
+    flex: 1;
+    justify-content: center;
+    min-height: var(--alvo-minimo);
+  }
+
+  .aviso {
+    padding-left: 16px;
+  }
+}

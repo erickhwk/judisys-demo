@@ -1,6 +1,6 @@
-// Carga e versão no navegador (SDD §7.1; DMO-08). O reset pelo botão (CAR-04, CAR-05) depende da
-// faixa da demo e entra aqui com a DMO-10. Cada teste começa com o armazenamento limpo (contexto
-// novo do Playwright).
+// Carga, versão e reset no navegador (SDD §7.1; DMO-08). O reset pelo botão da faixa (CAR-04,
+// CAR-05) veio com a DMO-10. Cada teste começa com o armazenamento limpo (contexto novo do
+// Playwright).
 import { expect, type Page, test } from '@playwright/test'
 
 const CHAVE_VERSAO = 'judisys:versao'
@@ -60,7 +60,7 @@ function contarSeed(page: Page): { total: number } {
 
 async function abrirDemo(page: Page): Promise<void> {
   await page.goto('./')
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
 }
 
 test.beforeEach(async ({ page }) => {
@@ -78,7 +78,7 @@ test('CAR-01 · primeira visita mostra o carregamento, baixa o seed e grava a ve
   })
   await page.goto('./')
   await expect(page.getByRole('status')).toHaveText('Carregando a demo…')
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
 
   expect(seed.total).toBe(1)
   const versao = await page.evaluate((chave) => localStorage.getItem(chave), CHAVE_VERSAO)
@@ -97,7 +97,7 @@ test('CAR-02 · versão igual não baixa o seed e mantém o que mudou', async ({
 
   const seed = contarSeed(page)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
   expect(seed.total).toBe(0)
   const depois = await lerTabela(page, 'processos')
   expect(depois.find((p) => p.id === processo.id)?.apelido).toBe('Alterado na demo')
@@ -112,12 +112,18 @@ test('CAR-03 · versão diferente apaga e recarrega o seed', async ({ page }) =>
 
   const seed = contarSeed(page)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
   expect(seed.total).toBe(1)
   const depois = await lerTabela(page, 'processos')
   expect(depois.find((p) => p.id === processo.id)?.apelido).toBe(processo.apelido)
   const versao = await page.evaluate((chave) => localStorage.getItem(chave), CHAVE_VERSAO)
   expect(versao).toMatch(/^1:[0-9a-f]{12}$/)
+
+  // Aviso do RF-03 na faixa, dispensável.
+  const aviso = page.getByText('A demo foi atualizada e os dados foram restaurados.')
+  await expect(aviso).toBeVisible()
+  await page.getByRole('button', { name: 'Dispensar aviso' }).click()
+  await expect(aviso).toHaveCount(0)
 })
 
 test('CAR-08 · seed inválido mostra a tela de erro, sem banco pela metade', async ({ page }) => {
@@ -137,7 +143,7 @@ test('CAR-09 · falha de rede: tela de erro e "Tentar de novo" carrega', async (
 
   await page.unroute('**/seed-versao.json')
   await page.getByRole('button', { name: 'Tentar de novo' }).click()
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
   expect(await lerTabela(page, 'processos')).toHaveLength(12)
 })
 
@@ -147,6 +153,7 @@ test('CAR-10 · sem IndexedDB a demo abre em memória', async ({ page }) => {
   })
   await abrirDemo(page)
   expect(await page.evaluate((chave) => localStorage.getItem(chave), CHAVE_VERSAO)).toBeNull()
+  await expect(page.getByText('suas alterações não serão salvas nesta aba')).toBeVisible()
 })
 
 test('CAR-12 · sem localStorage recarrega o seed a cada abertura', async ({ page }) => {
@@ -161,7 +168,7 @@ test('CAR-12 · sem localStorage recarrega o seed a cada abertura', async ({ pag
   const seed = contarSeed(page)
   await abrirDemo(page)
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Judisys' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
   expect(seed.total).toBe(2)
 })
 
@@ -179,4 +186,49 @@ test('T-34 · aberta em outra data, todo RMA aberto vence no dia 15', async ({ p
   // As demais datas seguem o deslocamento do T-24: a AGC da vitrine fica em @+6.
   const agcs = await lerTabela(page, 'agcs')
   expect(agcs.map((agc) => agc.dataPrimeira)).toContain('2027-01-28')
+})
+
+/** Entra como AJ e altera um processo direto no banco; devolve o apelido original. */
+async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknown }> {
+  await abrirDemo(page)
+  await page.getByRole('button', { name: /Entrar como Administrador/ }).click()
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  const [processo] = await lerTabela(page, 'processos')
+  if (!processo) throw new Error('seed sem processos')
+  await gravarLinha(page, 'processos', { ...processo, apelido: 'Alterado na demo' })
+  return { id: processo.id, apelido: processo.apelido }
+}
+
+test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
+  const processo = await entrarEAlterar(page)
+  await page.goto('./#/logs')
+  await page
+    .getByRole('region', { name: 'Demonstração' })
+    .getByRole('button', { name: 'Resetar demo' })
+    .click()
+  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
+  await expect(confirmacao).toBeVisible()
+  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
+
+  await expect(confirmacao).toBeHidden()
+  await expect(page).toHaveURL(/#\/$/)
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  const depois = await lerTabela(page, 'processos')
+  expect(depois.find((p) => p.id === processo.id)?.apelido).toBe(processo.apelido)
+  // Sem o aviso de versão (SDD §5.5).
+  await expect(page.getByText('A demo foi atualizada e os dados foram restaurados.')).toHaveCount(0)
+})
+
+test('CAR-05 · Resetar demo → cancelar não muda nada', async ({ page }) => {
+  const processo = await entrarEAlterar(page)
+  // Pelo menu da conta (RF-06), o mesmo diálogo da faixa.
+  await page.getByRole('button', { name: 'Menu da conta' }).click()
+  await page.getByRole('button', { name: 'Resetar demo' }).last().click()
+  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
+  await expect(confirmacao).toBeVisible()
+  await confirmacao.getByRole('button', { name: 'Cancelar' }).click()
+
+  await expect(confirmacao).toBeHidden()
+  const depois = await lerTabela(page, 'processos')
+  expect(depois.find((p) => p.id === processo.id)?.apelido).toBe('Alterado na demo')
 })
