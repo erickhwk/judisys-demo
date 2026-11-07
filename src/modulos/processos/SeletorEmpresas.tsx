@@ -33,6 +33,10 @@ export function SeletorEmpresas({ empresas, selecionadas, aoMudar, erro }: Props
       : empresas
           .filter((e) => !selecionadas.includes(e.id) && casa(e, palavras))
           .slice(0, MAXIMO_SUGESTOES)
+  function adicionar(id: string) {
+    aoMudar([...selecionadas, id])
+    setBusca('')
+  }
   const escolhidas = selecionadas.flatMap((id) => empresas.filter((e) => e.id === id))
 
   return (
@@ -48,6 +52,12 @@ export function SeletorEmpresas({ empresas, selecionadas, aoMudar, erro }: Props
         placeholder="Buscar e adicionar empresas"
         value={busca}
         onChange={(evento) => setBusca(evento.target.value)}
+        onKeyDown={(evento) => {
+          // Enter aqui adiciona a primeira sugestão, em vez de enviar o formulário do processo.
+          if (evento.key !== 'Enter') return
+          evento.preventDefault()
+          if (sugestoes[0]) adicionar(sugestoes[0].id)
+        }}
       />
       {palavras.length > 0 && (
         <ul className={estilos.sugestoes} aria-label="Empresas encontradas">
@@ -59,10 +69,7 @@ export function SeletorEmpresas({ empresas, selecionadas, aoMudar, erro }: Props
               <button
                 type="button"
                 className={estilos.sugestao}
-                onClick={() => {
-                  aoMudar([...selecionadas, empresa.id])
-                  setBusca('')
-                }}
+                onClick={() => adicionar(empresa.id)}
               >
                 <Plus size={16} aria-hidden="true" />
                 <span className="somente-leitor">Adicionar </span>

@@ -37,6 +37,28 @@ describe('mudancasLegiveis', () => {
     ])
   })
 
+  it('percentual com vírgula e enumerações com rótulo', () => {
+    const mudancas = mudancasLegiveis(
+      {
+        mudancas: [
+          { campo: 'honorariosPercentual', de: 2.5, para: 3 },
+          { campo: 'tipo', de: null, para: 'rj' },
+          { campo: 'consolidacao', de: 'nenhuma', para: 'substancial' },
+          { campo: 'origem', de: null, para: 'automatico' },
+          { campo: 'status', de: 'aberto', para: 'cumprido' },
+        ],
+      },
+      NOMES,
+    )
+    expect(mudancas).toEqual([
+      { campo: 'Honorários (%)', de: '2,5%', para: '3%' },
+      { campo: 'Tipo', de: '', para: 'Recuperação judicial' },
+      { campo: 'Consolidação', de: 'Nenhuma', para: 'Substancial' },
+      { campo: 'Origem', de: '', para: 'Automático' },
+      { campo: 'Situação', de: 'Aberto', para: 'Cumprido' },
+    ])
+  })
+
   it('`de` null ou undefined aparece vazio; campos de ligação somem', () => {
     const mudancas = mudancasLegiveis(
       {

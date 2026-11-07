@@ -49,6 +49,8 @@ export function useExcluirProcesso(aoExcluir?: () => void): {
   pedir: (processo: Tipos['processos']) => Promise<void>
   dialogo: ReactNode
   erro: string | null
+  /** A exclusão está em andamento (o registro já pode ter sumido da leitura). */
+  excluindo: boolean
 } {
   const contar = useServico(contarExclusaoProcesso)
   const excluir = useServico(excluirProcesso)
@@ -109,5 +111,5 @@ export function useExcluirProcesso(aoExcluir?: () => void): {
       aoCancelar={() => setPedido(null)}
     />
   )
-  return { pedir, dialogo, erro }
+  return { pedir, dialogo, erro, excluindo: ocupado }
 }

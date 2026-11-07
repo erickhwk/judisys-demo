@@ -66,7 +66,7 @@ export function AvancarFase({
         for (const problema of erro.problemas) {
           const campo =
             problema.campo === 'fase' || problema.campo === 'data' ? problema.campo : 'geral'
-          porCampo[campo] = problema.mensagem
+          porCampo[campo] = [porCampo[campo], problema.mensagem].filter(Boolean).join(' ')
         }
         setErros(porCampo)
       } else {

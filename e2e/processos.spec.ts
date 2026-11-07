@@ -95,7 +95,10 @@ test('PRC-15 · RJ nova começa em "Pedido", com as empresas e o histórico', as
   await page.getByRole('combobox', { name: /UF/ }).selectOption('SP')
   const empresas = page.getByRole('searchbox', { name: /Empresas relacionadas/ })
   await empresas.fill('tatu-bola mineracao')
-  await page.getByRole('button', { name: /Adicionar Tatu-Bola Mineração/ }).click()
+  // Enter na busca adiciona a primeira sugestão, sem enviar o formulário.
+  await empresas.press('Enter')
+  await expect(page.getByRole('heading', { name: 'Novo processo', level: 1 })).toBeVisible()
+  await expect(empresas).toHaveValue('')
   await expect(
     page.getByRole('button', { name: 'Remover Tatu-Bola Mineração Ltda.' }),
   ).toBeVisible()

@@ -30,14 +30,27 @@ import { ProcessoNaoEncontrado } from './ProcessoNaoEncontrado'
 import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO, UFS } from './rotulos'
 import { SeletorEmpresas } from './SeletorEmpresas'
 
+const ORDEM_USUARIOS = { ordem: { campo: 'nome', direcao: 'asc' } } as const
+
+function ErroAoCarregar({ titulo }: { titulo: string }) {
+  return (
+    <>
+      <Cabecalho titulo={titulo} />
+      <Erro mensagem="Não foi possível carregar o formulário." />
+    </>
+  )
+}
+
 export function NovoProcesso() {
   const { sessao } = useSessao()
   const criar = useServico(criarProcesso)
   const navegar = useNavigate()
-  const usuarios = useTodos('usuarios')
+  // Mesma consulta (e cache) do FormularioProcesso.
+  const usuarios = useTodos('usuarios', ORDEM_USUARIOS)
   const responsavelPadrao =
     sessao && usuarios.data?.some((u) => u.id === sessao.usuarioId) ? sessao.usuarioId : ''
 
+  if (usuarios.isError) return <ErroAoCarregar titulo="Novo processo" />
   if (!usuarios.isSuccess) return <Cabecalho titulo="Novo processo" />
   return (
     <FormularioProcesso
@@ -79,6 +92,7 @@ export function EditarProcesso() {
   const editar = useServico(editarProcesso)
   const navegar = useNavigate()
 
+  if (processo.isError || vinculos.isError) return <ErroAoCarregar titulo="Editar processo" />
   if (processo.data === null) return <ProcessoNaoEncontrado />
   if (!processo.data || !vinculos.isSuccess) return <Cabecalho titulo="Editar processo" />
   const atual = processo.data
@@ -121,7 +135,7 @@ function FormularioProcesso({
   salvar,
 }: PropsFormularioProcesso) {
   const navegar = useNavigate()
-  const usuarios = useTodos('usuarios', { ordem: { campo: 'nome', direcao: 'asc' } })
+  const usuarios = useTodos('usuarios', ORDEM_USUARIOS)
   const empresas = useTodos('empresas', { ordem: { campo: 'razaoSocial', direcao: 'asc' } })
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const {

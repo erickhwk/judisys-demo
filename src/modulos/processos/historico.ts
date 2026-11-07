@@ -7,6 +7,8 @@ import { CAMPO_EMPRESAS } from '../../dados/servicos/processos'
 import { formatarData, formatarMoeda } from '../../regras/datas'
 import { formatarCnj, formatarDocumento } from '../../regras/documentos'
 import { type Fase, ROTULOS_FASE } from '../../regras/fases'
+import { formatarPercentual } from './formulario'
+import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO } from './rotulos'
 
 export const ROTULOS_ACAO: Record<Log['acao'], string> = {
   criou: 'Criou',
@@ -74,6 +76,22 @@ const CAMPOS_MOEDA = new Set([
 ])
 const CAMPOS_DATA = new Set(['data', 'vencimento', 'dataPrimeira', 'dataSegunda', 'dataAgc'])
 const CAMPOS_FASE = new Set(['fase', 'faseAtual'])
+/** Valores de enumeração em texto (tipo, consolidação, origem e situação dos registros). */
+const ROTULOS_VALOR: Record<string, Readonly<Record<string, string>>> = {
+  tipo: ROTULOS_TIPO,
+  consolidacao: ROTULOS_CONSOLIDACAO,
+  origem: { automatico: 'Automático', manual: 'Manual' },
+  status: {
+    aberto: 'Aberto',
+    cumprido: 'Cumprido',
+    pendente: 'Pendente',
+    acolhido: 'Acolhido',
+    rejeitado: 'Rejeitado',
+    agendada: 'Agendada',
+    instalada: 'Instalada',
+    encerrada: 'Encerrada',
+  },
+}
 /** Campos internos que não dizem nada ao leitor do histórico. */
 const CAMPOS_OCULTOS = new Set(['processoId', 'marcoId', 'agcId', 'credorId', 'empresaId'])
 
@@ -99,6 +117,10 @@ function formatarValor(campo: string, valor: unknown, nomes: Nomes): string {
   if (CAMPOS_FASE.has(campo) && typeof valor === 'string') {
     return ROTULOS_FASE[valor as Fase] ?? valor
   }
+  if (campo === 'honorariosPercentual' && typeof valor === 'number') {
+    return `${formatarPercentual(valor)}%`
+  }
+  if (typeof valor === 'string' && ROTULOS_VALOR[campo]?.[valor]) return ROTULOS_VALOR[campo][valor]
   if (campo === 'numeroCnj' && typeof valor === 'string') return formatarCnj(valor)
   if (campo === 'categoria' && typeof valor === 'string') {
     return CATEGORIAS_INFORME[valor as CategoriaInforme] ?? valor

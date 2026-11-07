@@ -34,7 +34,8 @@ export function TelaDoProcesso({ aba }: { aba: Aba }) {
   const [erroDesfazer, setErroDesfazer] = useState<string | null>(null)
 
   if (processo.isError) return <Erro mensagem="Não foi possível carregar o processo." />
-  if (processo.data === null) return <ProcessoNaoEncontrado />
+  // Durante a exclusão, o processo some da leitura antes de a tela navegar para a lista.
+  if (processo.data === null) return exclusao.excluindo ? null : <ProcessoNaoEncontrado />
   if (!processo.data || !sessao) return null
   const atual = processo.data
 
