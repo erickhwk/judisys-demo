@@ -1,6 +1,7 @@
 import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app'
+import { Boot } from './dados/boot'
 import './estilos/global.css'
 
 // Catálogo dos componentes (DMO-09), só em dev: fora do build de produção.
@@ -18,7 +19,9 @@ createRoot(raiz).render(
         <Catalogo />
       </Suspense>
     ) : (
-      <App />
+      <Boot>
+        <App />
+      </Boot>
     )}
   </StrictMode>,
 )
