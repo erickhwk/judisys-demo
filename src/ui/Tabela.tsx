@@ -54,7 +54,10 @@ export function Tabela<T>({
       ) : (
         // biome-ignore lint/a11y/noNoninteractiveTabindex: área rolável precisa de foco para rolar pelo teclado
         <section className={estilos.rolagem} aria-label={rotulo} tabIndex={0}>
-          <table className={estilos.tabela} style={{ minWidth: larguraMinima }}>
+          <table
+            className={estilos.tabela}
+            style={{ minWidth: larguraMinimaEfetiva(colunas, larguraMinima) }}
+          >
             <thead>
               <tr>
                 {colunas.map((coluna) => (
@@ -93,6 +96,26 @@ export function Tabela<T>({
       {rodape && <div className={estilos.rodape}>{rodape}</div>}
     </div>
   )
+}
+
+/** Espaço mínimo de cada coluna sem `largura` (o nome, em geral) quando a tabela encolhe. */
+const MINIMO_COLUNA_LIVRE = 200
+
+/**
+ * Com `table-layout: fixed`, as colunas sem `largura` ficam com o que sobra das fixas em px. Na
+ * largura mínima, a sobra podia cair para poucos px e o nome quebrar letra a letra no celular
+ * (DMO-23). A mínima cresce até as colunas livres terem `MINIMO_COLUNA_LIVRE` cada. Colunas em %
+ * crescem com a tabela e ficam fora da conta.
+ */
+function larguraMinimaEfetiva<T>(colunas: ColunaTabela<T>[], larguraMinima: number): number {
+  if (colunas.some((coluna) => coluna.largura?.endsWith('%'))) return larguraMinima
+  let fixas = 0
+  let livres = 0
+  for (const coluna of colunas) {
+    if (coluna.largura?.endsWith('px')) fixas += Number.parseFloat(coluna.largura)
+    else if (!coluna.largura) livres++
+  }
+  return Math.max(larguraMinima, fixas + livres * MINIMO_COLUNA_LIVRE)
 }
 
 function classeAlinhamento(alinhar: ColunaTabela<unknown>['alinhar']) {

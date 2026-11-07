@@ -6,6 +6,11 @@
   background: var(--cor-fundo);
 }
 
+/* Só o invólucro do `inert` da faixa: não cria caixa. */
+.faixa {
+  display: contents;
+}
+
 .corpo {
   flex: 1;
   min-height: 0;
