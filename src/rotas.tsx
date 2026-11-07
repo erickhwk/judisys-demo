@@ -2,6 +2,7 @@
 // troca só a sua, pondo o componente dela no lugar do `EmConstrucao`. O roteador (roteador.tsx)
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
+import { TelaCredor, TelaQgc } from './modulos/credores'
 import { ListaEmpresas, NovaEmpresa, TelaEmpresa } from './modulos/empresas'
 import { Agenda } from './modulos/prazos/Agenda'
 import {
@@ -28,6 +29,7 @@ function rota(caminho: string, acao: Acao, modulo: Modulo, tela: ReactNode): Def
 /** Telas dentro do layout (faixa, menu lateral, rodapé). */
 export const ROTAS: DefinicaoRota[] = [
   rota('/', 'ler', 'dashboard', <EmConstrucao titulo="Dashboard" />),
+  rota('/processos/:id/credores/:credorId', 'ler', 'credores', <TelaCredor />),
   rota('/processos', 'ler', 'processos', <ListaProcessos />),
   rota('/processos/novo', 'editar', 'processos', <NovoProcesso />),
   rota('/processos/:id/editar', 'editar', 'processos', <EditarProcesso />),
@@ -38,7 +40,6 @@ export const ROTAS: DefinicaoRota[] = [
   rota('/processos/:id/agc', 'ler', 'agc', <TelaDoProcesso aba="agc" />),
   rota('/processos/:id/informes', 'ler', 'informes', <TelaDoProcesso aba="informes" />),
   rota('/processos/:id/historico', 'ler', 'logs', <TelaDoProcesso aba="historico" />),
-  rota('/processos/:id/credores/:credorId', 'ler', 'credores', <EmConstrucao titulo="Credor" />),
   rota('/processos/:id/agc/:agcId', 'ler', 'agc', <EmConstrucao titulo="AGC" />),
   rota('/empresas', 'ler', 'empresas', <ListaEmpresas />),
   rota('/empresas/novo', 'editar', 'empresas', <NovaEmpresa />),
@@ -53,5 +54,5 @@ export const ROTAS: DefinicaoRota[] = [
 
 /** Telas sem o layout (impressão). */
 export const ROTAS_SEM_LAYOUT: DefinicaoRota[] = [
-  rota('/processos/:id/qgc', 'ler', 'credores', <EmConstrucao titulo="QGC" />),
+  rota('/processos/:id/qgc', 'ler', 'credores', <TelaQgc />),
 ]

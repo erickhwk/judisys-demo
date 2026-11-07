@@ -1,0 +1,157 @@
+/* QGC para impressão (DMO-15, RF-30). */
+
+.paginaImpressao {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1040px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 32px 16px 56px;
+  background: var(--cor-superficie);
+}
+
+.barraImpressao {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cabecalhoQgc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--cor-azul-900);
+}
+
+.sobretitulo {
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cor-dourado-700);
+}
+
+.dadosProcesso {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+  margin: 0;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.dadosProcesso dt {
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.dadosProcesso dd {
+  margin: 0;
+  color: var(--cor-texto);
+}
+
+.grupoQgc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tabelaQgc {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+.tabelaQgc th,
+.tabelaQgc td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--cor-borda-linha);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.tabelaQgc .direita,
+.tabelaQgc .numero {
+  text-align: right;
+}
+
+.tabelaQgc .numero {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tabelaQgc thead th {
+  border-bottom: 1px solid var(--cor-borda);
+  font-size: var(--tamanho-caixa-alta);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cor-texto-muted);
+}
+
+.tabelaQgc thead th:nth-child(2) {
+  width: 190px;
+}
+
+.tabelaQgc thead th:nth-child(3) {
+  width: 170px;
+}
+
+.tabelaQgc tfoot th,
+.tabelaQgc tfoot td {
+  border-bottom: 0;
+  border-top: 2px solid var(--cor-borda);
+  font-weight: 700;
+  color: var(--cor-texto);
+}
+
+.totalGeral {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 24px;
+  padding: 16px 12px;
+  border-top: 2px solid var(--cor-azul-900);
+  border-bottom: 2px solid var(--cor-azul-900);
+  font-weight: 700;
+}
+
+.totalGeral strong {
+  margin-left: auto;
+  font-family: var(--fonte-titulo);
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .tabelaQgc {
+    font-size: 13px;
+  }
+
+  .tabelaQgc th,
+  .tabelaQgc td {
+    padding: 8px 6px;
+  }
+
+  /* Cabe o CNPJ formatado inteiro (18 caracteres a 13px), sem invadir a coluna do valor. */
+  .tabelaQgc thead th:nth-child(2) {
+    width: 142px;
+  }
+
+  .tabelaQgc thead th:nth-child(3) {
+    width: 116px;
+  }
+}
+
+@media print {
+  .paginaImpressao {
+    max-width: none;
+    padding: 0;
+    gap: 16px;
+  }
+}
