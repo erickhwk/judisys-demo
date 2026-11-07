@@ -1,5 +1,6 @@
 // Lista de processos (RF-11), como `processos-lista.html`: busca por apelido, CNJ e empresa,
-// abas por tipo, filtro de fase e paginação de 50. Busca, filtros e página ficam na URL.
+// abas por tipo, filtro de fase, paginação de 50 e exportação CSV de tudo que passa nos filtros
+// (RF-44). Busca, filtros e página ficam na URL.
 import { useQuery } from '@tanstack/react-query'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
@@ -17,6 +18,7 @@ import {
   type TipoProcesso,
 } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
+import { hoje } from '../../regras/relogio'
 import { Botao, BotaoIcone } from '../../ui/Botao'
 import { CampoSelecao } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
@@ -24,10 +26,12 @@ import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { Selo } from '../../ui/Selo'
 import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
+import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import { Cabecalho } from './Cabecalho'
 import { useExcluirProcesso } from './ExcluirProcesso'
+import { exportarProcessos } from './exportacao'
 import { listarProcessos } from './listagem'
 import { NavegacaoAbas } from './NavegacaoAbas'
 import { plural, ROTULOS_TIPO, TOM_TIPO } from './rotulos'
@@ -62,6 +66,7 @@ export function ListaProcessos() {
     empresas: useRepo('empresas'),
     processoEmpresas: useRepo('processoEmpresas'),
   }
+  const repoUsuarios = useRepo('usuarios')
   const filtro = { busca, tipo, fase, pagina }
   const lista = useQuery({
     queryKey: ['processos', 'lista', filtro],
@@ -71,6 +76,9 @@ export function ListaProcessos() {
   const usuarios = useTodos('usuarios')
   const nomeDe = (id: string) => usuarios.data?.find((u) => u.id === id)?.nome ?? '—'
   const exclusao = useExcluirProcesso()
+  const exportacao = useExportarCsv(() =>
+    exportarProcessos({ ...repos, usuarios: repoUsuarios }, { busca, tipo, fase }, hoje()),
+  )
 
   /** Troca parâmetros da URL; mudar busca ou filtro volta à primeira página. */
   function mudar(novos: Record<string, string | undefined>) {
@@ -174,17 +182,21 @@ export function ListaProcessos() {
             : undefined
         }
         acoes={
-          podeEditar && (
-            <Botao
-              variante="primario"
-              icone={<Plus size={18} />}
-              onClick={() => navegar('/processos/novo')}
-            >
-              Novo processo
-            </Botao>
-          )
+          <>
+            {exportacao.botao}
+            {podeEditar && (
+              <Botao
+                variante="primario"
+                icone={<Plus size={18} />}
+                onClick={() => navegar('/processos/novo')}
+              >
+                Novo processo
+              </Botao>
+            )}
+          </>
         }
       />
+      {exportacao.erro}
 
       <Filtros
         aoLimpar={busca || fase || tipo ? () => setParametros({}, { replace: true }) : undefined}

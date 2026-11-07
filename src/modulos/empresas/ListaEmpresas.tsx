@@ -2,8 +2,7 @@
 // BUS-03), paginação de 50, exportação CSV de tudo que passa na busca (RF-44) e exclusão (T-23).
 // Busca e página ficam na URL, para o "voltar" do navegador e do formulário manterem a lista.
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Download, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { useRepo } from '../../dados/contexto'
 import { type Filtro, POR_PAGINA } from '../../dados/repositorio'
@@ -16,9 +15,9 @@ import { Erro } from '../../ui/Erro'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
+import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
-import { baixarArquivo } from './baixar'
 import { Cabecalho } from './Cabecalho'
 import estilos from './Empresas.module.css'
 import { useExclusaoEmpresa } from './ExclusaoEmpresa'
@@ -57,21 +56,10 @@ export function ListaEmpresas() {
     setParametros(proximos, { replace: true })
   }
 
-  const [exportando, setExportando] = useState(false)
-  const [erroExportar, setErroExportar] = useState(false)
-
-  async function exportar() {
-    setExportando(true)
-    setErroExportar(false)
-    try {
-      const todas = await repo.todos({ busca, ordem: ORDEM })
-      baixarArquivo(nomeArquivoCsv('empresas', hoje()), gerarCsv(COLUNAS_CSV_EMPRESAS, todas))
-    } catch {
-      setErroExportar(true)
-    } finally {
-      setExportando(false)
-    }
-  }
+  const exportacao = useExportarCsv(async () => ({
+    nome: nomeArquivoCsv('empresas', hoje()),
+    conteudo: gerarCsv(COLUNAS_CSV_EMPRESAS, await repo.todos({ busca, ordem: ORDEM })),
+  }))
 
   const colunas: ColunaTabela<Empresa>[] = [
     {
@@ -143,9 +131,7 @@ export function ListaEmpresas() {
         apoio={apoio}
         acoes={
           <>
-            <Botao icone={<Download size={18} />} onClick={exportar} disabled={exportando}>
-              Exportar CSV
-            </Botao>
+            {exportacao.botao}
             {podeEditar && (
               <Botao
                 variante="primario"
@@ -158,7 +144,7 @@ export function ListaEmpresas() {
           </>
         }
       />
-      {erroExportar && <Erro mensagem="Não foi possível exportar o CSV." />}
+      {exportacao.erro}
       <Filtros aoLimpar={busca ? () => mudar({ busca: '' }) : undefined}>
         <CampoBusca
           rotulo="Buscar por razão social, nome fantasia ou CNPJ"

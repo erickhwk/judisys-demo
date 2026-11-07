@@ -1,6 +1,6 @@
 // Agenda geral (RF-25, SDD §7.4): prazos de todos os processos em lista, com os filtros de período,
-// processo e responsável (PRZ-08), ou no calendário mensal (PRZ-09). Vista, filtros, mês e página
-// ficam na URL (#/agenda?vista=lista|calendario), para o link e o voltar do navegador.
+// processo e responsável (PRZ-08) e exportação CSV de tudo que passa nos filtros (RF-44), ou no
+// calendário mensal (PRZ-09). Vista, filtros, mês e página ficam na URL (#/agenda?vista=lista|calendario), para o link e o voltar do navegador.
 import { CalendarDays, List, Plus } from 'lucide-react'
 import { type ReactNode, useMemo } from 'react'
 import { useSearchParams } from 'react-router'
@@ -13,9 +13,11 @@ import { juntarClasses } from '../../ui/classes'
 import { Erro } from '../../ui/Erro'
 import { Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
+import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { AvisoDaAcao } from './AvisoDaAcao'
 import { CalendarioMensal } from './CalendarioMensal'
+import { exportarPrazos } from './exportacao'
 import estilos from './prazos.module.css'
 import {
   ehMes,
@@ -86,6 +88,10 @@ export function Agenda() {
     [consultaPrazos.data, processos, periodo, processoId, responsavelId, hoje],
   )
 
+  const exportacao = useExportarCsv(async () =>
+    exportarPrazos(filtrados, processos, responsaveis, hoje),
+  )
+
   const mudar = (mudancas: Record<string, string | null>) => {
     setParametros(
       (atuais) => {
@@ -145,6 +151,7 @@ export function Agenda() {
               Calendário
             </BotaoVista>
           </fieldset>
+          {vista === 'lista' && !carregando && !falhou && exportacao.botao}
           {acoes.podeEditar && (
             <Botao variante="primario" icone={<Plus size={18} />} onClick={() => acoes.novo()}>
               Novo prazo
@@ -202,6 +209,7 @@ export function Agenda() {
       </Filtros>
 
       <AvisoDaAcao aviso={acoes.aviso} />
+      {exportacao.erro}
 
       {falhou ? (
         <Erro mensagem="Não foi possível carregar a agenda." />

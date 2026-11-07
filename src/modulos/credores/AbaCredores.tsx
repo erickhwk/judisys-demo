@@ -1,20 +1,23 @@
 // Aba Credores do processo (RF-26 a RF-30): quadro-resumo por classe acima da lista, filtro por
-// classe, busca por nome ou CPF/CNPJ, 50 por página, e os pedidos de quem está fora da lista.
+// classe, busca por nome ou CPF/CNPJ, 50 por página, exportação CSV de tudo que passa no filtro
+// (RF-44, CRD-11) e os pedidos de quem está fora da lista.
 // Só o conteúdo: o cabeçalho do processo e as abas são da TelaDoProcesso (DMO-12).
 import { FilePlus2, Printer, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
+import { useRepo } from '../../dados/contexto'
 import type { Tipos } from '../../dados/schemas'
 import { formatarMoeda } from '../../regras/datas'
 import { formatarDocumento } from '../../regras/documentos'
-import type { TipoProcesso } from '../../regras/fases'
 import { pode } from '../../regras/permissoes'
 import { type Classe, resumoPorClasse, rotuloClasse } from '../../regras/qgc'
+import { hoje } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
 import { CampoSelecao } from '../../ui/Campo'
 import { CampoBusca, Filtros } from '../../ui/Filtros'
 import { Paginacao } from '../../ui/Paginacao'
 import { Tabela } from '../../ui/Tabela'
+import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import {
@@ -27,21 +30,24 @@ import {
 import estilos from './credores.module.css'
 import { DialogoCredor } from './DialogoCredor'
 import { DialogoPedido } from './DialogoPedido'
+import { exportarCredores, filtroDaLista } from './exportacao'
 import { classesDoTipo } from './formularios'
 import { ListaPedidos } from './ListaPedidos'
 import { valorOuTraco } from './moeda'
 import { QuadroResumo } from './QuadroResumo'
 
 type Credor = Tipos['credores']
+type Processo = Tipos['processos']
 
 export function AbaCredores({ processoId }: { processoId: string }) {
   const processo = useProcesso(processoId)
   if (processo.isPending) return <p className={estilos.carregando}>Carregando credores…</p>
   if (!processo.data) return <Vazio titulo="Processo não encontrado" />
-  return <ConteudoAba processoId={processoId} tipo={processo.data.tipo} />
+  return <ConteudoAba processo={processo.data} />
 }
 
-function ConteudoAba({ processoId, tipo }: { processoId: string; tipo: TipoProcesso }) {
+function ConteudoAba({ processo }: { processo: Processo }) {
+  const { id: processoId, tipo } = processo
   const { sessao } = useSessao()
   const podeEditar = sessao ? pode(sessao.papel, 'editar', 'credores') : false
   const [parametros, setParametros] = useSearchParams()
@@ -53,12 +59,11 @@ function ConteudoAba({ processoId, tipo }: { processoId: string; tipo: TipoProce
   const todos = useCredoresDoProcesso(processoId)
   const publicada = useRelacaoPublicada(processoId)
   const pedidos = usePedidosDoProcesso(processoId)
-  const lista = usePaginaDeCredores({
-    onde: { processoId, classe: classe || undefined },
-    busca,
-    pagina,
-    ordem: { campo: 'nome', direcao: 'asc' },
-  })
+  const lista = usePaginaDeCredores({ ...filtroDaLista(processoId, { busca, classe }), pagina })
+  const repoCredores = useRepo('credores')
+  const exportacao = useExportarCsv(() =>
+    exportarCredores(repoCredores, processo, { busca, classe }, hoje()),
+  )
 
   function mudar(campos: Record<string, string>) {
     setParametros(
@@ -83,6 +88,7 @@ function ConteudoAba({ processoId, tipo }: { processoId: string; tipo: TipoProce
           <Printer size={18} aria-hidden="true" />
           QGC para impressão
         </Link>
+        {exportacao.botao}
         {podeEditar && (
           <>
             <Botao
@@ -103,6 +109,7 @@ function ConteudoAba({ processoId, tipo }: { processoId: string; tipo: TipoProce
           </>
         )}
       </div>
+      {exportacao.erro}
 
       {todos.data && <QuadroResumo resumo={resumoPorClasse(todos.data)} tipo={tipo} />}
 

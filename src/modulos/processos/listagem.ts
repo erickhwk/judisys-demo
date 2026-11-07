@@ -27,8 +27,25 @@ export interface ListaDeProcessos extends Pagina<Processo> {
 
 export async function listarProcessos(
   repos: ReposListagem,
-  { busca = '', tipo, fase, pagina = 1 }: FiltroProcessos,
+  { pagina = 1, ...filtro }: FiltroProcessos,
 ): Promise<ListaDeProcessos> {
+  const { processos, porTipo } = await filtrarProcessos(repos, filtro)
+  const paginas = Math.max(1, Math.ceil(processos.length / POR_PAGINA))
+  const atual = Math.min(Math.max(1, Number.isFinite(pagina) ? Math.floor(pagina) : 1), paginas)
+  return {
+    itens: processos.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA),
+    total: processos.length,
+    pagina: atual,
+    paginas,
+    porTipo,
+  }
+}
+
+/** Todos os processos que passam na busca, no tipo e na fase, por apelido (lista e CSV, RF-44). */
+export async function filtrarProcessos(
+  repos: ReposListagem,
+  { busca = '', tipo, fase }: Omit<FiltroProcessos, 'pagina'>,
+): Promise<{ processos: Processo[]; porTipo: ListaDeProcessos['porTipo'] }> {
   const onde = { faseAtual: fase }
   const ordem = { campo: 'apelido', direcao: 'asc' } as const
   let processos = await repos.processos.todos({ onde, ordem })
@@ -52,14 +69,5 @@ export async function listarProcessos(
     rj: processos.filter((p) => p.tipo === 'rj').length,
     falencia: processos.filter((p) => p.tipo === 'falencia').length,
   }
-  const doTipo = tipo ? processos.filter((p) => p.tipo === tipo) : processos
-  const paginas = Math.max(1, Math.ceil(doTipo.length / POR_PAGINA))
-  const atual = Math.min(Math.max(1, Number.isFinite(pagina) ? Math.floor(pagina) : 1), paginas)
-  return {
-    itens: doTipo.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA),
-    total: doTipo.length,
-    pagina: atual,
-    paginas,
-    porTipo,
-  }
+  return { processos: tipo ? processos.filter((p) => p.tipo === tipo) : processos, porTipo }
 }
