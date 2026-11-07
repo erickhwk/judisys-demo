@@ -9,7 +9,7 @@ import { type ClasseVotante, rotuloClasse } from '../../regras/qgc'
 import type { Convocacao, Instalacao } from '../../regras/votacao'
 import { credoresVotantes, instalacao, motivoSemVoto } from '../../regras/votacao'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
-import { type ContextoGravacao, criarRepositorio } from '../repositorio'
+import { type ContextoGravacao, criarRepositorio, ErroNaoEncontrado } from '../repositorio'
 import type { Tipos } from '../schemas'
 import { buscarOuFalhar, ErroRegra, exigirPermissao } from './comum'
 
@@ -49,7 +49,7 @@ export function salvarAgc(armazenamento: Armazenamento, contexto: ContextoGravac
         return repo.criar({ processoId: processo.id, ...campos, status: 'agendada' })
       }
       const agc = await agcAgendada(armazenamento, id)
-      if (agc.processoId !== processo.id) throw new ErroRegra(ERRO_AGC_NAO_AGENDADA)
+      if (agc.processoId !== processo.id) throw new ErroNaoEncontrado('agcs', agc.id)
       return repo.atualizar(agc.id, campos)
     })
   }
@@ -103,7 +103,9 @@ export function marcarPresenca(armazenamento: Armazenamento, contexto: ContextoG
       for (const credorId of new Set(credorIds)) {
         const credor = credores.get(credorId)
         if (!credor) throw new ErroRegra(ERRO_CREDOR_DE_OUTRO_PROCESSO)
-        const motivo = motivoSemVoto(credor)
+        // Desmarcar vale também para quem perdeu o direito a voto depois de marcado (ex.: crédito
+        // zerado por um pedido acolhido); marcar, só para quem vota (INV-06).
+        const motivo = presente ? motivoSemVoto(credor) : null
         if (motivo) throw new ErroRegra(`${credor.nome}: ${motivo.toLowerCase()}.`)
 
         const atual = presencaPorCredor.get(credorId)
@@ -136,8 +138,12 @@ export function marcarClasse(armazenamento: Armazenamento, contexto: ContextoGra
   }): Promise<void> => {
     exigirPermissao(contexto, 'agc')
     const agc = await buscarOuFalhar(armazenamento, 'agcs', agcId)
-    const votantes = credoresVotantes(await credoresDoProcesso(armazenamento, agc.processoId))
-    const credorIds = votantes.filter((v) => v.classe === classe).map((v) => v.credorId)
+    const credores = await credoresDoProcesso(armazenamento, agc.processoId)
+    const credorIds = presente
+      ? credoresVotantes(credores)
+          .filter((v) => v.classe === classe)
+          .map((v) => v.credorId)
+      : credores.filter((c) => c.classe === classe).map((c) => c.id)
     await marcar({ agcId, credorIds, presente })
   }
 }

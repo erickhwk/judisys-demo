@@ -57,7 +57,9 @@ export function linhasDePresenca(
     return {
       credor,
       valor: valorVigente(credor),
-      presente: motivo === null && presentes.has(credor.id),
+      // Quem perdeu o direito a voto depois de marcado continua aparecendo como presente, para
+      // poder ser desmarcado.
+      presente: presentes.has(credor.id),
       motivo,
     }
   })

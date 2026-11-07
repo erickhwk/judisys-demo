@@ -12,6 +12,7 @@ import { Selo } from '../../ui/Selo'
 import { Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
+import { plural } from '../processos/rotulos'
 import { type Agc, emSimulacao, SITUACOES_AGC } from './agc'
 import estilos from './agc.module.css'
 import { useAgcsDoProcesso } from './consultas'
@@ -109,6 +110,5 @@ export function AbaAgc({ processoId }: { processoId: string }) {
 }
 
 function quantidade(total: number): string {
-  if (total === 0) return 'Nenhuma AGC'
-  return total === 1 ? '1 AGC' : `${total} AGCs`
+  return total === 0 ? 'Nenhuma AGC' : plural(total, 'AGC', 'AGCs')
 }

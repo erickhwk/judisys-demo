@@ -9,6 +9,7 @@ import { pode } from '../../regras/permissoes'
 import { hoje } from '../../regras/relogio'
 import { credoresVotantes } from '../../regras/votacao'
 import { Botao } from '../../ui/Botao'
+import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { Vazio } from '../../ui/Vazio'
@@ -35,6 +36,7 @@ export function TelaAgc() {
   const { id = '', agcId = '' } = useParams()
   const processo = useProcesso(id)
   const agc = useAgc(agcId)
+  if (processo.isError || agc.isError) return <Erro mensagem="Não foi possível carregar a AGC." />
   if (processo.isPending || agc.isPending) {
     return <p className={estilos.carregando}>Carregando AGC…</p>
   }
@@ -107,7 +109,9 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
         <p>{agc.pauta}</p>
       </section>
 
-      {credores.isPending || presentes.isPending ? (
+      {credores.isError || presentes.isError ? (
+        <Erro mensagem="Não foi possível carregar a lista de presença." />
+      ) : credores.isPending || presentes.isPending ? (
         <p className={estilos.carregando}>Carregando lista de presença…</p>
       ) : (
         <>

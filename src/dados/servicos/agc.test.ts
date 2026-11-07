@@ -159,6 +159,32 @@ describe.each(IMPLEMENTACOES)('serviços da AGC (%s)', (_nome, criar) => {
       expect(await presentesDe('agc-001')).toEqual(['crd-0001', 'crd-0003'])
     })
 
+    it('credor que deixou de votar depois de marcado pode ser desmarcado, também pela classe', async () => {
+      // crd-0005 (não sujeito) e crd-0007 (classe II, valor zero) marcados antes de perder o voto.
+      const presenca = (id: string, credorId: string) => ({
+        id,
+        agcId: 'agc-001',
+        credorId,
+        escritorioId: ESCRITORIO_ID,
+        criadoEm: AGORA,
+        atualizadoEm: AGORA,
+      })
+      await armazenamento.put('presencas', presenca('pre-x1', 'crd-0005'))
+      await armazenamento.put('presencas', presenca('pre-x2', 'crd-0007'))
+
+      await marcarPresenca(
+        armazenamento,
+        contexto(),
+      )({ agcId: 'agc-001', credorIds: ['crd-0005'], presente: false })
+      await marcarClasse(
+        armazenamento,
+        contexto(),
+      )({ agcId: 'agc-001', classe: 'garantia-real', presente: false })
+      const presentes = await presentesDe('agc-001')
+      expect(presentes).not.toContain('crd-0005')
+      expect(presentes).not.toContain('crd-0007')
+    })
+
     it('recusa credor de outro processo, sem gravar nada', async () => {
       const falha = marcarPresenca(
         armazenamento,

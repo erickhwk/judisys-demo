@@ -1,7 +1,7 @@
 // Lista de presença da AGC (RF-32): credor a credor, com busca, filtro de classe e 50 por página.
 // Quem não vota (não sujeito, valor zero) aparece com a caixa desabilitada e o motivo (AGC-24,
 // INV-06). "Todos da classe" fica no painel de instalação, ao lado do quórum de cada classe.
-import { useId, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { useServico } from '../../dados/contexto'
 import { POR_PAGINA } from '../../dados/repositorio'
 import { marcarPresenca } from '../../dados/servicos/agc'
@@ -14,6 +14,7 @@ import { Paginacao } from '../../ui/Paginacao'
 import { Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { mensagemDeErro } from '../credores/erros'
+import { plural } from '../processos/rotulos'
 import { type Agc, type FiltroClasse, filtrarPresenca, type LinhaPresenca } from './agc'
 import estilos from './agc.module.css'
 
@@ -36,12 +37,16 @@ export function ListaPresenca({
   const [erro, setErro] = useState<string | null>(null)
   const marcar = useServico(marcarPresenca)
 
-  const filtradas = filtrarPresenca(linhas, { busca, classe })
+  const filtradas = useMemo(
+    () => filtrarPresenca(linhas, { busca, classe }),
+    [linhas, busca, classe],
+  )
   const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA))
   const paginaAtual = Math.min(pagina, totalPaginas)
   const visiveis = filtradas.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA)
   const votantes = linhas.filter((linha) => !linha.motivo)
   const presentes = votantes.filter((linha) => linha.presente).length
+  const presentesSemVoto = linhas.filter((linha) => linha.motivo && linha.presente).length
 
   const presenteEm = (linha: LinhaPresenca) => otimistas.get(linha.credor.id) ?? linha.presente
 
@@ -120,6 +125,8 @@ export function ListaPresenca({
         topo={
           <span>
             {presentes} de {votantes.length} credores votantes presentes
+            {presentesSemVoto > 0 &&
+              ` · ${plural(presentesSemVoto, 'marcado que não vota mais', 'marcados que não votam mais')}: desmarque`}
           </span>
         }
         vazio={
@@ -140,7 +147,11 @@ export function ListaPresenca({
                 type="checkbox"
                 className={estilos.caixa}
                 checked={presenteEm(linha)}
-                disabled={!editavel || linha.motivo !== null || otimistas.has(linha.credor.id)}
+                disabled={
+                  !editavel ||
+                  (linha.motivo !== null && !presenteEm(linha)) ||
+                  otimistas.has(linha.credor.id)
+                }
                 aria-label={`Presente: ${linha.credor.nome}`}
                 aria-describedby={linha.motivo ? `motivo-${linha.credor.id}` : undefined}
                 onChange={() => alternar(linha)}

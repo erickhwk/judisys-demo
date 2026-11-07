@@ -19,6 +19,7 @@ import { Confirmacao } from '../../ui/Confirmacao'
 import { Selo, type TomSelo } from '../../ui/Selo'
 import { Tabela } from '../../ui/Tabela'
 import { mensagemDeErro } from '../credores/erros'
+import { plural } from '../processos/rotulos'
 import type { Agc } from './agc'
 import estilos from './agc.module.css'
 
@@ -31,7 +32,9 @@ const SITUACOES: Record<SituacaoInstalacaoClasse, { rotulo: string; tom: TomSelo
 /** Percentual do valor votante presente, truncado em centésimos (50,004% não vira 50,01%). */
 function percentual(classe: InstalacaoClasse): string {
   if (classe.valorTotal === 0) return '—'
-  return `${formatarCentesimos(Math.floor((classe.valorPresente * 10000) / classe.valorTotal))}%`
+  // Em BigInt: centavos × 10.000 passa do inteiro seguro em classes de bilhões.
+  const centesimos = (BigInt(classe.valorPresente) * BigInt(10000)) / BigInt(classe.valorTotal)
+  return `${formatarCentesimos(Number(centesimos))}%`
 }
 
 export function PainelInstalacao({
@@ -233,8 +236,12 @@ export function PainelInstalacao({
         titulo={`Instalar a AGC em ${convocacao}ª convocação?`}
         mensagem={
           <>
-            {situacao.classes.reduce((soma, c) => soma + c.quantidadePresente, 0)} credores
-            presentes. Depois de instalada, a lista de presença fica fechada.
+            {plural(
+              situacao.classes.reduce((soma, c) => soma + c.quantidadePresente, 0),
+              'credor presente',
+              'credores presentes',
+            )}
+            . Depois de instalada, a lista de presença fica fechada.
             {erro && (
               <span className={estilos.erroTexto} role="alert">
                 {' '}

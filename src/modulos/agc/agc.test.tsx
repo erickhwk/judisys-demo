@@ -78,8 +78,8 @@ describe('regras da tela', () => {
     const primeiraSemVoto = linhas.findIndex((linha) => linha.motivo)
     expect(linhas.slice(primeiraSemVoto).every((linha) => linha.motivo)).toBe(true)
     expect(linhas[0]?.credor.classe).toBe('trabalhista')
-    // Presença gravada de quem não vota não conta.
-    expect(linhas.find((l) => l.credor.id === 'crd-0005')).toMatchObject({ presente: false })
+    // Quem deixou de votar depois de marcado aparece presente, para poder ser desmarcado.
+    expect(linhas.find((l) => l.credor.id === 'crd-0005')).toMatchObject({ presente: true })
     expect(linhas.find((l) => l.credor.id === 'crd-0001')).toMatchObject({ presente: true })
 
     const semVoto = filtrarPresenca(linhas, { busca: '', classe: 'sem-voto' })
