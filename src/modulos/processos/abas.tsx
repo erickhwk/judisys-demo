@@ -4,6 +4,7 @@ import type { JSX } from 'react'
 import type { Modulo } from '../../regras/permissoes'
 import { EmConstrucao } from '../../ui/TelasDeAviso'
 import { AbaCredores } from '../credores/AbaCredores'
+import { AbaInformes } from '../informes/AbaInformes'
 import { AbaPrazos } from '../prazos/AbaPrazos'
 import { AbaEmpresas } from './AbaEmpresas'
 import { AbaHistorico } from './AbaHistorico'
@@ -35,18 +36,14 @@ export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = {
   empresas: { rotulo: 'Empresas', modulo: 'empresas', Conteudo: AbaEmpresas },
   credores: { rotulo: 'Credores', modulo: 'credores', Conteudo: AbaCredores },
   prazos: { rotulo: 'Prazos', modulo: 'prazos', Conteudo: AbaPrazos },
-  // TEMPORÁRIO: AGC e Informes chegam com DMO-16 e DMO-19.
+  // TEMPORÁRIO: a AGC chega com a DMO-16.
   agc: {
     rotulo: 'AGC',
     modulo: 'agc',
     soRj: true,
     Conteudo: () => <EmConstrucao titulo="AGC" />,
   },
-  informes: {
-    rotulo: 'Informes',
-    modulo: 'informes',
-    Conteudo: () => <EmConstrucao titulo="Informes" />,
-  },
   // FIM DO TEMPORÁRIO
+  informes: { rotulo: 'Informes', modulo: 'informes', Conteudo: AbaInformes },
   historico: { rotulo: 'Histórico', modulo: 'logs', Conteudo: AbaHistorico },
 }

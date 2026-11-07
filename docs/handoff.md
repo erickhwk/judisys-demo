@@ -4,40 +4,45 @@ Data: 2026-11-07. Responder sempre em pt-BR.
 
 ## Onde estamos
 
-- Planejamento aprovado: `docs/prd-demo.md`, `docs/sdd-demo.md` (prevalece; decisões T-01 a T-33), `docs/tasks-demo.md` (25 tarefas e lotes sugeridos no topo).
-- Repo público `erickhwk/judisys-demo` (pasta `~/code/judisys`), publicado em https://erickhwk.github.io/judisys-demo/ pelo CI a cada push na `main` (Pages ativado pela API, fonte GitHub Actions).
-- **Concluídas (Concluído 🎉 no Trello):** DMO-01 a DMO-06 e DMO-09, ou seja, lotes 1, 2 e 3. `main` em `7cbce72`, 315 testes Vitest, sem worktrees nem branches locais além da `main`.
-- Board: https://trello.com/b/ufNoQ9bK. **AJ-01** (porta do e2e por `PORTA_E2E` + teste-guarda do preset do Biome) está em "A Fazer": https://trello.com/c/QbnQZI9c.
+- Spec: `docs/prd-demo.md`, `docs/sdd-demo.md` (prevalece; decisões T-01 a T-39), `docs/tasks-demo.md` (25 tarefas, lotes sugeridos no topo).
+- Repo público `erickhwk/judisys-demo` (`~/code/judisys`), publicado em https://erickhwk.github.io/judisys-demo/ pelo CI a cada push na `main`. Já no ar: login por papel, casca (faixa, menu, rodapé), processos, empresas, prazos/agenda e credores/QGC.
+- `main` em `09a4d59`: 658 testes Vitest e 47 e2e verdes; sem worktrees nem branches locais além da `main`.
+- Board: https://trello.com/b/ufNoQ9bK.
+  - Concluído 🎉: DMO-01 a DMO-11 e AJ-01.
+  - Pronto pra deploy (lote 7a, deploy verde, falta o usuário autorizar Concluído): DMO-12, DMO-13, DMO-14, DMO-15.
+  - A Fazer: AJ-02 (componentes repetidos + `position: relative` na `.rolagem` da Tabela), AJ-03 (CNPJ único entre empresas), AJ-04 (CPF/CNPJ único entre credores do processo).
 
-## Próximo passo
+## Próximo passo: lote 7b
 
-1. **AJ-01** antes do lote 6 (quando as telas ganham e2e por tarefa). Pequeno: dá para fazer sozinho, com o checklist de revisão do `~/.claude/CLAUDE.md` em passada única (diff pequeno), `/code-review` pela skill.
-2. **Lote 4: DMO-07 (seed e PDFs) ∥ DMO-11 (serviços de processo)**, com a `execucao-paralela`. Ponha no `contexto`/`nota`:
-   - DMO-07: documentos gravados **só com dígitos** (schemas da DMO-06 fazem `transform(somenteDigitos)`); `completarCpf/Cnpj/Cnj` de `src/regras/documentos.ts` exigem base de 9/12/18 dígitos; o README tem uma linha dizendo que `pnpm seed` é placeholder: atualizar. Teste de determinismo (INV-07).
-   - DMO-11: garantir **um único RMA aberto** por RJ (INV-05) também ao desfazer/refazer "processamento deferido" (`novoRma` de `prazos.ts` nasce sem `marcoId`); **não capturar erro dentro de `armazenamento.transacao`** (Dexie aborta tudo, memória mantém gravações parciais); `excluir` genérico não faz cascata (T-23 é dos serviços); `useServico(fabrica)` exige fábrica estável.
-   - Projeto sem banco: `teste` sem `drop` (setup `pnpm install --frozen-lockfile`); enquanto o AJ-01 não entrar, os agentes não rodam `pnpm e2e` (porta fixa 4173) e o orquestrador roda no merge de teste.
-3. Seguir os lotes do `docs/tasks-demo.md`. DMO-25 é no `~/code/draft-site`, depois da demo pronta.
+**DMO-19 · Informes e anexos ∥ DMO-20 · Busca global ∥ DMO-21 · Usuários e logs**, com a `execucao-paralela` (cada uma `visual: true`). Atenção: a DMO-20 é a busca global, não usuários.
 
-## Decisões desta sessão que não estão em spec
+O que pôr no `contexto`/`nota` (não está na spec):
+- **`src/rotas.tsx` conflita sempre** (lote 7a: todo PR depois do primeiro brigou no import e, às vezes, nas linhas de rota). Peça a cada tarefa o import **numa linha própria em posição diferente** (ex.: DMO-19 logo depois do import de credores, DMO-21 no fim do bloco) e confira, depois de cada resolução, `grep -o "rota('[^']*'" src/rotas.tsx | sort | uniq -d` vazio. O resolvedor "mantém os dois lados" duplica rotas quando o conflito pega as linhas da tabela.
+- Abas do processo: `src/modulos/processos/abas.tsx` tem `agc` e `informes` num bloco `// TEMPORÁRIO`. A DMO-19 exporta `AbaInformes({ processoId })` (só conteúdo) e o orquestrador liga no mapa depois, como fez com AbaPrazos/AbaCredores; a aba AGC é da DMO-16.
+- DMO-19: anexo `{ origem: 'publico', caminho: 'anexos/x.pdf', nome }` ou `{ origem: 'local', arquivoId, ... }` (blob na tabela `arquivos`, sem log próprio); erro de cota com `ehErroDeCota`/`MENSAGEM_COTA` de `src/dados/carga.ts` (fecha o CAR-11 que ficou desmarcado na DMO-08); `VisualizadorPdf` em `src/ui/`.
+- DMO-21: logs com `de` `null` (seed) ou `undefined` (app) tratados como vazio; log de exclusão de processo usa o prefixo `cascata.<tabela>` (`PREFIXO_CASCATA` em `src/dados/servicos/`); desempate de logs no mesmo segundo é por id (UUID) no repositório; formatação de/para pode reaproveitar `src/modulos/processos/historico.ts`.
+- Componente genérico novo fica na pasta do módulo (o AJ-02 junta depois). Cabeçalho de página, download e moeda já existem em 2 ou 3 cópias: reaproveite um deles em vez de criar mais.
+- Revisor: `/comparacao-visual` logo depois da `/revisao-spec`; o `capturar.sh` só faz login por formulário, então script Playwright próprio clicando no cartão "Entrar como …", portas 431{n} (preview) e 420{n} (e2e). Mesmo assim, confira se as capturas vieram (no lote 5 faltou e o orquestrador fez).
+- Os testes e2e que contam linhas precisam esperar a lista carregar (o PRZ-10 falhou só no merge de teste por isso).
 
-- O usuário roda merge; eu rodo instalação, testes, push de branch, PR, CI e cards (ver memória `feedback_commands`). Repo/visibilidade e ações externas novas: perguntar.
-- DMO-09: o item "catálogo conferido visualmente" ficou desmarcado (não confirmado antes do merge). Catálogo só em dev: `pnpm dev` → http://localhost:5173/judisys-demo/#/catalogo (abrir a URL direto; o hash só é lido no carregamento até a DMO-10 pôr o roteador).
-- Para a DMO-18 (QGC impresso): `src/estilos/impressao.css` esconde todo `<button>`/`<nav>` na impressão; dados não podem ser `<button>`.
-- Para a DMO-17: critério novo do T-33 já está no arquivo de tarefas e no card.
+Depois do 7b: lote 8 (DMO-16 AGC cadastro e presença, DMO-18 dashboard, DMO-22 CSV), lote 9 (DMO-17 votação), lote 10 (DMO-23, DMO-24), e os AJ-02 a 04 quando couber. DMO-25 no `~/code/draft-site`, com a demo pronta.
+
+## Decisões da sessão fora da spec
+
+- O usuário faz merge e autoriza mover para Concluído; eu rodo instalação, testes, push de branch, PR, CI e cards (memória `feedback_commands`).
+- Na rodada de dúvidas, recomendações com "a sua escolha" geram ambiguidade: dê uma recomendação só.
 
 ## Pegadinhas
 
-- `biome migrate` troca o preset para `"none"` (linter desligado). Não rodar; o AJ-01 cria a guarda.
-- Markdown fica fora do Biome (`!**/*.md`); `docs/` já foi reformatado uma vez por engano.
-- `trello.sh diff` mostra "sobra no card" quando o card recebeu item cuja edição no arquivo de tarefas ainda está num PR aberto: esperado até o merge.
-- Este `docs/handoff.md` fica modificado e sem commit na `main`; commite junto com a primeira branch da próxima sessão (por exemplo, a do AJ-01) para a árvore ficar limpa antes do lote.
-- Retro aplicada em `~/code/claude-setup` (commits `8443238`, `379d4c2`, ainda sem push): `docs/projeto-novo-vite.md` e a `execucao-paralela` aceitam projeto sem banco (`teste` sem `drop`) e `visual: true` por tarefa.
+- Este `docs/handoff.md` fica modificado e sem commit na `main`: commite junto com a primeira branch da próxima sessão (ou num PR `docs:`), para a árvore ficar limpa antes do lote.
+- `biome migrate` desliga o linter (há teste-guarda em `src/biome.test.ts`); Markdown fica fora do Biome.
+- Build avisa chunk > 500 kB (614 kB na DMO-10): candidato a AJ de carregamento sob demanda.
+- Para a retro: o `capturar.sh` da `comparacao-visual` não sabe segurar/derrubar URL (telas passageiras) nem logar por clique.
 
 ## Skills sugeridas
 
-- `execucao-paralela`: lote 4 em diante (use `visual: true` nas tarefas de tela: DMO-10, DMO-12 a DMO-21, DMO-23).
-- `sdd-para-trello`: mover cards, marcar checklists, anexar PRs (AJ-01 e lotes).
-- `simplify`, `revisao-spec`, `code-review`, `security-review`: checklist antes de cada PR.
-- `comparacao-visual`: tarefas que mudam telas.
-- `run`: subir a demo e conferir no navegador.
-- `artifact-design` / `artifact-diagramming`: material do curso das regras de RJ/falência (SDD Q-02), a oferecer quando as telas estiverem encaminhadas.
+- `execucao-paralela`: lote 7b.
+- `sdd-para-trello`: cards (mover, checar, anexar PR, AJ).
+- `simplify`, `revisao-spec`, `code-review`, `security-review`: checklist antes de PR.
+- `comparacao-visual`: telas.
+- `retro`: há material acumulado desde a última (lotes 4 a 7a).
