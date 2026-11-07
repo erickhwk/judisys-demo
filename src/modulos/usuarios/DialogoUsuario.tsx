@@ -13,6 +13,7 @@ import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Dialogo } from '../../ui/Dialogo'
 import { mensagemDeErro } from '../credores/erros'
 import { NOMES_PAPEIS } from '../entrada/papeis'
+import { useSessao } from '../entrada/sessao'
 import estilos from './usuarios.module.css'
 
 type EntradaUsuario = z.input<typeof camposUsuario>
@@ -62,6 +63,7 @@ function FormularioUsuario({
   aoTerminar: () => void
 }) {
   const repo = useRepo('usuarios')
+  const { sessao, entrar } = useSessao()
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const {
     register,
@@ -82,6 +84,8 @@ function FormularioUsuario({
     try {
       if (usuario) await repo.atualizar(usuario.id, dados)
       else await repo.criar(dados)
+      // O nome do menu da conta vem da sessão: acompanha a edição do próprio usuário.
+      if (proprio && sessao) entrar({ ...sessao, nome: dados.nome })
       aoTerminar()
     } catch (falha) {
       if (falha instanceof ErroValidacao) {

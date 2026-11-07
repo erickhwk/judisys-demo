@@ -6,11 +6,11 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
 import type { Id } from '../../dados/armazenamento'
 import { useRepo, useTodos } from '../../dados/contexto'
-import { POR_PAGINA, type Repositorio } from '../../dados/repositorio'
+import { COLECOES, POR_PAGINA, type Repositorio } from '../../dados/repositorio'
 import type { Log, Registro } from '../../dados/schemas'
 import { PREFIXO_CASCATA } from '../../dados/servicos/exclusoes'
 import { formatarDataHora } from '../../regras/datas'
-import type { Modulo } from '../../regras/permissoes'
+import { type Modulo, pode } from '../../regras/permissoes'
 import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Filtros } from '../../ui/Filtros'
@@ -18,6 +18,7 @@ import { Paginacao } from '../../ui/Paginacao'
 import { type ColunaTabela, Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { Cabecalho } from '../empresas/Cabecalho'
+import { useSessao } from '../entrada/sessao'
 import { Mudancas } from '../processos/AbaHistorico'
 import { type Nomes, ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
 import { ROTULOS_MODULO } from '../usuarios/permissoes'
@@ -100,12 +101,20 @@ function useRegistrosDosLogs(logs: readonly Log[]) {
 function LinkDoRegistro({
   log,
   registros,
+  podeAbrir,
+  falhou,
 }: {
   log: Log
   registros: Map<string, Registro | null> | undefined
+  /** O papel da sessão lê o módulo do registro (RF-40: sem link para tela proibida). */
+  podeAbrir: boolean
+  /** A busca dos registros falhou: sem link, em vez de "…" para sempre. */
+  falhou: boolean
 }) {
-  if (!temDestino(log.colecao)) return <span className={estilos.apagado}>—</span>
-  if (!registros?.has(chaveDoRegistro(log))) return <span className={estilos.apagado}>…</span>
+  if (!temDestino(log.colecao) || !podeAbrir) return <span className={estilos.apagado}>—</span>
+  if (!registros?.has(chaveDoRegistro(log))) {
+    return <span className={estilos.apagado}>{falhou ? '—' : '…'}</span>
+  }
   const registro = registros.get(chaveDoRegistro(log))
   if (!registro) return <span className={estilos.apagado}>Registro não existe mais</span>
   const destino = destinoDoRegistro(log, registro)
@@ -114,6 +123,9 @@ function LinkDoRegistro({
 }
 
 export function TelaLogs() {
+  const { sessao } = useSessao()
+  const podeAbrir = (log: Log) =>
+    sessao ? pode(sessao.papel, 'ler', COLECOES[log.colecao].modulo) : false
   const [parametros, setParametros] = useSearchParams()
   const valor = (nome: Parametro) => parametros.get(nome) || undefined
   const filtros: FiltrosLogs = {
@@ -200,7 +212,14 @@ export function TelaLogs() {
       chave: 'registro',
       titulo: 'Registro',
       largura: '15%',
-      celula: (log) => <LinkDoRegistro log={log} registros={registros.data} />,
+      celula: (log) => (
+        <LinkDoRegistro
+          log={log}
+          registros={registros.data}
+          podeAbrir={podeAbrir(log)}
+          falhou={registros.isError}
+        />
+      ),
     },
   ]
 
@@ -217,6 +236,9 @@ export function TelaLogs() {
           onChange={(evento) => mudar('usuario', evento.target.value)}
         >
           <option value="">Todos os usuários</option>
+          {filtros.usuarioId && usuarios.data && !nomes.usuarios.has(filtros.usuarioId) && (
+            <option value={filtros.usuarioId}>Usuário excluído</option>
+          )}
           {usuarios.data?.map((usuario) => (
             <option key={usuario.id} value={usuario.id}>
               {usuario.nome}
@@ -241,6 +263,9 @@ export function TelaLogs() {
           onChange={(evento) => mudar('processo', evento.target.value)}
         >
           <option value="">Todos os processos</option>
+          {filtros.processoId && processos.data && !apelidos.has(filtros.processoId) && (
+            <option value={filtros.processoId}>Processo excluído</option>
+          )}
           {processos.data?.map((processo) => (
             <option key={processo.id} value={processo.id}>
               {processo.apelido}

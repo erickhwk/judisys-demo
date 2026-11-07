@@ -85,6 +85,22 @@ describe('TelaLogs', () => {
     expect(exclusao).toContain('Excluiu processo Processo excluído')
     expect(exclusao).toContain('Excluídos junto: marco de fase: 1')
     expect(exclusao).toContain('Registro não existe mais')
+    // O filtro do processo que saiu continua visível no campo.
+    expect(html).toMatch(/<option value="prc-002" selected="">Processo excluído<\/option>/)
+  })
+
+  it('RF-40 · sem link para o registro de um módulo que o papel não lê', async () => {
+    await criarRepositorio(armazenamento, 'usuarios', {
+      ...contexto('2026-11-06T09:00:00'),
+      usuario: { id: 'usr-aj', escritorioId: ESCRITORIO_ID },
+      papel: 'aj',
+    }).criar({ nome: 'Nova Pessoa', email: 'nova@exemplo.test', papel: 'analista' })
+
+    expect(texto(await tela('/?modulo=usuarios', 'aj'))).toContain('Abrir usuário')
+    const doAnalista = await tela('/?modulo=usuarios', 'analista')
+    expect(linhas(doAnalista)[0]).toContain('Criou usuário')
+    expect(texto(doAnalista)).not.toContain('Abrir usuário')
+    expect(doAnalista).not.toContain('href="/usuarios"')
   })
 
   it('mudanças campo a campo; "de" null (seed) ou ausente (demo) aparece como vazio', async () => {

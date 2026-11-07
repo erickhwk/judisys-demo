@@ -222,3 +222,16 @@ test('logs no celular (390px): a tabela rola por dentro, sem rolagem horizontal 
   await expect(logs(page)).toHaveCount(50)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
 })
+
+test('AJ edita o próprio nome: o menu da conta acompanha', async ({ page }) => {
+  await entrarComo(page, /Entrar como Administrador/)
+  await page.goto('./#/usuarios')
+  await page.getByRole('button', { name: 'Editar Helena Prado' }).click()
+  const edicao = page.getByRole('dialog', { name: 'Editar usuário' })
+  await edicao.getByLabel('Nome').fill('Helena Prado Souza')
+  await edicao.getByRole('button', { name: 'Salvar' }).click()
+  await expect(edicao).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Menu da conta' })).toContainText(
+    'Helena Prado Souza',
+  )
+})
