@@ -2,6 +2,12 @@
 // troca só a sua, pondo o componente dela no lugar do `EmConstrucao`. O roteador (roteador.tsx)
 // aplica a guarda de sessão e de permissão a todas.
 import type { ReactNode } from 'react'
+import {
+  EditarProcesso,
+  ListaProcessos,
+  NovoProcesso,
+  TelaDoProcesso,
+} from './modulos/processos/telas'
 import type { Acao, Modulo } from './regras/permissoes'
 import { EmConstrucao } from './ui/TelasDeAviso'
 
@@ -20,16 +26,16 @@ function rota(caminho: string, acao: Acao, modulo: Modulo, tela: ReactNode): Def
 /** Telas dentro do layout (faixa, menu lateral, rodapé). */
 export const ROTAS: DefinicaoRota[] = [
   rota('/', 'ler', 'dashboard', <EmConstrucao titulo="Dashboard" />),
-  rota('/processos', 'ler', 'processos', <EmConstrucao titulo="Processos" />),
-  rota('/processos/novo', 'editar', 'processos', <EmConstrucao titulo="Novo processo" />),
-  rota('/processos/:id/editar', 'editar', 'processos', <EmConstrucao titulo="Editar processo" />),
-  rota('/processos/:id/visao-geral', 'ler', 'processos', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/empresas', 'ler', 'empresas', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/credores', 'ler', 'credores', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/prazos', 'ler', 'prazos', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/agc', 'ler', 'agc', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/informes', 'ler', 'informes', <EmConstrucao titulo="Processo" />),
-  rota('/processos/:id/historico', 'ler', 'logs', <EmConstrucao titulo="Processo" />),
+  rota('/processos', 'ler', 'processos', <ListaProcessos />),
+  rota('/processos/novo', 'editar', 'processos', <NovoProcesso />),
+  rota('/processos/:id/editar', 'editar', 'processos', <EditarProcesso />),
+  rota('/processos/:id/visao-geral', 'ler', 'processos', <TelaDoProcesso aba="visao-geral" />),
+  rota('/processos/:id/empresas', 'ler', 'empresas', <TelaDoProcesso aba="empresas" />),
+  rota('/processos/:id/credores', 'ler', 'credores', <TelaDoProcesso aba="credores" />),
+  rota('/processos/:id/prazos', 'ler', 'prazos', <TelaDoProcesso aba="prazos" />),
+  rota('/processos/:id/agc', 'ler', 'agc', <TelaDoProcesso aba="agc" />),
+  rota('/processos/:id/informes', 'ler', 'informes', <TelaDoProcesso aba="informes" />),
+  rota('/processos/:id/historico', 'ler', 'logs', <TelaDoProcesso aba="historico" />),
   rota('/processos/:id/credores/:credorId', 'ler', 'credores', <EmConstrucao titulo="Credor" />),
   rota('/processos/:id/agc/:agcId', 'ler', 'agc', <EmConstrucao titulo="AGC" />),
   rota('/empresas', 'ler', 'empresas', <EmConstrucao titulo="Empresas" />),
