@@ -202,6 +202,8 @@ export const ERRO_AGC_ENCERRADA = 'A AGC já foi encerrada: o resultado registra
 export const ERRO_VOTO_DE_NAO_PRESENTE = 'Só votam os credores presentes com direito a voto.'
 export const ERRO_PRESENTE_SEM_VOTO =
   'Há presentes sem voto: lance o voto de todos antes de registrar.'
+export const ERRO_SEM_PRESENTES_VOTANTES =
+  'Nenhum presente tem direito a voto: não há votação a registrar.'
 
 /** Título e PDF genérico da ata criada pelo registro (o mesmo do seed, `public/anexos/`). */
 export const TITULO_ATA = 'Ata da assembleia geral de credores'
@@ -256,6 +258,10 @@ export function registrarResultadoAgc(armazenamento: Armazenamento, contexto: Co
       const votamAqui = new Set(
         votantes.filter((v) => presentes.has(v.credorId)).map((v) => v.credorId),
       )
+
+      // T-32: sem presentes votantes não há votação (ex.: o crédito do único presente zerou depois
+      // da instalação); encerrar a AGC aqui seria irreversível.
+      if (votamAqui.size === 0) throw new ErroRegra(ERRO_SEM_PRESENTES_VOTANTES)
 
       const votoPorCredor = new Map<Id, VotoLancado['voto']>()
       for (const { credorId, voto } of votos) {

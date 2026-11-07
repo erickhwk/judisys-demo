@@ -95,6 +95,9 @@ export function motivoSemRegistro(
     return 'Instale a AGC para abrir a votação: o resultado só é registrado depois da instalação.'
   }
   if (agc.status === 'encerrada') return 'A AGC já foi encerrada.'
+  if (resultado.classes.every((classe) => classe.presentes === 0)) {
+    return 'Nenhum presente tem direito a voto: não há votação a registrar.'
+  }
   const faltam = presentesSemVoto(resultado)
   if (faltam > 0) {
     return `Falta o voto de ${plural(faltam, 'presente', 'presentes')}: lance todos os votos para registrar o resultado.`

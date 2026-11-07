@@ -17,6 +17,7 @@ import {
   ERRO_CREDOR_DE_OUTRO_PROCESSO,
   ERRO_PRESENTE_SEM_VOTO,
   ERRO_SEM_PRESENTES,
+  ERRO_SEM_PRESENTES_VOTANTES,
   ERRO_VOTO_DE_NAO_PRESENTE,
   instalarAgc,
   marcarClasse,
@@ -358,6 +359,17 @@ describe.each(IMPLEMENTACOES)('registrarResultadoAgc (%s)', (_nome, criar) => {
     await expect(registrar([{ credorId: 'crd-0001', voto: 'sim' }])).rejects.toThrow(
       ERRO_PRESENTE_SEM_VOTO,
     )
+    expect(await statusDaAgc()).toBe('instalada')
+    expect(await atas()).toEqual([])
+  })
+
+  it('T-32 · sem presente com direito a voto não registra (crédito zerado depois da instalação)', async () => {
+    await instalarEm2a()
+    for (const id of ['crd-0001', 'crd-0003']) {
+      const credor = await armazenamento.get<Tipos['credores']>('credores', id)
+      await armazenamento.put('credores', { ...credor, valorAj: 0, valorQgc: 0 })
+    }
+    await expect(registrar([])).rejects.toThrow(ERRO_SEM_PRESENTES_VOTANTES)
     expect(await statusDaAgc()).toBe('instalada')
     expect(await atas()).toEqual([])
   })

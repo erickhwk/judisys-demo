@@ -296,6 +296,10 @@ describe('votação', () => {
       { credorId: 'crd-0003', voto: 'abstencao' },
     ])
     expect(motivoSemRegistro({ status: 'instalada' }, completo)).toBeNull()
+    const semPresentes = resultadoAgc(votantes, new Set(), [])
+    expect(motivoSemRegistro({ status: 'instalada' }, semPresentes)).toMatch(
+      /^Nenhum presente tem direito a voto/,
+    )
 
     expect(percentualDe(1, 3)).toBe('33,33%')
     expect(percentualDe(50_004, 100_000)).toBe('50,00%')
