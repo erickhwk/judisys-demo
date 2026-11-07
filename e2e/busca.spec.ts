@@ -98,6 +98,10 @@ test('BUS-06 · credor recém-criado aparece na busca', async ({ page }) => {
   await page.getByRole('button', { name: 'Novo credor' }).click()
   const dialogo = page.getByRole('dialog', { name: 'Novo credor' })
   await dialogo.getByLabel('Nome').fill('Quitéria Xavante')
+  // Com o formulário aberto, Ctrl+K não abre a busca por cima dele.
+  await page.keyboard.press('Control+k')
+  await expect(busca(page)).toHaveCount(0)
+  await expect(dialogo).toBeVisible()
   await dialogo.getByLabel('CPF ou CNPJ').fill('529.982.247-25')
   await dialogo.getByLabel('Classe').selectOption({ index: 1 })
   await dialogo.getByLabel('Relação do devedor (R$)').fill('1.000,00')

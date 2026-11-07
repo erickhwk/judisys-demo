@@ -64,10 +64,14 @@ describe('buscarNoIndice', () => {
 })
 
 describe('ehAtalhoBusca', () => {
-  it('BUS-01 · Ctrl+K e ⌘K abrem; K sozinho não', () => {
-    expect(ehAtalhoBusca({ key: 'k', ctrlKey: true, metaKey: false })).toBe(true)
-    expect(ehAtalhoBusca({ key: 'K', ctrlKey: false, metaKey: true })).toBe(true)
-    expect(ehAtalhoBusca({ key: 'k', ctrlKey: false, metaKey: false })).toBe(false)
-    expect(ehAtalhoBusca({ key: 'j', ctrlKey: true, metaKey: false })).toBe(false)
+  it('BUS-01 · Ctrl+K e ⌘K abrem; K sozinho, com Shift ou com Alt não', () => {
+    const tecla = { key: 'k', ctrlKey: false, metaKey: false, shiftKey: false, altKey: false }
+    expect(ehAtalhoBusca({ ...tecla, ctrlKey: true })).toBe(true)
+    expect(ehAtalhoBusca({ ...tecla, key: 'K', metaKey: true })).toBe(true)
+    expect(ehAtalhoBusca(tecla)).toBe(false)
+    expect(ehAtalhoBusca({ ...tecla, key: 'j', ctrlKey: true })).toBe(false)
+    // Ctrl+Shift+K (console do Firefox) e Ctrl+Alt+K ficam com o navegador.
+    expect(ehAtalhoBusca({ ...tecla, ctrlKey: true, shiftKey: true })).toBe(false)
+    expect(ehAtalhoBusca({ ...tecla, ctrlKey: true, altKey: true })).toBe(false)
   })
 })

@@ -11,9 +11,16 @@ import estilos from './BuscaGlobal.module.css'
 import { buscarNoIndice, ROTULOS_GRUPO } from './indice'
 import { useIndiceBusca } from './useIndiceBusca'
 
-/** Ctrl+K, ou ⌘K no Mac. */
-export function ehAtalhoBusca(evento: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey'>) {
-  return (evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'k'
+/** Ctrl+K, ou ⌘K no Mac; com Shift ou Alt é outro atalho (ex.: Ctrl+Shift+K do navegador). */
+export function ehAtalhoBusca(
+  evento: Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'>,
+) {
+  return (
+    (evento.ctrlKey || evento.metaKey) &&
+    !evento.shiftKey &&
+    !evento.altKey &&
+    evento.key.toLowerCase() === 'k'
+  )
 }
 
 function ehMac(): boolean {
@@ -25,9 +32,10 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
   const [consulta, setConsulta] = useState('')
   const navegar = useNavigate()
   const indice = useIndiceBusca(papel, aberta)
+  // Com erro, o índice antigo do cache não aparece junto da mensagem.
   const grupos = useMemo(
-    () => (indice.data ? buscarNoIndice(indice.data, consulta) : []),
-    [indice.data, consulta],
+    () => (indice.data && !indice.isError ? buscarNoIndice(indice.data, consulta) : []),
+    [indice.data, indice.isError, consulta],
   )
   const atalho = ehMac() ? '⌘K' : 'Ctrl K'
 
@@ -37,6 +45,8 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
     const aoTeclar = (evento: KeyboardEvent) => {
       if (!ehAtalhoBusca(evento)) return
       evento.preventDefault()
+      // Com outro diálogo aberto (formulário, confirmação), a busca não abre por cima dele.
+      if (document.querySelector('dialog[open]')) return
       setAberta(true)
     }
     document.addEventListener('keydown', aoTeclar)
@@ -54,6 +64,8 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
   }
 
   const digitou = consulta.trim() !== ''
+  // Depois de uma gravação o índice é relido; até lá, "nada encontrado" pode ser só o índice velho.
+  const lendo = indice.isFetching
 
   return (
     <>
@@ -92,13 +104,15 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
                 do credor.
               </p>
             )}
-            {digitou && indice.isPending && <Command.Loading>Carregando…</Command.Loading>}
-            {digitou && indice.isError && (
+            {digitou && lendo && grupos.length === 0 && (
+              <Command.Loading>Carregando…</Command.Loading>
+            )}
+            {digitou && !lendo && indice.isError && (
               <p className={estilos.dica} role="alert">
                 Não foi possível carregar a busca.
               </p>
             )}
-            {digitou && indice.isSuccess && grupos.length === 0 && (
+            {digitou && !lendo && indice.isSuccess && grupos.length === 0 && (
               <p className={estilos.dica}>Nada encontrado para “{consulta.trim()}”.</p>
             )}
             {grupos.map((grupo) => (
