@@ -34,14 +34,16 @@ export async function listarProcessos(
   let processos = await repos.processos.todos({ onde, ordem })
 
   if (busca.trim()) {
-    const diretos = await repos.processos.todos({ onde, busca })
-    const empresas = await repos.empresas.todos({ busca })
-    const viaEmpresa = new Set<string>()
-    for (const empresa of empresas) {
-      const vinculos = await repos.processoEmpresas.todos({ onde: { empresaId: empresa.id } })
-      for (const vinculo of vinculos) viaEmpresa.add(vinculo.processoId)
+    const [diretos, empresas, vinculos] = await Promise.all([
+      repos.processos.todos({ onde, busca }),
+      repos.empresas.todos({ busca }),
+      repos.processoEmpresas.todos(),
+    ])
+    const idsEmpresas = new Set(empresas.map((e) => e.id))
+    const ids = new Set(diretos.map((p) => p.id))
+    for (const vinculo of vinculos) {
+      if (idsEmpresas.has(vinculo.empresaId)) ids.add(vinculo.processoId)
     }
-    const ids = new Set([...diretos.map((p) => p.id), ...viaEmpresa])
     processos = processos.filter((processo) => ids.has(processo.id))
   }
 

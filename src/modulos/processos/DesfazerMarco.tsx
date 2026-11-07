@@ -12,11 +12,12 @@ import { Botao } from '../../ui/Botao'
 import { Confirmacao } from '../../ui/Confirmacao'
 import { mensagemDeErro } from './mensagens'
 import estilos from './processos.module.css'
+import { plural } from './rotulos'
 
 /** "Serão removidos 1 prazo aberto: Objeções ao plano." (texto do RF-15), por vencimento. */
 export function textoPrazosRemovidos(prazos: { titulo: string; vencimento: string }[]): string {
   if (prazos.length === 0) return 'Nenhum prazo aberto será removido.'
-  const quantidade = prazos.length === 1 ? '1 prazo aberto' : `${prazos.length} prazos abertos`
+  const quantidade = plural(prazos.length, 'prazo aberto', 'prazos abertos')
   const titulos = [...prazos]
     .sort((a, b) => a.vencimento.localeCompare(b.vencimento))
     .map((p) => p.titulo)

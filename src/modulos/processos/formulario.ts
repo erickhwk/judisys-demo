@@ -25,6 +25,11 @@ export function lerPercentual(texto: string): number | null {
   return valor <= 100 ? valor : null
 }
 
+/** Percentual gravado → texto com vírgula (`2.5` → `2,5`). */
+export function formatarPercentual(valor: number): string {
+  return String(valor).replace('.', ',')
+}
+
 const moedaObrigatoria = z
   .string()
   .trim()
@@ -125,7 +130,7 @@ export function paraFormulario(
     honorariosPercentual:
       processo.honorariosPercentual == null
         ? ''
-        : String(processo.honorariosPercentual).replace('.', ','),
+        : formatarPercentual(processo.honorariosPercentual),
     honorariosValor:
       processo.honorariosValor == null ? '' : formatarCentavos(processo.honorariosValor),
     empresaIds,

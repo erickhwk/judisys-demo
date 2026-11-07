@@ -9,6 +9,7 @@ import { hoje } from '../../regras/relogio'
 import { juntarClasses } from '../../ui/classes'
 import { Selo, type TomSelo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
+import { formatarPercentual } from './formulario'
 import { linhaDoTempo } from './linhaDoTempo'
 import estilos from './processos.module.css'
 import { plural, ROTULOS_CONSOLIDACAO } from './rotulos'
@@ -43,7 +44,7 @@ export function AbaVisaoGeral({ processoId }: { processoId: string }) {
   const proximos = (prazos.data ?? []).slice(0, MAXIMO_PRAZOS)
   const honorarios = [
     atual.honorariosPercentual != null
-      ? `${String(atual.honorariosPercentual).replace('.', ',')}%`
+      ? `${formatarPercentual(atual.honorariosPercentual)}%`
       : null,
     atual.honorariosValor != null ? formatarMoeda(atual.honorariosValor) : null,
   ].filter(Boolean)
