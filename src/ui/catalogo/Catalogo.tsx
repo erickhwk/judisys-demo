@@ -5,7 +5,7 @@
  * Os dados são fictícios e os valores já vêm formatados como texto.
  */
 import { Pencil, Plus, Trash } from 'lucide-react'
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Botao, BotaoIcone } from '../Botao'
 import { CampoAreaTexto, CampoMarcacao, CampoSelecao, CampoTexto } from '../Campo'
 import { Confirmacao } from '../Confirmacao'
@@ -387,13 +387,12 @@ function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
 
 /** PDF mínimo de uma página, como blob, só para o catálogo. */
 function useUrlPdfExemplo() {
-  const blob = useMemo(() => new Blob([pdfMinimo()], { type: 'application/pdf' }), [])
   const [url, setUrl] = useState<string>()
   useEffect(() => {
-    const criada = URL.createObjectURL(blob)
+    const criada = URL.createObjectURL(new Blob([pdfMinimo()], { type: 'application/pdf' }))
     setUrl(criada)
     return () => URL.revokeObjectURL(criada)
-  }, [blob])
+  }, [])
   return url
 }
 

@@ -28,10 +28,14 @@ export function Paginacao({ pagina, totalPaginas, aoMudar }: PropsPaginacao) {
         >
           <ChevronLeft size={18} aria-hidden="true" />
         </button>
-        {paginasVisiveis(pagina, totalPaginas).map((item, indice) =>
+        {paginasVisiveis(pagina, totalPaginas).map((item, indice, itens) =>
           item === 'reticencias' ? (
-            // biome-ignore lint/suspicious/noArrayIndexKey: reticências não têm identidade própria
-            <span key={`reticencias-${indice}`} className={estilos.reticencias} aria-hidden="true">
+            // A página antes das reticências é única: serve de chave.
+            <span
+              key={`apos-${itens[indice - 1]}`}
+              className={estilos.reticencias}
+              aria-hidden="true"
+            >
               …
             </span>
           ) : (
