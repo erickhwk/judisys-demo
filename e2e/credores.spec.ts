@@ -169,3 +169,29 @@ test('AJ-07 · digitação rápida na busca de Credores não perde caracteres; a
   await expect(campo).toHaveValue('')
   await expect.poll(() => buscaNaUrl(page)).toBeNull()
 })
+
+test('AJ-13 · na trilha do credor, o processo leva à visão geral e Credores à aba', async ({
+  page,
+}) => {
+  await entrarComo(page, 'aj')
+  await page.goto(CREDOR_IMPUGNACAO.rota)
+  const trilha = page.getByRole('navigation', { name: 'Trilha' })
+  const processo = trilha.getByRole('link', { name: 'Grupo Lontra Azul', exact: true })
+  const credores = trilha.getByRole('link', { name: 'Credores', exact: true })
+  await expect(processo).toHaveAttribute('href', '#/processos/prc-001/visao-geral')
+  await expect(credores).toHaveAttribute('href', '#/processos/prc-001/credores')
+
+  await processo.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-001\/visao-geral$/)
+  await expect(page.getByRole('heading', { name: 'Grupo Lontra Azul', level: 1 })).toBeVisible()
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Seções do processo' })
+      .getByRole('link', { name: 'Visão geral' }),
+  ).toHaveAttribute('aria-current', 'page')
+
+  await page.goBack()
+  await expect(page.getByRole('heading', { name: CREDOR_IMPUGNACAO.nome, level: 1 })).toBeVisible()
+  await credores.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-001\/credores$/)
+})
