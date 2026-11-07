@@ -17,6 +17,7 @@ import {
   AVISO_DOCUMENTO_EXISTENTE,
   credorComDocumento,
   decidirPedido,
+  ERRO_CLASSE_DO_TIPO,
   ERRO_PEDIDO_JA_DECIDIDO,
   ERRO_SO_ANTES_DA_RELACAO,
   ERRO_SO_IMPUGNACAO,
@@ -360,6 +361,17 @@ describe.each(IMPLEMENTACOES)('pedidos de crédito sobre %s', (_nome, criar) => 
       expect(erro.vinculos).toEqual([
         { colecao: 'credores', id: 'crd-0005', rotulo: 'Débora Lima' },
       ])
+      expect(await logsNovos()).toHaveLength(0)
+    })
+
+    it('classe que o tipo do processo não tem é recusada (C-01)', async () => {
+      const erro = await erroDe(
+        registrarPedido(
+          armazenamento,
+          contexto(),
+        )({ ...base, classePedida: 'tributario', credorId: 'crd-0010', tipo: 'impugnacao' }),
+      )
+      expect(erro.message).toBe(ERRO_CLASSE_DO_TIPO)
       expect(await logsNovos()).toHaveLength(0)
     })
 

@@ -8,6 +8,7 @@
 // - Requerente fora da lista só vira credor ao acolher; rejeitar só muda o status (CRD-07).
 import { somenteDigitos } from '../../regras/documentos'
 import { type Fase, fasesDoTipo, type TipoProcesso } from '../../regras/fases'
+import { CLASSES_FALENCIA, CLASSES_RJ, type Classe } from '../../regras/qgc'
 import type { Armazenamento, Id, Tabela } from '../armazenamento'
 import { type ContextoGravacao, criarRepositorio } from '../repositorio'
 import type { Novo, Tipos } from '../schemas'
@@ -83,6 +84,7 @@ export const ERRO_SO_ANTES_DA_RELACAO =
 export const ERRO_TIPO_PARA_CREDOR = 'Habilitação é para quem não está na lista de credores.'
 export const ERRO_TIPO_PARA_REQUERENTE = 'Divergência é para credor que já está na lista.'
 export const ERRO_CREDOR_DE_OUTRO_PROCESSO = 'O credor não pertence a este processo.'
+export const ERRO_CLASSE_DO_TIPO = 'Esta classe não existe neste tipo de processo.'
 export const AVISO_DOCUMENTO_EXISTENTE = 'Já existe credor com este CPF/CNPJ neste processo'
 
 /** Credor do processo com este CPF/CNPJ (CRD-08), comparando só os dígitos. */
@@ -95,14 +97,19 @@ export function credorComDocumento(armazenamento: Armazenamento) {
   }
 }
 
-async function publicadaNoProcesso(armazenamento: Armazenamento, processoId: Id) {
+const CLASSES_DO_TIPO: Readonly<Record<TipoProcesso, readonly Classe[]>> = {
+  rj: CLASSES_RJ,
+  falencia: CLASSES_FALENCIA,
+}
+
+async function situacaoDoProcesso(armazenamento: Armazenamento, processoId: Id) {
   const processo = await buscarOuFalhar(armazenamento, 'processos', processoId)
   const marcos = await armazenamento.porIndice<Tipos['marcosDeFase']>(
     'marcosDeFase',
     'processoId',
     processoId,
   )
-  return relacaoAjPublicada(processo.tipo, marcos)
+  return { tipo: processo.tipo, publicada: relacaoAjPublicada(processo.tipo, marcos) }
 }
 
 /** O que a tela informa ao registrar; `status` é sempre `pendente`. */
@@ -120,7 +127,11 @@ export function registrarPedido(armazenamento: Armazenamento, contexto: Contexto
   return async (dados: NovoPedido): Promise<Pedido> => {
     exigirPermissao(contexto, 'credores')
     return armazenamento.transacao(TABELAS_PEDIDOS, async () => {
-      const publicada = await publicadaNoProcesso(armazenamento, dados.processoId)
+      const { tipo, publicada } = await situacaoDoProcesso(armazenamento, dados.processoId)
+      // O schema da coleção aceita as classes dos dois tipos; a do pedido tem de ser do processo.
+      if (!CLASSES_DO_TIPO[tipo].includes(dados.classePedida)) {
+        throw new ErroRegra(ERRO_CLASSE_DO_TIPO)
+      }
       const naLista = Boolean(dados.credorId)
       if (publicada && dados.tipo !== 'impugnacao') throw new ErroRegra(ERRO_SO_IMPUGNACAO)
       if (!publicada && dados.tipo === 'impugnacao') throw new ErroRegra(ERRO_SO_ANTES_DA_RELACAO)
