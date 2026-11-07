@@ -304,6 +304,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - [ ] Marcar cumprido; cores de vencido e urgente (RF-24)
   - [ ] Agenda em lista com os filtros do RF-25 e calendário mensal navegável
   - [ ] Edição do vencimento de prazo automático (C-05)
+  - [ ] Título de prazo automático travado na edição (só o vencimento muda; T-37)
 - **Testes:**
   - [ ] PRZ-06 · cores na lista
   - [ ] PRZ-08 · filtros "7 dias" e "vencidos"
