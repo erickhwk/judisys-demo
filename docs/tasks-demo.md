@@ -149,6 +149,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - [ ] Repositório: `listar`, `todos`, `buscar`, `criar`, `atualizar`, `excluir`; preenche `id`, `escritorioId`, `criadoEm`, `atualizadoEm`
   - [ ] Cada gravação checa `pode()`, valida com zod e grava o log na mesma transação
   - [ ] `DadosProvider` e hooks para as telas, com `invalidateQueries()` após toda gravação (T-22)
+  - [ ] `.claude/` no `.gitignore` (worktrees dos agentes quebravam o `pnpm lint` local; decidido com o usuário no lote 2)
 - **Testes:**
   - [ ] Suíte do repositório rodando nas duas implementações (`describe.each`, `fake-indexeddb`)
   - [ ] LOG-01 · edição grava log com de/para
