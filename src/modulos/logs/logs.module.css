@@ -1,0 +1,9 @@
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.apagado {
+  color: var(--cor-texto-muted);
+}

@@ -13,7 +13,7 @@ import { plural } from './rotulos'
 /** Quantas mudanças mostrar por log antes de resumir ("e mais 3"). */
 const MAXIMO_MUDANCAS = 6
 
-function Mudancas({ log, nomes }: { log: Log; nomes: Nomes }) {
+export function Mudancas({ log, nomes }: { log: Log; nomes: Nomes }) {
   const mudancas = mudancasLegiveis(log, nomes)
   if (mudancas.length === 0) return <span className={estilos.semMudanca}>—</span>
   const visiveis = mudancas.slice(0, MAXIMO_MUDANCAS)
