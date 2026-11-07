@@ -70,6 +70,8 @@ const PARES: readonly (readonly [string, string])[] = [
   ['--cor-azul-900', '--cor-azul-claro'],
   ['--cor-azul-900', '--cor-dourado-claro'],
   ['--cor-texto', '--cor-azul-claro'],
+  ['--cor-texto-forte', '--cor-trilho'],
+  ['--cor-azul-800', '--cor-azul-claro'],
   ['--cor-texto-invertido', '--cor-azul-900'],
   ['--cor-texto-invertido', '--cor-azul-700'],
   ['--cor-texto-invertido', '--cor-perigo'],
@@ -94,6 +96,7 @@ const PARES: readonly (readonly [string, string])[] = [
   ['--cor-previa-texto', '--cor-previa-cartao'],
   ['--cor-previa-texto', '--cor-previa-fundo'],
   ['--cor-previa-rotulo', '--cor-previa-cartao'],
+  ['--cor-dourado-200', '--cor-previa-destaque'],
 ]
 
 describe.each([

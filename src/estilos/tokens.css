@@ -110,6 +110,7 @@
   --cor-previa-borda: #e6e1d5;
   --cor-previa-icone: #f4ecda;
   --cor-previa-traco: #ddd7c8;
+  --cor-previa-destaque: #0b2a5e;
   --sombra-previa: 0 30px 80px rgba(0, 0, 0, 0.45);
   --sombra-previa-flutuante: 0 18px 40px rgba(0, 0, 0, 0.4);
 
@@ -215,5 +216,6 @@
     --cor-previa-borda: #26406f;
     --cor-previa-icone: #3a2d12;
     --cor-previa-traco: #2c4677;
+    --cor-previa-destaque: #1c3364;
   }
 }

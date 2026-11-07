@@ -416,7 +416,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: var(--cor-azul-800);
+  background: var(--cor-previa-destaque);
   color: var(--cor-dourado-200);
 }
 
