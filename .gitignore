@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.log
+.DS_Store
+
+# Gerados no build (T-06)
+public/seed.json
+public/seed-versao.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
