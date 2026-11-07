@@ -1,5 +1,6 @@
 // Classes de credores, valor vigente, quadro-resumo por classe e variação entre as relações
 // (RF-26 a RF-28, RF-30, C-01, T-26). Valores em centavos inteiros (INV-03).
+import { formatarCentavos } from './datas'
 
 /** Classes da RJ (RF-26): I a IV do art. 41 e "Não sujeito" (art. 49, §3º, C-07). */
 export const CLASSES_RJ = [
@@ -204,13 +205,10 @@ function razaoEmCentesimos(parte: number, todo: number): number {
 export function formatarVariacao(variacaoCalculada: Variacao | null): string {
   if (variacaoCalculada === null || variacaoCalculada.percentualCentesimos === null) return '—'
   const centesimos = variacaoCalculada.percentualCentesimos
-  const sinal = centesimos > 0 ? '+' : centesimos < 0 ? '-' : ''
-  return `${sinal}${formatarCentesimos(Math.abs(centesimos))}%`
+  return `${centesimos > 0 ? '+' : ''}${formatarCentesimos(centesimos)}%`
 }
 
-/** Centésimos de ponto percentual → `20,00` (sem sinal de %). */
+/** Centésimos de ponto percentual → `20,00` (sem sinal de %); mesma aritmética dos centavos. */
 export function formatarCentesimos(centesimos: number): string {
-  const sinal = centesimos < 0 ? '-' : ''
-  const absoluto = Math.abs(centesimos)
-  return `${sinal}${Math.floor(absoluto / 100)},${(absoluto % 100).toString().padStart(2, '0')}`
+  return formatarCentavos(centesimos, '')
 }
