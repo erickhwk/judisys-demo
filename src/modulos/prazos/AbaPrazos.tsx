@@ -2,7 +2,7 @@
 // (que é da TelaDoProcesso, DMO-12). Lista com as cores de situação, prazo manual, marcar como
 // cumprido e editar o vencimento do prazo automático.
 import { Plus } from 'lucide-react'
-import { useEffect, useId, useMemo } from 'react'
+import { useEffect, useId, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router'
 import { useRegistro, useTodos } from '../../dados/contexto'
 import type { Tipos } from '../../dados/schemas'
@@ -30,13 +30,15 @@ export function AbaPrazos({ processoId }: { processoId: string }) {
   const acoes = useAcoesPrazo({ processos })
   const prazos = useMemo(() => [...(consulta.data ?? [])].sort(compararPrazos), [consulta.data])
 
-  // Link do calendário ou da agenda (PRZ-09): rola até o prazo.
+  // Link do calendário ou da agenda (PRZ-09): rola até o prazo uma vez, quando ele aparece. Depois
+  // de cumprir ou criar um prazo a lista muda de tamanho, mas a tela não volta a pular para ele.
+  const rolouPara = useRef<string | null>(null)
   useEffect(() => {
-    if (destacado && prazos.length > 0) {
-      document
-        .getElementById(ancoraDoPrazo(destacado))
-        ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
+    if (!destacado || prazos.length === 0 || rolouPara.current === destacado) return
+    const linha = document.getElementById(ancoraDoPrazo(destacado))
+    if (!linha) return
+    rolouPara.current = destacado
+    linha.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [destacado, prazos.length])
 
   if (consulta.isError) return <Erro mensagem="Não foi possível carregar os prazos." />

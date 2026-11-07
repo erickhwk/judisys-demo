@@ -226,4 +226,26 @@ describe('formulário de prazo', () => {
       titulo: MENSAGEM_OBRIGATORIO,
     })
   })
+
+  it('PRZ-10 · apagar a base legal de um manual deixa o campo ausente, como no criado sem ela', async () => {
+    const armazenamento = new ArmazenamentoMemoria()
+    await carregarSeedMini(armazenamento)
+    const repo = criarRepositorio(armazenamento, 'prazos', CONTEXTO)
+    const manual = await repo.criar(
+      novoPrazoManual({
+        processoId: 'prc-001',
+        titulo: 'Reunião',
+        vencimento: '2026-11-20',
+        baseLegal: 'art. 22',
+      }),
+    )
+    const mudancas = mudancasDaEdicao(manual, { ...valoresIniciais(manual), baseLegal: '  ' })
+    expect(mudancas).toEqual({ titulo: 'Reunião', vencimento: '2026-11-20', baseLegal: undefined })
+    const salvo = await repo.atualizar(manual.id, mudancas)
+    expect(salvo.baseLegal).toBeUndefined()
+    const logs = (await armazenamento.todos<Log>('logs')).filter(
+      (log) => log.registroId === manual.id && log.acao === 'editou',
+    )
+    expect(logs[0]?.mudancas).toEqual([{ campo: 'baseLegal', de: 'art. 22', para: undefined }])
+  })
 })

@@ -47,7 +47,7 @@ export function Agenda() {
     responsavelId: parametros.get('responsavel') ?? '',
   }
   const mes = ehMes(mesNaUrl) ? mesNaUrl : mesDe(hoje)
-  const pagina = Number(parametros.get('pagina') ?? 1) || 1
+  const pagina = Math.floor(Number(parametros.get('pagina') ?? 1)) || 1
 
   const consultaPrazos = useTodos('prazos')
   const consultaProcessos = useTodos('processos', ORDEM_APELIDO)
@@ -103,8 +103,11 @@ export function Agenda() {
   const filtrar = (chave: 'periodo' | 'processo' | 'responsavel', valor: string) =>
     mudar({ [chave]: valor, pagina: null })
 
+  // No calendário o campo Período não aparece: só processo e responsável contam como filtro.
   const filtrou =
-    filtro.periodo !== PERIODO_PADRAO || filtro.processoId !== '' || filtro.responsavelId !== ''
+    (vista === 'lista' && filtro.periodo !== PERIODO_PADRAO) ||
+    filtro.processoId !== '' ||
+    filtro.responsavelId !== ''
   const carregando =
     consultaPrazos.isPending || consultaProcessos.isPending || consultaUsuarios.isPending
   const falhou = consultaPrazos.isError || consultaProcessos.isError || consultaUsuarios.isError

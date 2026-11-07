@@ -37,14 +37,18 @@ export type PropsFormularioPrazo = {
   aoSalvar: (prazo: Prazo) => void
 }
 
-const CAMPOS: readonly (keyof ValoresPrazo)[] = ['processoId', 'titulo', 'vencimento', 'baseLegal']
-
-/** Erros do schema do repositório (T-04) nos campos do formulário; o resto vai para o geral. */
-function errosDoRepositorio(erro: ErroValidacao): { campos: ErrosPrazo; geral?: string } {
+/**
+ * Erros do schema do repositório (T-04) nos campos que estão na tela; o resto (inclusive o do
+ * processo, quando ele vem fixo) vai para a mensagem geral, para nenhum erro sumir sem aviso.
+ */
+function errosDoRepositorio(
+  erro: ErroValidacao,
+  visiveis: readonly (keyof ValoresPrazo)[],
+): { campos: ErrosPrazo; geral?: string } {
   const campos: ErrosPrazo = {}
   const outros: string[] = []
   for (const problema of erro.problemas) {
-    const campo = CAMPOS.find((c) => c === problema.campo)
+    const campo = visiveis.find((c) => c === problema.campo)
     if (campo) campos[campo] ??= problema.mensagem
     else outros.push(problema.mensagem)
   }
@@ -87,7 +91,12 @@ export function FormularioPrazo({
       aoSalvar(gravado)
     } catch (erro) {
       if (erro instanceof ErroValidacao) {
-        const { campos, geral } = errosDoRepositorio(erro)
+        const { campos, geral } = errosDoRepositorio(
+          erro,
+          pedeProcesso
+            ? ['processoId', 'titulo', 'vencimento', 'baseLegal']
+            : ['titulo', 'vencimento', 'baseLegal'],
+        )
         setErros(campos)
         setErroGeral(geral)
       } else {

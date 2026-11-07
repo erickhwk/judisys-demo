@@ -233,8 +233,12 @@ export function mudancasDaEdicao(
   return {
     titulo: valores.titulo.trim(),
     vencimento: valores.vencimento,
-    // Sem base legal antes e depois: não grava '' no lugar do campo ausente (o log ficaria com
-    // uma mudança que ninguém fez).
-    ...(baseLegal === '' && prazo.baseLegal === undefined ? {} : { baseLegal }),
+    // Base legal vazia é campo ausente, como no prazo criado sem ela (PRZ-10): apagar grava
+    // `undefined`, e quem não tinha continua sem mudança no log.
+    ...(baseLegal !== ''
+      ? { baseLegal }
+      : prazo.baseLegal === undefined
+        ? {}
+        : { baseLegal: undefined }),
   }
 }
