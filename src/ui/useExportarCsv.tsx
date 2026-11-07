@@ -3,16 +3,10 @@
 // passam no filtro, não só a página (CRD-11); aqui fica o estado do botão e o aviso de falha.
 import { Download } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
+import type { ArquivoCsv } from '../regras/csv'
 import { Botao } from './Botao'
 import { baixarArquivo } from './baixarArquivo'
 import { Erro } from './Erro'
-
-export interface ArquivoCsv {
-  /** `judisys-<módulo>-aaaa-mm-dd.csv` (`nomeArquivoCsv`). */
-  nome: string
-  /** Conteúdo de `gerarCsv`. */
-  conteudo: string
-}
 
 export interface ExportacaoCsv {
   botao: ReactNode
@@ -20,7 +14,7 @@ export interface ExportacaoCsv {
   erro: ReactNode
 }
 
-export function useExportarCsv(gerar: () => Promise<ArquivoCsv>): ExportacaoCsv {
+export function useExportarCsv(gerar: () => ArquivoCsv | Promise<ArquivoCsv>): ExportacaoCsv {
   const [exportando, setExportando] = useState(false)
   const [falhou, setFalhou] = useState(false)
 

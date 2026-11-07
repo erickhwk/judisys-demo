@@ -3,11 +3,10 @@
 // `1234,56`, sem separador de milhar.
 import type { Filtro, Repositorio } from '../../dados/repositorio'
 import type { Tipos } from '../../dados/schemas'
-import { type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
+import { type ArquivoCsv, type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
 import type { DataIso } from '../../regras/datas'
 import type { TipoProcesso } from '../../regras/fases'
 import { type Classe, rotuloClasse } from '../../regras/qgc'
-import type { ArquivoCsv } from '../../ui/useExportarCsv'
 
 type Credor = Tipos['credores']
 

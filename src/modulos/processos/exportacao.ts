@@ -2,10 +2,9 @@
 // página. CNJ com pontuação e passivo em `1234,56`, para o Excel em pt-BR.
 import type { Repositorio } from '../../dados/repositorio'
 import type { Tipos } from '../../dados/schemas'
-import { type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
+import { type ArquivoCsv, type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
 import type { DataIso } from '../../regras/datas'
 import { ROTULOS_FASE } from '../../regras/fases'
-import type { ArquivoCsv } from '../../ui/useExportarCsv'
 import { type FiltroProcessos, filtrarProcessos, type ReposListagem } from './listagem'
 import { ROTULOS_CONSOLIDACAO, ROTULOS_TIPO } from './rotulos'
 

@@ -1,9 +1,8 @@
 // CSV da agenda (RF-25, RF-44): todos os prazos que passam nos filtros de período, processo e
 // responsável, não só a página. Vencimento em `dd/mm/aaaa`; situação calculada em `hoje`.
 import type { Tipos } from '../../dados/schemas'
-import { type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
+import { type ArquivoCsv, type ColunaCsv, gerarCsv, nomeArquivoCsv } from '../../regras/csv'
 import type { DataIso } from '../../regras/datas'
-import type { ArquivoCsv } from '../../ui/useExportarCsv'
 import { rotuloSituacao } from './regras'
 
 type Prazo = Tipos['prazos']
@@ -49,6 +48,6 @@ export function exportarPrazos(
 ): ArquivoCsv {
   return {
     nome: nomeArquivoCsv('prazos', hoje),
-    conteudo: gerarCsv(colunasCsvPrazos(processos, responsaveis, hoje), [...prazos]),
+    conteudo: gerarCsv(colunasCsvPrazos(processos, responsaveis, hoje), prazos),
   }
 }
