@@ -12,10 +12,18 @@ export const PAPEIS = {
   analista: /Entrar como Analista/,
 } as const
 
+/**
+ * O `h1` do início: a saudação com o primeiro nome (CAB-01). Vale em qualquer hora, então serve
+ * também aos specs sem o relógio fixo.
+ */
+export function tituloDoInicio(page: Page): Locator {
+  return page.getByRole('heading', { name: /^(Bom dia|Boa tarde|Boa noite), /, level: 1 })
+}
+
 export async function entrarComo(page: Page, papel: keyof typeof PAPEIS): Promise<void> {
   await page.goto('./#/entrar')
   await page.getByRole('button', { name: PAPEIS[papel] }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 }
 
 /** Troca de papel pelo menu da conta e entra com o outro (PER-02). */
@@ -24,7 +32,19 @@ export async function trocarPara(page: Page, papel: keyof typeof PAPEIS): Promis
   await page.getByRole('button', { name: 'Trocar de papel' }).click()
   await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
   await page.getByRole('button', { name: PAPEIS[papel] }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
+}
+
+/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
+export async function resetarPelaFaixa(page: Page): Promise<void> {
+  await page
+    .getByRole('region', { name: 'Demonstração' })
+    .getByRole('button', { name: 'Resetar demo' })
+    .click()
+  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
+  await expect(confirmacao).toBeVisible()
+  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
+  await expect(confirmacao).toBeHidden()
 }
 
 // --- Credor do vitrine com impugnação pendente --------------------------------------------------

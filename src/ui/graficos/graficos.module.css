@@ -1,0 +1,287 @@
+/* Gráficos em SVG (S-06). Cores só por tokens (INV-04); os traços que não podem engrossar com a
+   largura usam vector-effect="non-scaling-stroke" no próprio elemento. */
+
+.base {
+  stroke: var(--cor-borda);
+  stroke-width: 1;
+}
+
+.guia {
+  stroke: var(--cor-borda-linha);
+  stroke-width: 1;
+}
+
+.divisa {
+  stroke: var(--cor-superficie);
+  stroke-width: 2;
+}
+
+/* Rosca */
+
+.rosca {
+  display: block;
+  flex: none;
+}
+
+.roscaValor {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 22px;
+  fill: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+.roscaRotulo {
+  font-family: var(--fonte-texto);
+  font-size: 9.5px;
+  fill: var(--cor-texto-muted);
+}
+
+/* Barra 100% */
+
+.barra100 {
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Colunas */
+
+.colunas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.areaColunas {
+  position: relative;
+  /* Espaço para o número da coluna mais alta. */
+  margin-top: 16px;
+}
+
+.desenhoColunas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.valoresColunas {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  pointer-events: none;
+}
+
+.valoresColunas > span {
+  position: relative;
+  align-self: end;
+  text-align: center;
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: var(--cor-texto-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.valoresColunas > .valorDestaque {
+  color: var(--cor-dourado-700);
+  font-weight: 700;
+}
+
+.rotulosColunas {
+  display: grid;
+  font-size: 10.5px;
+  color: var(--cor-texto-muted);
+  text-align: center;
+}
+
+.rotulosColunas > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+/* Linha */
+
+.linha {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.areaLinha {
+  position: relative;
+  /* Folga para o ponto marcado no topo e na base. */
+  margin: 6px 0;
+}
+
+.desenhoLinha {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.traco {
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.marca {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--cor-superficie);
+  transform: translate(-50%, -50%);
+}
+
+.rotulosLinha {
+  position: relative;
+  height: 1.4em;
+  font-size: 10.5px;
+  color: var(--cor-texto-muted);
+}
+
+.rotulosLinha > span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.rotulosLinha > .rotuloMarca {
+  color: var(--cor-dourado-700);
+  font-weight: 600;
+}
+
+/* Barras horizontais */
+
+.barras {
+  display: flex;
+  flex-direction: column;
+  /* Quem usa ajusta o vão e a largura do nome por estas variáveis, sem mexer na grade da linha. */
+  gap: var(--barras-vao, 10px);
+  width: 100%;
+  min-width: 0;
+}
+
+.linhaBarra {
+  display: grid;
+  grid-template-columns: minmax(0, var(--barras-largura-nome, 9em)) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.nomeBarra {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.trilhoBarra {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.valorBarra {
+  font-size: 12.5px;
+  color: var(--cor-texto-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Empilhado (Q-08 no celular): nome e valor em cima, barra embaixo na largura toda. */
+.barrasEmpilhadas .linhaBarra {
+  grid-template-columns: minmax(0, 1fr) auto;
+  row-gap: 4px;
+}
+
+.barrasEmpilhadas .trilhoBarra {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* Legenda */
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--legenda-fonte, 12px);
+  color: var(--cor-texto-forte);
+}
+
+.legendaEmColuna {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 7px;
+}
+
+/* Duas colunas (Q-11): a da esquerda pode ganhar mais largura com --legenda-coluna-1 (em fr). */
+.legendaEmDuasColunas {
+  display: grid;
+  grid-template-columns: minmax(0, var(--legenda-coluna-1, 1fr)) minmax(0, 1fr);
+  gap: 6px var(--legenda-vao-colunas, 20px);
+}
+
+.itemLegenda {
+  display: flex;
+  align-items: center;
+  gap: var(--legenda-vao-item, 6px);
+  min-width: 0;
+}
+
+.ponto {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+}
+
+.rotuloLegenda {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.valorLegenda {
+  margin-left: auto;
+  padding-left: 4px;
+  color: var(--cor-texto);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.detalheLegenda {
+  margin-left: auto;
+  padding-left: 4px;
+  color: var(--cor-texto-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Com o detalhe, o valor vem logo depois dele, numa largura fixa para os valores se alinharem. */
+.detalheLegenda + .valorLegenda {
+  min-width: 2.2em;
+  padding-left: 3px;
+  margin-left: 0;
+  text-align: right;
+}

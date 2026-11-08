@@ -1,11 +1,23 @@
-// Busca global (RF-38, T-08): ícone no topo e Ctrl/⌘+K abrem um diálogo com o `cmdk`. Os
+// Busca global (RF-38, T-08): Ctrl/⌘+K e o botão de busca abrem um diálogo com o `cmdk`. Os
 // resultados vêm do índice em memória (`useIndiceBusca`), agrupados por tipo, até 5 por grupo;
 // setas escolhem e Enter vai à tela do registro.
+// INI-01 (S-08): o Layout monta a busca uma vez, em volta das telas; o botão que a abre mora no
+// `CabecalhoPagina` e no `CabecalhoInicio` (desktop) e na lupa da barra do topo (tablet e celular),
+// via `BotaoBuscaGlobal`.
 import { Command } from 'cmdk'
 import { Search } from 'lucide-react'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router'
 import type { Papel } from '../../regras/permissoes'
+import { juntarClasses } from '../../ui/classes'
 import { Dialogo } from '../../ui/Dialogo'
 import estilos from './BuscaGlobal.module.css'
 import { buscarNoIndice, ROTULOS_GRUPO } from './indice'
@@ -27,7 +39,46 @@ function ehMac(): boolean {
   return typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 }
 
-export function BuscaGlobal({ papel }: { papel: Papel }) {
+/** Abre a busca; `null` fora do Layout (telas renderizadas sozinhas, nos testes). */
+const ContextoBusca = createContext<(() => void) | null>(null)
+
+export type PropsBotaoBuscaGlobal = {
+  /** Só a lupa (barra do topo do tablet e do celular). */
+  compacto?: boolean
+  className?: string
+}
+
+/** Botão que abre a busca global. Fora do Layout não aparece. */
+export function BotaoBuscaGlobal({ compacto = false, className }: PropsBotaoBuscaGlobal) {
+  const abrir = useContext(ContextoBusca)
+  if (!abrir) return null
+  const atalho = ehMac() ? '⌘K' : 'Ctrl K'
+  return (
+    <button
+      type="button"
+      className={juntarClasses(compacto ? estilos.lupaTopo : estilos.abrir, className)}
+      aria-label="Buscar"
+      aria-keyshortcuts="Control+K Meta+K"
+      onClick={abrir}
+    >
+      <Search size={20} aria-hidden="true" />
+      {!compacto && (
+        <>
+          <span className={estilos.rotulo}>Buscar</span>
+          <kbd className={estilos.atalho}>{atalho}</kbd>
+        </>
+      )}
+    </button>
+  )
+}
+
+export type PropsBuscaGlobal = {
+  papel: Papel
+  /** As telas: o `BotaoBuscaGlobal` dentro delas abre esta busca. */
+  children?: ReactNode
+}
+
+export function BuscaGlobal({ papel, children }: PropsBuscaGlobal) {
   const [aberta, setAberta] = useState(false)
   const [consulta, setConsulta] = useState('')
   const navegar = useNavigate()
@@ -37,7 +88,7 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
     () => (indice.data && !indice.isError ? buscarNoIndice(indice.data, consulta) : []),
     [indice.data, indice.isError, consulta],
   )
-  const atalho = ehMac() ? '⌘K' : 'Ctrl K'
+  const abrir = useCallback(() => setAberta(true), [])
 
   // Layout effect: o atalho já funciona quando a tela aparece (um efeito comum pode rodar depois
   // da pintura e perder o primeiro Ctrl+K).
@@ -68,18 +119,8 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
   const lendo = indice.isFetching
 
   return (
-    <>
-      <button
-        type="button"
-        className={estilos.abrir}
-        aria-label="Buscar"
-        aria-keyshortcuts="Control+K Meta+K"
-        onClick={() => setAberta(true)}
-      >
-        <Search size={20} aria-hidden="true" />
-        <span className={estilos.rotulo}>Buscar</span>
-        <kbd className={estilos.atalho}>{atalho}</kbd>
-      </button>
+    <ContextoBusca.Provider value={abrir}>
+      {children}
       <Dialogo aberto={aberta} aoFechar={fechar} titulo="Busca global">
         <Command
           label="Buscar processos, empresas e credores"
@@ -148,6 +189,6 @@ export function BuscaGlobal({ papel }: { papel: Papel }) {
           </Command.List>
         </Command>
       </Dialogo>
-    </>
+    </ContextoBusca.Provider>
   )
 }

@@ -1,0 +1,30 @@
+/* Q-11: barra 100% e a legenda em duas colunas (desktop e tablet) ou numa (celular). */
+
+.corpo {
+  min-width: 0;
+  margin-top: 10px;
+  container-type: inline-size;
+}
+
+.conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Na unidade estreita (208 a 230px), os vãos cedem para o nome da classe caber inteiro. */
+@container (max-width: 450px) {
+  /* A coluna da esquerda leva a maior classe (o valor mais longo): um pouco mais de largura. */
+  .conteudo:not([data-desenho="celular"]) {
+    --legenda-coluna-1: 1.1fr;
+    --legenda-vao-colunas: 10px;
+    --legenda-vao-item: 5px;
+  }
+}
+
+/* Perto da unidade mínima (208px), a legenda desce meio ponto. */
+@container (max-width: 410px) {
+  .conteudo:not([data-desenho="celular"]) {
+    --legenda-fonte: 11.5px;
+  }
+}

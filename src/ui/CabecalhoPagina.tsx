@@ -1,7 +1,10 @@
 // Cabeçalho de página de todas as telas, como nos guias: trilha opcional ("Processos / Novo
 // processo", `processo-novo.html`), título, linha de apoio (`processos-lista.html`) e ações à direita.
+// À direita das ações fica o botão da busca global (INI-01, S-08); abaixo de 901px ele some, e a
+// busca abre pela lupa da barra do topo.
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { BotaoBuscaGlobal } from '../modulos/busca/BuscaGlobal'
 import estilos from './CabecalhoPagina.module.css'
 import { juntarClasses } from './classes'
 
@@ -42,7 +45,10 @@ export function CabecalhoPagina({ titulo, trilha, apoio, acoes }: PropsCabecalho
         <h1>{titulo}</h1>
         {apoio && <div className={estilos.apoio}>{apoio}</div>}
       </div>
-      {acoes && <div className={estilos.acoes}>{acoes}</div>}
+      <div className={estilos.acoes}>
+        {acoes}
+        <BotaoBuscaGlobal className={estilos.busca} />
+      </div>
     </header>
   )
 }

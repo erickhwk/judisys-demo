@@ -1,13 +1,13 @@
 // Sessão, papéis e guardas de rota (SDD §7.2, §5.6; DMO-10). Cada teste começa com o armazenamento
 // limpo (contexto novo do Playwright).
 import { expect, test } from '@playwright/test'
-import { AGORA, entrarComo, trocarPara } from './apoio'
+import { AGORA, entrarComo, tituloDoInicio, trocarPara } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
 })
 
-test('PER-01 · entrar como analista vai ao dashboard e o menu da conta mostra nome e papel', async ({
+test('PER-01 · entrar como analista vai ao início e o menu da conta mostra nome e papel', async ({
   page,
 }) => {
   await page.goto('./')
@@ -18,16 +18,21 @@ test('PER-01 · entrar como analista vai ao dashboard e o menu da conta mostra n
   await page.getByRole('button', { name: /Entrar como Analista/ }).click()
 
   await expect(page).toHaveURL(/#\/$/)
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
   const sessao = await page.evaluate(() => sessionStorage.getItem('judisys:sessao'))
   expect(JSON.parse(sessao ?? '{}')).toMatchObject({ nome: 'Lia Campos', papel: 'analista' })
 
-  await page.getByRole('button', { name: 'Menu da conta' }).click()
-  await expect(page.getByText('Lia Campos', { exact: true }).last()).toBeVisible()
-  await expect(page.getByText('Analista', { exact: true })).toBeVisible()
+  // INI-01: a conta mora no pé do menu, que já mostra nome e papel; o painel repete os dois.
+  const conta = page.getByRole('button', { name: 'Menu da conta' })
+  await conta.click()
+  const painel = page.locator(`[id="${await conta.getAttribute('aria-controls')}"]`)
+  await expect(painel.getByText('Lia Campos', { exact: true })).toBeVisible()
+  await expect(painel.getByText('Analista', { exact: true })).toBeVisible()
   // Analista não vê Usuários no menu (RF-40: sem permissão, escondido).
-  await expect(page.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
-  await expect(page.getByRole('link', { name: 'Logs' })).toBeVisible()
+  // No menu: o quadro Atividade recente do início também tem um link "Logs" (INI-03).
+  const menu = page.getByRole('complementary', { name: 'Menu' })
+  await expect(menu.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
+  await expect(menu.getByRole('link', { name: 'Logs' })).toBeVisible()
 })
 
 test('PER-02 · trocar de papel limpa a sessão e volta ao login', async ({ page }) => {
@@ -78,15 +83,15 @@ test('PER-09 · a sessão é por aba: outra aba pede login', async ({ page, cont
 
   // A primeira aba continua dentro.
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 })
 
 test('rota desconhecida com sessão mostra "Página não encontrada"', async ({ page }) => {
   await entrarComo(page, 'aj')
   await page.goto('./#/nao-existe')
   await expect(page.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible()
-  await page.getByRole('link', { name: 'Voltar ao dashboard' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: 'Voltar ao início' }).click()
+  await expect(tituloDoInicio(page)).toBeVisible()
 })
 
 test('moldura: faixa da demo, link do WhatsApp e rodapé com a Draft', async ({ page }) => {
@@ -104,12 +109,15 @@ test('moldura: faixa da demo, link do WhatsApp e rodapé com a Draft', async ({ 
 test('celular: o menu lateral abre como gaveta e fecha ao navegar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await entrarComo(page, 'aj')
-  const processos = page.getByRole('link', { name: 'Processos' })
+  // No menu: os quadros do início também têm links "Processos" (INI-03).
+  const processos = page.getByRole('complementary', { name: 'Menu' }).getByRole('link', {
+    name: 'Processos',
+  })
   await expect(processos).toBeHidden()
   const abrirMenu = page.getByRole('button', { name: 'Abrir menu' })
   // Teclado: o foco entra na gaveta e, com Esc, volta ao botão que a abriu.
   await abrirMenu.click()
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeFocused()
+  await expect(page.getByRole('link', { name: 'Início' })).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(processos).toBeHidden()
   await expect(abrirMenu).toBeFocused()

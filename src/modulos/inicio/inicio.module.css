@@ -1,0 +1,31 @@
+/* Início, conforme o artboard "INI · Desktop claro": cabeçalho, a faixa do Personalizar quando em
+   edição e a grade, com 20px entre eles. A grade vai até 1240px, alinhada à esquerda (5.3). */
+
+.tela {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.conteiner {
+  width: 100%;
+  max-width: 1240px;
+}
+
+.aviso {
+  max-width: 1240px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  background: var(--cor-superficie);
+  color: var(--cor-texto-forte);
+  font-size: var(--tamanho-texto-pequeno);
+}
+
+/* Montagem vazia de propósito (RF-23) */
+
+.semQuadros {
+  border: 1px dashed var(--cor-quadro-guia);
+  border-radius: 12px;
+}

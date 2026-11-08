@@ -10,6 +10,8 @@ import {
   type Linha,
   lerTabela,
   pedidosDeIsadora,
+  resetarPelaFaixa,
+  tituloDoInicio,
 } from './apoio'
 
 const CHAVE_VERSAO = 'judisys:versao'
@@ -184,24 +186,12 @@ async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknow
   return { id: processo.id, apelido: processo.apelido }
 }
 
-/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
-async function resetarPelaFaixa(page: Page): Promise<void> {
-  await page
-    .getByRole('region', { name: 'Demonstração' })
-    .getByRole('button', { name: 'Resetar demo' })
-    .click()
-  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
-  await expect(confirmacao).toBeVisible()
-  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-  await expect(confirmacao).toBeHidden()
-}
-
-test('CAR-04 · Resetar demo → confirmar volta ao seed e ao dashboard', async ({ page }) => {
+test('CAR-04 · Resetar demo → confirmar volta ao seed e ao início', async ({ page }) => {
   const processo = await entrarEAlterar(page)
   await page.goto('./#/logs')
   await resetarPelaFaixa(page)
   await expect(page).toHaveURL(/#\/$/)
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
   const depois = await lerTabela(page, 'processos')
   expect(depois.find((p) => p.id === processo.id)?.apelido).toBe(processo.apelido)
   // Sem o aviso de versão (SDD §5.5).
@@ -233,7 +223,7 @@ test('CAR-04 · alteração feita pela tela (acolher a impugnação) é desfeita
   expect((await lerTabela(page, 'logs')).length).toBeGreaterThan(logsAntes)
 
   await resetarPelaFaixa(page)
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 
   // Volta ao seed: o QGC sem valor, a impugnação pendente e o log da decisão desfeito.
   await page.goto(CREDOR_IMPUGNACAO.rota)

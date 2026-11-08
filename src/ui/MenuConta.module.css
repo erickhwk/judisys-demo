@@ -5,19 +5,29 @@
 .botao {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 48px;
-  max-width: 280px;
-  padding: 0 12px 0 6px;
-  border: 1px solid var(--cor-borda-suave);
-  border-radius: var(--raio-pilula);
-  background: var(--cor-superficie);
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 10px 6px 8px;
+  border: 0;
+  border-radius: var(--raio-campo);
+  background: transparent;
   color: var(--cor-texto-muted);
+  text-align: left;
   cursor: pointer;
 }
 
 .botao:hover {
   background: var(--cor-hover-fantasma);
+}
+
+/* Só o avatar: alvo de 44px (menu recolhido e barra do topo) */
+.soAvatar {
+  width: var(--alvo-minimo);
+  min-height: var(--alvo-minimo);
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
 }
 
 .avatar {
@@ -29,25 +39,40 @@
   justify-content: center;
   border-radius: 50%;
   background: var(--cor-dourado-claro);
-  color: var(--cor-dourado-600);
+  color: var(--cor-dourado-700);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.nomeCurto {
+.identidade {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.nomeCurto,
+.papelCurto {
   overflow: hidden;
-  font-size: var(--tamanho-texto-pequeno);
-  font-weight: 600;
-  color: var(--cor-texto);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.seta {
-  flex: none;
-  transition: transform 0.15s ease;
+.nomeCurto {
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 600;
+  color: var(--cor-texto);
 }
 
-.setaAberta {
-  transform: rotate(180deg);
+.papelCurto {
+  font-size: 12.5px;
+  color: var(--cor-texto-muted);
+}
+
+.seta {
+  flex: none;
 }
 
 .painel {
@@ -110,8 +135,10 @@
   color: var(--cor-texto);
 }
 
-@media (max-width: 640px) {
-  .nomeCurto {
-    display: none;
-  }
+/* No pé do menu, o painel abre para cima, a partir da esquerda (cabe também com o menu recolhido). */
+.paraCima {
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
 }

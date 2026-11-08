@@ -4,7 +4,7 @@
 // ou anel); o que falhar entra na lista do fim do teste.
 // A rolagem horizontal da página no celular é conferida pela guarda de `rolagem.spec.ts` (AJ-02).
 import { expect, type Locator, type Page, test } from '@playwright/test'
-import { AGORA } from './apoio'
+import { AGORA, tituloDoInicio } from './apoio'
 
 test.use({ viewport: { width: 390, height: 844 }, hasTouch: true })
 
@@ -73,7 +73,7 @@ async function entrarPeloTeclado(page: Page, falhas: Falhas): Promise<void> {
   await page.goto('./#/entrar')
   await tabAte(page, page.getByRole('button', { name: /Entrar como Administrador/ }), falhas)
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 }
 
 /** Abre a gaveta do menu pelo teclado e escolhe um item. */
@@ -96,9 +96,9 @@ test('CEL-01 · roteiro da seção 3 do PRD no celular, só com o teclado', asyn
   test.setTimeout(180_000)
   const falhas: Falhas = []
 
-  // 1. Entra como AJ e vê o dashboard.
+  // 1. Entra como AJ e vê o início.
   await entrarPeloTeclado(page, falhas)
-  for (const indicador of [/Processos ativos/i, /Passivo sob administração/i, /Prazos/i]) {
+  for (const indicador of [/Carteira por fase/i, /Passivo sob administração/i, /Prazos/i]) {
     await expect(page.locator('main').getByText(indicador).first()).toBeVisible()
   }
   await expect(page.locator('main').getByText(/AGC/).first()).toBeVisible()

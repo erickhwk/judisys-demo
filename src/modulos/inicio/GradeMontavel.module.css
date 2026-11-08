@@ -1,0 +1,107 @@
+/* Grade do início (SDD-INI §5.3), conforme os artboards "INI · Desktop claro", "INI · Tablet" e
+   "INI · Personalizar": unidades de altura fixa de 176px com vão de 16px, posição explícita de cada
+   quadro (os buracos ficam) e, na edição, as células desenhadas por baixo como guias tracejadas. */
+
+.grade {
+  position: relative;
+  display: grid;
+  gap: 16px;
+}
+
+.celula {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Celular: lista na ordem de leitura, altura livre (RF-11). */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Modo de edição */
+
+.guia {
+  z-index: 0;
+  border: 1px dashed var(--cor-quadro-guia);
+  border-radius: 12px;
+}
+
+.arrastando {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* O arrastado segue o ponteiro por cima de tudo, levemente inclinado (canvas). */
+.arrastado {
+  z-index: 5;
+  opacity: 0.92;
+  pointer-events: none;
+  border-radius: 12px;
+  box-shadow: var(--sombra-dialogo);
+}
+
+/* Lugar onde o quadro vai cair: os outros já desceram para abrir espaço (RF-19). */
+.destino {
+  z-index: 2;
+  border: 2px dashed var(--cor-quadro-sombra);
+  border-radius: 12px;
+  background: var(--cor-fundo);
+}
+
+/* Na recusa, a origem continua reservada: soltar devolve o quadro para cá. */
+.origem {
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--cor-quadro-sombra);
+  border-radius: 12px;
+  background: var(--cor-fundo);
+  color: var(--cor-texto-muted);
+  font-size: 12.5px;
+}
+
+/* Sombra vermelha da recusa, já cortada na borda do grid (5.6, passo 3). Fica por cima do quadro
+   arrastado, para o aviso não sumir embaixo dele. */
+.recusa,
+.recusaAviso {
+  position: absolute;
+  z-index: 6;
+  background: var(--cor-perigo-claro);
+  pointer-events: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--cor-quadro-recusa);
+}
+
+.recusa {
+  opacity: 0.96;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 12px;
+  border: 2px solid var(--cor-quadro-recusa);
+  border-radius: 12px;
+}
+
+/* Quadro todo fora do grid: faixa na borda por onde saiu e o aviso ao lado, dentro do grid. */
+.recusaFaixa {
+  position: absolute;
+  z-index: 6;
+  border-radius: 3px;
+  background: var(--cor-quadro-recusa);
+  pointer-events: none;
+}
+
+.recusaAviso {
+  max-width: 240px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--cor-quadro-recusa);
+  border-radius: 8px;
+}

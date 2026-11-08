@@ -27,17 +27,11 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
   const erros = vigiarConsole(page)
   const foraDoPermitido = await vigiarRede(page, baseURL)
 
-  // 1. Entra como AJ e vê o dashboard: carteira, passivo, prazos e a AGC da semana que vem.
+  // 1. Entra como AJ e vê o início: a grade com o padrão do papel (RF-17).
   await entrarComo(page, 'aj')
-  await expect(page.locator('[data-stat="processos-ativos"]')).toContainText(/\d/)
-  await expect(page.locator('[data-stat="passivo"]')).toContainText('R$')
-  await expect(page.getByRole('region', { name: 'Próximos prazos' }).getByRole('link')).toHaveCount(
-    8,
-  )
-  const proximasAgcs = page.getByRole('region', { name: 'Próximas AGCs' })
-  await expect(proximasAgcs.getByRole('link', { name: /Grupo Lontra Azul/ })).toContainText(
-    '13/11/2026',
-  )
+  for (const quadro of ['Carteira por fase', 'Passivo sob administração', 'Próxima AGC']) {
+    await expect(page.getByRole('region', { name: quadro })).toBeVisible()
+  }
 
   // 2. Abre o processo vitrine pela lista: timeline de fases e prazos.
   await page.getByRole('navigation').getByRole('link', { name: 'Processos', exact: true }).click()

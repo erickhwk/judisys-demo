@@ -1,0 +1,42 @@
+/* Próximos prazos (Q-04): a coluna da data (curta e relativa) e o texto. A data fica em vermelho no
+   vencido e em dourado no de hoje, como os selos da agenda (RF-24). */
+
+.linha {
+  grid-template-columns: 50px minmax(0, 1fr);
+}
+
+.quando {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.quando b {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quando span {
+  font-size: 11px;
+  color: var(--cor-texto-muted);
+}
+
+[data-situacao="vencido"] .quando b,
+[data-situacao="vencido"] .quando span {
+  color: var(--cor-perigo);
+}
+
+[data-situacao="hoje"] .quando b,
+[data-situacao="hoje"] .quando span {
+  color: var(--cor-dourado-700);
+}
+
+/* Mais largura (tablet, celular): a coluna da data respira. */
+@container (min-width: 300px) {
+  .linha {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+  }
+}

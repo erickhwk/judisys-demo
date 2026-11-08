@@ -9,11 +9,11 @@ import { Vazio } from './Vazio'
 /** Mensagem da rota acessada direto sem permissão (RF-40, PER-04). */
 export const MENSAGEM_SEM_PERMISSAO = 'Seu papel não permite esta ação'
 
-function VoltarAoDashboard() {
+function VoltarAoInicio() {
   return (
     <Link to="/" className={estilos.voltar}>
       <ArrowLeft size={18} aria-hidden="true" />
-      Voltar ao dashboard
+      Voltar ao início
     </Link>
   )
 }
@@ -40,7 +40,7 @@ export function SemPermissao() {
       <Erro
         titulo={MENSAGEM_SEM_PERMISSAO}
         mensagem="Para fazer isso, troque de papel pelo menu da conta."
-        acao={<VoltarAoDashboard />}
+        acao={<VoltarAoInicio />}
       />
     </>
   )
@@ -54,8 +54,8 @@ export function NaoEncontrada() {
         <Vazio
           icone={<Compass size={24} />}
           titulo="Este endereço não existe na demo"
-          descricao="Confira o link ou volte ao dashboard."
-          acao={<VoltarAoDashboard />}
+          descricao="Confira o link ou volte ao início."
+          acao={<VoltarAoInicio />}
         />
       </div>
     </>

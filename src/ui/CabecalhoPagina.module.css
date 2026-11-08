@@ -61,3 +61,19 @@
   align-items: center;
   gap: 12px;
 }
+
+/* Vazio quando a tela não tem ações e a busca está escondida (fora do Layout ou no celular). */
+.acoes:empty {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  /* Regras separadas: navegador sem :has() descarta só a segunda, e a busca continua escondida. */
+  .busca {
+    display: none;
+  }
+
+  .acoes:not(:has(> :not(.busca))) {
+    display: none;
+  }
+}
