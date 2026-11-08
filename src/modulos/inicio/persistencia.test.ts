@@ -94,6 +94,19 @@ describe('lerMontagem e gravarMontagem', () => {
     expect(lerMontagem('usr-1', 'aj', fonte)).toEqual(MINHA)
   })
 
+  it('MNT-08 · montagem salva com todos os quadros descartados vira o padrão do papel', () => {
+    storage.setItem(
+      chaveDaMontagem('usr-1'),
+      JSON.stringify({ versao: 1, itens: [{ quadro: 'velho', x: 0, y: 0 }] }),
+    )
+    expect(lerMontagem('usr-1', 'aj', fonte)).toEqual(padraoDoPapel('aj'))
+  })
+
+  it('MNT-08 · montagem salva vazia de propósito (PRS-11) continua vazia', () => {
+    gravarMontagem('usr-1', [], fonte)
+    expect(lerMontagem('usr-1', 'aj', fonte)).toEqual([])
+  })
+
   it('MNT-05 · a montagem lida passa pelo normalizar', () => {
     storage.setItem(
       chaveDaMontagem('usr-1'),
