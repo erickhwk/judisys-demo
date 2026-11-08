@@ -40,19 +40,42 @@ interface PropsContador {
   idDescricao: string
 }
 
+/** O número fica `aria-hidden` e chega ao leitor de tela pelo `aria-describedby` do link; o alerta
+ * some quando é zero (CAS-03). */
+function Numero({
+  idDescricao,
+  valor,
+  descricao,
+  alerta = false,
+}: PropsContador & { valor: number; descricao: string; alerta?: boolean }) {
+  return (
+    <>
+      {(valor > 0 || !alerta) && (
+        <span
+          className={juntarClasses(estilos.contador, alerta && estilos.contadorAlerta)}
+          data-contador={alerta ? 'vencidos' : 'processos'}
+          aria-hidden="true"
+        >
+          {valor}
+        </span>
+      )}
+      <span id={idDescricao} hidden>
+        {descricao}
+      </span>
+    </>
+  )
+}
+
 /** Total de processos (RF-01, CAS-02). Mesma consulta do início (`useTodos('processos')`). */
 function ContadorProcessos({ idDescricao }: PropsContador) {
   const total = useTodos('processos').data?.length
   if (total === undefined) return null
   return (
-    <>
-      <span className={estilos.contador} data-contador="processos" aria-hidden="true">
-        {total}
-      </span>
-      <span id={idDescricao} hidden>
-        {total === 1 ? '1 processo' : `${total} processos`}
-      </span>
-    </>
+    <Numero
+      idDescricao={idDescricao}
+      valor={total}
+      descricao={total === 1 ? '1 processo' : `${total} processos`}
+    />
   )
 }
 
@@ -62,26 +85,13 @@ function ContadorVencidos({ idDescricao }: PropsContador) {
   if (!prazos) return null
   const dia = hoje()
   const vencidos = prazos.filter((prazo) => noPeriodo(prazo, 'vencidos', dia)).length
-  if (vencidos === 0)
-    return (
-      <span id={idDescricao} hidden>
-        nenhum prazo vencido
-      </span>
-    )
-  return (
-    <>
-      <span
-        className={juntarClasses(estilos.contador, estilos.contadorAlerta)}
-        data-contador="vencidos"
-        aria-hidden="true"
-      >
-        {vencidos}
-      </span>
-      <span id={idDescricao} hidden>
-        {vencidos === 1 ? '1 prazo vencido' : `${vencidos} prazos vencidos`}
-      </span>
-    </>
-  )
+  const descricao =
+    vencidos === 0
+      ? 'nenhum prazo vencido'
+      : vencidos === 1
+        ? '1 prazo vencido'
+        : `${vencidos} prazos vencidos`
+  return <Numero idDescricao={idDescricao} valor={vencidos} descricao={descricao} alerta />
 }
 
 const SECOES: { titulo: string; itens: Item[] }[] = [
