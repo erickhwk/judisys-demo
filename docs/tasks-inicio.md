@@ -204,6 +204,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] Quatro quadros conforme as fichas, nas três variantes e nos dois temas.
   - [ ] Informes publicados com 6 meses no celular; prazos cumpridos com o subtítulo "por mês de vencimento" (C-01).
   - [ ] Capturas nos extremos de largura.
+  - [ ] Token `--cor-grafico-5` nos dois temas (com par no `tokens.test.ts`) para a 5ª série do Passivo por classe, que hoje usa a cor do trilho e some no tema claro (decidido no lote 1, INI-05).
 - **Testes:**
   - [ ] QDR-09 · passivo do seed igual ao total do topo
   - [ ] QDR-10 · informes por mês do seed, 12 e 6 meses
