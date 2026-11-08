@@ -6,7 +6,7 @@ export type PropsErro = {
   titulo?: string
   /** O que deu errado, em linguagem de usuário (ex.: "Seu papel não permite esta ação"). */
   mensagem: ReactNode
-  /** Ex.: botão "Tentar de novo" ou "Voltar ao dashboard". */
+  /** Ex.: botão "Tentar de novo" ou "Voltar ao início". */
   acao?: ReactNode
 }
 

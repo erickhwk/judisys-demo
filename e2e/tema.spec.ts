@@ -3,7 +3,7 @@
 // abas e sobrevive ao recarregar e ao reset da demo; o script do <head> aplica o tema sem o app;
 // a impressão fica clara.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, entrarComo, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -45,7 +45,7 @@ test('TEM-02 · o botão alterna o tema, e a escolha salva sobrevive ao recarreg
   expect(fundo).toBe('rgb(10, 22, 48)')
 
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
   await expect(html(page)).toHaveAttribute('data-theme', 'dark')
   // A escolha vence o sistema.
   await page.emulateMedia({ colorScheme: 'light' })
@@ -91,7 +91,7 @@ test('TEM-05 · o reset da demo mantém a escolha de tema', async ({ page }) => 
   const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
   await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
   await expect(confirmacao).toBeHidden()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 
   expect(await escolhaSalva(page)).toBe('dark')
   await page.reload()

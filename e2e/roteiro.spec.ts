@@ -27,7 +27,7 @@ test('roteiro do PRD §3: AJ → vitrine → credores → AGC → cram down → 
   const erros = vigiarConsole(page)
   const foraDoPermitido = await vigiarRede(page, baseURL)
 
-  // 1. Entra como AJ e vê o dashboard: carteira, passivo, prazos e a AGC da semana que vem.
+  // 1. Entra como AJ e vê o início: carteira, passivo, prazos e a AGC da semana que vem.
   await entrarComo(page, 'aj')
   await expect(page.locator('[data-stat="processos-ativos"]')).toContainText(/\d/)
   await expect(page.locator('[data-stat="passivo"]')).toContainText('R$')

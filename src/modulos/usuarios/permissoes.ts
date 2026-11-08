@@ -4,7 +4,7 @@ import type { Modulo, Nivel } from '../../regras/permissoes'
 import type { TomSelo } from '../../ui/Selo'
 
 export const ROTULOS_MODULO: Readonly<Record<Modulo, string>> = {
-  dashboard: 'Dashboard, busca e consultas',
+  dashboard: 'Início, busca e consultas',
   processos: 'Processos',
   empresas: 'Empresas',
   informes: 'Informes',
