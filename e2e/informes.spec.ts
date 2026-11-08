@@ -251,3 +251,31 @@ test('AJ-12 · digitação rápida na busca de Informes não perde caracteres; a
   await limparBuscaPendente(page, campo)
   await expect(linhas(page)).toHaveCount(50)
 })
+
+test('AJ-16 · na trilha do informe, o processo leva à visão geral e Informes à lista', async ({
+  page,
+}) => {
+  await entrarComo(page, 'aj')
+  await page.goto('./#/informes/inf-024')
+  const trilha = page.getByRole('navigation', { name: 'Trilha' })
+  const processo = trilha.getByRole('link', { name: 'Moinho Quero-Quero', exact: true })
+  await expect(trilha.getByRole('link', { name: 'Informes', exact: true })).toHaveAttribute(
+    'href',
+    '#/informes',
+  )
+  await expect(processo).toHaveAttribute('href', '#/processos/prc-005/visao-geral')
+
+  await processo.click()
+  await expect(page).toHaveURL(/#\/processos\/prc-005\/visao-geral$/)
+  await expect(page.getByRole('heading', { name: 'Moinho Quero-Quero', level: 1 })).toBeVisible()
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Seções do processo' })
+      .getByRole('link', { name: 'Visão geral' }),
+  ).toHaveAttribute('aria-current', 'page')
+
+  await page.goBack()
+  await expect(
+    page.getByRole('heading', { name: 'Ata da assembleia geral de credores', level: 1 }),
+  ).toBeVisible()
+})
