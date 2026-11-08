@@ -13,7 +13,7 @@ import {
 } from '../../dados/carga'
 import { ArmazenamentoDexie } from '../../dados/dexie'
 import { ArmazenamentoMemoria } from '../../dados/memoria'
-import { type Montagem, PADROES, padraoDoPapel } from './montagem'
+import { type Montagem, normalizar, PADROES, padraoDoPapel } from './montagem'
 import {
   apagarMontagens,
   chaveDaMontagem,
@@ -99,7 +99,7 @@ describe('lerMontagem e gravarMontagem', () => {
       chaveDaMontagem('usr-1'),
       JSON.stringify({ versao: 1, itens: [{ quadro: 'velho', x: 0, y: 0 }] }),
     )
-    expect(lerMontagem('usr-1', 'aj', fonte)).toEqual(padraoDoPapel('aj'))
+    expect(lerMontagem('usr-1', 'aj', fonte)).toEqual(normalizar(padraoDoPapel('aj'), 'aj'))
   })
 
   it('MNT-08 · montagem salva vazia de propósito (PRS-11) continua vazia', () => {

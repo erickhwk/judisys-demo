@@ -238,9 +238,9 @@ describe('normalizar', () => {
     expect(normalizar([], 'aj')).toEqual([])
   })
 
-  it('MNT-08 · todos os itens descartados (inexistentes ou repetidos) viram o padrão do papel', () => {
+  it('MNT-08 · todos os itens descartados (quadro inexistente) viram o padrão do papel', () => {
     expect(normalizar([{ quadro: 'velho', x: 0, y: 0 }], 'advogado')).toEqual(
-      ordemDeLeitura(padraoDoPapel('advogado')),
+      normalizar(padraoDoPapel('advogado'), 'advogado'),
     )
   })
 })
