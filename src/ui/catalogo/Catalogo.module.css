@@ -85,3 +85,51 @@
     padding: 24px 16px 48px;
   }
 }
+
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Gráficos (INI-05): cartões na largura de uma (272px) e de duas unidades (560px) do início. */
+.graficos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.cartaoGrafico,
+.cartaoGraficoDuplo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 272px;
+  max-width: 100%;
+  padding: 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-card);
+}
+
+.cartaoGraficoDuplo {
+  width: 560px;
+}
+
+.tituloCartao,
+.subtitulo {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cor-texto-muted);
+}
+
+.roscaComLegenda {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
