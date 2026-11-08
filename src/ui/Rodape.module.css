@@ -15,8 +15,9 @@
   color: var(--cor-texto);
 }
 
-.marca:hover {
-  color: var(--cor-dourado-700);
+.marca:hover,
+.marca:focus-visible {
+  color: var(--cor-draft-laranja);
 }
 
 @media (max-width: 640px) {
