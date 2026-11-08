@@ -55,7 +55,7 @@ export interface PropsGradeMontavel {
   /** A montagem exibida: a salva ou, no modo de edição, o rascunho. */
   montagem: Montagem
   cols: Colunas
-  /** Largura do contêiner, para a unidade das sombras (até 1240px). */
+  /** Largura do contêiner, para a unidade das sombras (até 2200px). */
   largura: number
   editando: boolean
   /** Mudança do rascunho pelo arrasto ou pelo ×. Só chamada no modo de edição. */

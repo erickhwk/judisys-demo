@@ -57,11 +57,11 @@ async function medir(page: Page) {
 }
 
 test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
-  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 298px no desktop, de 292 e
+  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 538px no desktop, de 292 e
   // 432px no tablet e o celular de 288 a 599px.
   const casos = [
     { conteiner: 880, variante: 'desktop', unidade: 208 },
-    { conteiner: 1240, variante: 'desktop', unidade: 298 },
+    { conteiner: 2200, variante: 'desktop', unidade: 538 },
     { conteiner: 600, variante: 'tablet', unidade: 292 },
     { conteiner: 879, variante: 'tablet', unidade: 431 },
     { conteiner: 288, variante: 'celular', unidade: 288 },
@@ -102,7 +102,7 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     await montarOsQuatro(page)
     await expect(page.locator('[data-semanas="6"]')).toBeVisible()
     const casca = 1440 - ((await grade(page).boundingBox())?.width ?? 0)
-    for (const conteiner of [880, 1240, 600, 879]) {
+    for (const conteiner of [880, 2200, 600, 879]) {
       await page.setViewportSize({ width: conteiner + casca, height: 1000 })
       const [, calendario] = await medir(page)
       expect(calendario?.estouro, `calendário em ${conteiner}px`).toBeLessThanOrEqual(0)

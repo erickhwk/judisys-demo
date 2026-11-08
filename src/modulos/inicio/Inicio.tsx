@@ -121,7 +121,7 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
         {aviso}
       </p>
 
-      <div ref={ref} className={estilos.conteiner}>
+      <div ref={ref}>
         {largura !== null &&
           cols !== null &&
           (exibida.length === 0 ? (

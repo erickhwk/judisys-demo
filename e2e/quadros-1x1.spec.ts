@@ -59,9 +59,9 @@ test('QDR-04 · pedidos de crédito do seed, e o Ver leva aos credores do proces
 
 // --- QDR-16 · sem estouro nos extremos de largura (SDD-INI §5.3) -------------------------------
 
-/** Contêiner da grade nos extremos de cada faixa: unidade de 208 e 298 (4 colunas), 292 e 432
+/** Contêiner da grade nos extremos de cada faixa: unidade de 208 e 538 (4 colunas), 292 e 432
  * (2 colunas) e a lista do celular de 288 a 599. */
-const EXTREMOS = [880, 1240, 600, 879, 288, 599]
+const EXTREMOS = [880, 2200, 600, 879, 288, 599]
 
 /** Ajusta a janela até o contêiner da grade ter `alvo` px (a casca muda com a faixa). */
 async function conteinerCom(page: Page, alvo: number): Promise<void> {

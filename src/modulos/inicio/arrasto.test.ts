@@ -34,10 +34,10 @@ describe('larguras (5.3)', () => {
     expect(colunasDaLargura(largura)).toBe(cols)
   })
 
-  it('unidade de 208px em 880px e de 298px a partir de 1240px (GRD-09)', () => {
+  it('unidade de 208px em 880px e de 538px a partir de 2200px (GRD-09)', () => {
     expect(larguraDaUnidade(880, 4)).toBe(208)
-    expect(larguraDaUnidade(1240, 4)).toBe(298)
-    expect(larguraDaUnidade(1600, 4)).toBe(298)
+    expect(larguraDaUnidade(2200, 4)).toBe(538)
+    expect(larguraDaUnidade(2560, 4)).toBe(538)
   })
 
   it('unidade de 292 a 432px em 2 colunas', () => {

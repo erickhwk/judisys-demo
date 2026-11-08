@@ -1,6 +1,6 @@
 /* Q-12 · Carteira por fase, conforme a ficha "carteira" do canvas (SDD-INI §11). Fase com processo
    no tom do tipo (RJ azul, falência dourada); fase vazia apagada. As medidas do canvas são de
-   unidade de 272px; as daqui valem de 208 a 298px no desktop e de 292 a 432px no tablet (SDD §5.3). */
+   unidade de 272px; as daqui valem de 208 a 538px no desktop e de 292 a 432px no tablet (SDD §5.3). */
 
 .carteira {
   display: flex;

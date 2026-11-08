@@ -16,8 +16,8 @@ import {
 export const VAO = 16
 /** Altura de uma unidade nas faixas de 4 e de 2 colunas (5.3). */
 export const ALTURA_UNIDADE = 176
-/** Largura máxima do grid: 4 unidades de 298px e 3 vãos (5.3). */
-export const LARGURA_MAXIMA = 1240
+/** Largura máxima do grid: 4 unidades de 538px e 3 vãos (5.3, AJ-21). */
+export const LARGURA_MAXIMA = 2200
 /** A partir desta largura de contêiner, 4 colunas e Personalizar (5.3). */
 export const LARGURA_4_COLUNAS = 880
 /** A partir desta largura de contêiner, 2 colunas; abaixo, a lista do celular (5.3). */
@@ -32,7 +32,7 @@ export function colunasDaLargura(largura: number): Colunas {
   return 1
 }
 
-/** Largura de uma unidade: o contêiner (até 1240px) menos os vãos, dividido pelas colunas. */
+/** Largura de uma unidade: o contêiner (até 2200px) menos os vãos, dividido pelas colunas. */
 export function larguraDaUnidade(largura: number, cols: number): number {
   const util = Math.min(largura, LARGURA_MAXIMA)
   return (util - VAO * (cols - 1)) / cols
