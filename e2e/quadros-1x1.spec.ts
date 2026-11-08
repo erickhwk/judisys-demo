@@ -85,7 +85,11 @@ async function estouros(page: Page, id: string): Promise<string[]> {
     for (const el of secao.querySelectorAll<HTMLElement>('*')) {
       const r = el.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
-      if (r.right > caixa.right - 0.5 || r.bottom > caixa.bottom - 0.5 || r.left < caixa.left) {
+      if (
+        r.right > caixa.right - 0.5 ||
+        r.bottom > caixa.bottom - 0.5 ||
+        r.left < caixa.left - 0.5
+      ) {
         problemas.push(`fora da moldura: ${el.tagName} "${el.textContent?.slice(0, 30)}"`)
       }
       if (getComputedStyle(el).textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth) {

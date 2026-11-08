@@ -110,7 +110,7 @@
   color: var(--cor-texto);
 }
 
-/* Unidade estreita (até ~230px): caixas mais justas para o "1ª convocação" caber inteiro. */
+/* Corpo até 196px (unidade até ~230px): caixas mais justas para o "1ª convocação" caber inteiro. */
 @container (max-width: 196px) {
   .convocacoes {
     gap: 6px;

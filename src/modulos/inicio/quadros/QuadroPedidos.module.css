@@ -38,19 +38,15 @@
   color: var(--cor-texto-forte);
 }
 
-/* Unidade estreita (até ~274px): rosca e legenda mais justas, e a nota pode quebrar em duas linhas
-   (o nome do processo não cabe numa só em 174px de conteúdo). */
 /* No celular a altura é livre: a nota quebra em vez de cortar o nome do processo. */
 [data-variante="celular"] .nota {
   white-space: normal;
 }
 
+/* Corpo até 240px (unidade até ~274px): rosca e legenda mais justas, e a nota pode quebrar em duas
+   linhas (o nome do processo não cabe numa só em 174px de conteúdo). O contêiner é o `.corpo`, então
+   a consulta vale só para os filhos dele. */
 @container (max-width: 240px) {
-  .corpo {
-    gap: 6px;
-    margin-top: 6px;
-  }
-
   .grafico {
     gap: 8px;
   }
