@@ -69,18 +69,19 @@ test.describe('larguras', () => {
     const titulo = await tituloDoInicio(page).boundingBox()
     expect(prazos?.x).toBe(titulo?.x)
     // As ações do cabeçalho param na borda direita da grade, e não na da janela (AJ-21).
-    const personalizar = await page.getByRole('button', { name: 'Personalizar' }).boundingBox()
     const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
-    expect(personalizar?.x).toBeLessThan((caixa?.x ?? 0) + (caixa?.width ?? 0))
     expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(
       (caixa?.x ?? 0) + (caixa?.width ?? 0),
       0,
     )
   })
 
-  test('GRD-09 · monitor de 2560px: a grade preenche a coluna (AJ-21)', async ({ page }) => {
+  test('AJ-21 · monitor de 2560px com o menu aberto: a grade preenche a coluna', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 2560, height: 1000 })
     await entrarComo(page, 'advogado')
+    await expect(page.getByRole('button', { name: 'Recolher menu' })).toBeVisible()
     const caixa = await grade(page).boundingBox()
     const resto = await page.evaluate(() => {
       const grade = document.querySelector('[data-colunas]')

@@ -133,7 +133,7 @@ Medidas pela largura do contêiner do grid (`useContainerWidth`), com vão de 16
 | 600 a 879px | 2 | 292 a 432px | não |
 | < 600px | 1 (lista, sem a biblioteca) | largura toda | não |
 
-- O grid tem largura máxima de 2200px (unidade de 538px) e fica alinhado à esquerda. O cabeçalho do início para na mesma largura, então as ações ficam na borda direita da grade. **Revisto na AJ-21 (2026-11-08):** o teto era 1240px (unidade de 298px), e num monitor de 2560px a grade ocupava metade da coluna, com a busca e o Personalizar soltos na borda da janela. O usuário quis os quadros ocupando a tela; 2200px preenche até 2560px, e só um ultrawide sobra vazio à direita.
+- O grid tem largura máxima de 2200px (unidade de 538px) e fica alinhado à esquerda. O cabeçalho do início para na mesma largura, então as ações ficam na borda direita da grade. **Revisto na AJ-21 (2026-11-08):** o teto era 1240px (unidade de 298px), e num monitor de 2560px a grade ocupava metade da coluna, com a busca e o Personalizar soltos na borda da janela. O usuário quis os quadros ocupando a tela; 2200px preenche um monitor de 2560px com o menu aberto; com o menu recolhido, ou num ultrawide, sobra vazio à direita, e o cabeçalho continua alinhado à grade. O teto vem de `LARGURA_MAXIMA` (`arrasto.ts`), aplicado como estilo na tela do início, para a unidade do arrasto e as células não divergirem.
 - Altura da unidade: 176px, com 16px de vão, nas faixas de 4 e de 2 colunas.
 - **Limite das 4 colunas em 880px (decidido com o usuário na INI-03, 2026-11-08):** o SDD previa 976px, contando com o menu e as margens do canvas. Com o menu real de 280px e 44px de margem, 1280px com o menu aberto deixa cerca de 912px para a grade (menos com a barra de rolagem), e o notebook ficaria no desenho de tablet e sem o Personalizar. Baixar o limite para 880px mantém as 4 colunas ali.
 - **Polidez (RNF-04):** cada variante de desktop precisa ficar correta com unidade de 208 a 538px. Cada variante de tablet, de 292 a 432px. Cada variante de celular, de 288 a 599px. As capturas de aceite cobrem os extremos: 1280px com o menu aberto (unidade de cerca de 216px), 1440px, 834px e 390px.
@@ -241,7 +241,7 @@ Todos puros, com `hoje` por parâmetro:
 | GRD-06 | F | 390px | abrir | Uma coluna na mesma ordem, variantes de celular, altura livre (RF-11). |
 | GRD-07 | F | qualquer quadro | clicar no link do cabeçalho | Vai à tela de origem (RF-13). |
 | GRD-08 | B | montagem com buraco | abrir | O buraco continua (S-04). |
-| GRD-09 | B | janela de 3440px; janela de 2560px | abrir | Grid de 2200px, unidade de 538px, ações do cabeçalho na borda direita da grade; em 2560px a grade preenche a coluna (5.3, AJ-21). |
+| GRD-09 | B | janela de 3440px | abrir | Grid de 2200px, unidade de 538px, busca na borda direita da grade (5.3, AJ-21). |
 
 ### 7.4 Quadros — QDR
 

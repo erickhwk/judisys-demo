@@ -1,5 +1,6 @@
 /* Início, conforme o artboard "INI · Desktop claro": cabeçalho, a faixa do Personalizar quando em
-   edição e a grade, com 20px entre eles. Tudo vai até 2200px, alinhado à esquerda (5.3, AJ-21): a grade
+   edição e a grade, com 20px entre eles. Tudo vai até 2200px (`LARGURA_MAXIMA`, no estilo do
+   componente), alinhado à esquerda (5.3, AJ-21): a grade
    preenche a coluna até o monitor de 2560px e, além disso, as ações do cabeçalho ficam na borda
    direita da grade, e não na da janela. */
 
@@ -7,7 +8,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 2200px;
 }
 
 .aviso {

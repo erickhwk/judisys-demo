@@ -60,6 +60,11 @@ describe('célula pelo ponteiro (5.6, passo 2)', () => {
     expect(colunaPretendida(300 + 314 * 4 + 20, 20, 300, 298)).toBe(4)
   })
 
+  it('na unidade máxima de 538px, cada coluna começa 554px depois da anterior (AJ-21)', () => {
+    expect(colunaPretendida(300 + 554 * 2 + 20, 20, 300, 538)).toBe(2)
+    expect(colunaPretendida(300 + 554 * 3 + 300, 20, 300, 538)).toBe(4)
+  })
+
   it('a linha nunca fica acima da primeira', () => {
     expect(linhaPretendida(100, 10, 200)).toBe(0)
     expect(linhaPretendida(200 + 192 * 2 + 10, 10, 200)).toBe(2)
