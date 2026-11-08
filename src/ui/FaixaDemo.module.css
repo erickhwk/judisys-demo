@@ -65,7 +65,7 @@
 
 .destaque {
   border-color: transparent;
-  background: var(--cor-dourado-degrade);
+  background: var(--cor-dourado-500);
   color: var(--cor-sobre-dourado);
 }
 

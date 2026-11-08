@@ -93,7 +93,7 @@
 }
 
 .item[aria-current="page"] {
-  background: var(--cor-dourado-degrade);
+  background: var(--cor-dourado-500);
   color: var(--cor-sobre-dourado);
   font-weight: 700;
 }
