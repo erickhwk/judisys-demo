@@ -6,7 +6,7 @@ import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
-  funilPorFase,
+  carteiraPorFase,
   numerosDoTopo,
   passivoPorClasse,
   proximasAgcs,
@@ -77,12 +77,13 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         { rotulo: 'Total', valor: dinheiro(classes.reduce((soma, c) => soma + c.valor, 0)) },
       ],
     },
-    ...(['rj', 'falencia'] as const).map((tipo) => ({
-      titulo: `Funil por fase, ${tipo === 'rj' ? 'RJ' : 'falência'} (funilPorFase)`,
-      linhas: funilPorFase(tabelas.processos, tipo).map((e) => ({
-        rotulo: e.rotulo,
-        valor: e.quantidade,
-      })),
+    ...carteiraPorFase(tabelas.processos).map((c) => ({
+      titulo: `Carteira por fase, ${c.tipo === 'rj' ? 'RJ' : 'falência'} (carteiraPorFase)`,
+      linhas: [
+        { rotulo: 'Ativos', valor: c.ativos },
+        { rotulo: 'Encerrados', valor: c.encerrados },
+        ...c.fases.map((f) => ({ rotulo: f.rotulo, valor: f.quantidade })),
+      ],
     })),
     {
       titulo: 'Próximos prazos em aberto (proximosPrazos)',

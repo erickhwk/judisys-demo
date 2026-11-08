@@ -4,8 +4,9 @@ import type { Tipos } from '../../dados/schemas'
 import { type DataIso, somarDias } from '../../regras/datas'
 import {
   ehFaseFinal,
+  FASES_FALENCIA,
+  FASES_RJ,
   type Fase,
-  fasesDoTipo,
   ROTULOS_FASE,
   type TipoProcesso,
 } from '../../regras/fases'
@@ -66,22 +67,44 @@ export function numerosDoTopo(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Funil por fase (RF-08, T-35)
+// INI-09 · Carteira por fase (SDD-INI §5.7, Q-12), no lugar do antigo funil por fase (RF-08, T-35)
 
-export interface EtapaDoFunil {
+export interface FaseDaCarteira {
   fase: Fase
   rotulo: string
   quantidade: number
 }
 
-/** Toda fase do tipo, na ordem do RF-14, com quantos processos estão parados nela (zero também). */
-export function funilPorFase(processos: readonly Processo[], tipo: TipoProcesso): EtapaDoFunil[] {
-  const doTipo = processos.filter((p) => p.tipo === tipo)
-  return fasesDoTipo(tipo).map((fase) => ({
-    fase,
-    rotulo: ROTULOS_FASE[fase],
-    quantidade: doTipo.filter((p) => p.faseAtual === fase).length,
-  }))
+export interface CarteiraDoTipo {
+  tipo: TipoProcesso
+  /** Processos do tipo fora das fases finais. */
+  ativos: number
+  /** Processos do tipo na fase "Encerrada", a última da sequência. */
+  encerrados: number
+  /** Toda fase da sequência do RF-14, na ordem, com zero onde não há processo. */
+  fases: FaseDaCarteira[]
+}
+
+/**
+ * Contagem por fase da carteira, RJ e depois falência, com todas as fases da sequência do RF-14
+ * (as vazias também, para o quadro apagá-las). As finais alternativas da RJ (convolada em
+ * falência, desistência) ficam de fora (SDD-INI §5.7).
+ */
+export function carteiraPorFase(processos: readonly Processo[]): CarteiraDoTipo[] {
+  return (['rj', 'falencia'] as const).map((tipo) => {
+    const doTipo = processos.filter((p) => p.tipo === tipo)
+    const sequencia: readonly Fase[] = tipo === 'rj' ? FASES_RJ : FASES_FALENCIA
+    return {
+      tipo,
+      ativos: doTipo.filter(ehAtivo).length,
+      encerrados: doTipo.filter((p) => p.faseAtual === 'encerrada').length,
+      fases: sequencia.map((fase) => ({
+        fase,
+        rotulo: ROTULOS_FASE[fase],
+        quantidade: doTipo.filter((p) => p.faseAtual === fase).length,
+      })),
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------------------------
