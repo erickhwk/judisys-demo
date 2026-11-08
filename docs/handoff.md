@@ -1,63 +1,62 @@
-# Handoff — Judisys demo (DMO concluída; INI em especificação)
+# Handoff — Judisys demo (INI: lote 1 concluído)
 
 Data: 2026-11-08. Responda sempre em pt-BR.
 
 ## Foco da próxima sessão
 
-**Rodar o lote 1 do INI (início montável)**: INI-01, INI-02, INI-04 e INI-05, em paralelo, com a `execucao-paralela`.
+**Rodar o lote 2 do INI: a INI-03** (grade montável, Personalizar e moldura do quadro), com a `execucao-paralela`.
 
-- As worktrees e os PRs usam a branch **`ini-redesign`** como base, nunca a `main`.
-- A divisão de arquivos e os args do lote estão no topo de `docs/tasks-inicio.md`.
-
-A INI-02 inclui o script `pnpm indicadores`, a fonte única dos números do seed (decidido em 2026-11-08).
+- É uma tarefa só. Pela regra da casa ("lote só com duas tarefas ou mais"), pode rodar como um lote de uma tarefa, para manter o par implementador e revisor. A outra opção é a própria sessão implementar. Combine com o usuário.
+- A tarefa começa pela prova de conceito da recusa no `react-grid-layout` 2.3 (Q-01, SDD §5.6). Se não ficar estável, a alternativa é um grid próprio, decidida e registrada no SDD dentro da própria tarefa.
+- A base é a `ini-redesign`, e o PR vai para ela, nunca para a `main`.
 
 ## Onde estamos
 
-- **Demo no ar:** https://judisys-demo.draft.dev.br, publicada pela `main` (`ace642c`), com 991 testes Vitest e 105 e2e verdes. As tarefas DMO-01 a DMO-25 e AJ-01 a AJ-17 estão em Concluído 🎉.
-- **Feature INI**, o redesenho da área logada:
-  - **Especificação:** `docs/prd-inicio.md`, `docs/sdd-inicio.md` (prevalece sobre o PRD) e `docs/tasks-inicio.md`, todos aprovados.
-  - **Branch de agregação `ini-redesign`:** já está no GitHub, com o PRD, o SDD e as tarefas. Todos os PRs INI vão para ela. Só a INI-10 abre o PR `ini-redesign` → `main`, porque a `main` publica a demo a cada push.
-  - **Cards:** INI-01 a INI-10 estão no Backlog do board https://trello.com/b/ufNoQ9bK, com a label `início`.
-  - **Referência visual aprovada:** canvas https://claude.ai/artifact/GLuzrvfvB5HY7Wy1je9sbr, linhas "INI · Casca e início" e "INI · Fichas" (SDD §11). As linhas de cima (propostas A, B, C e A2) são histórico.
+- **`ini-redesign`:** está com as tarefas INI-01, INI-02, INI-04 e INI-05 (PRs #43 a #46, mergeados pelo orquestrador com o CI verde, com autorização excepcional do usuário).
+  - Topo: o commit de docs da retro e este handoff.
+  - Na última suíte local com o lote integrado: Vitest 1104 e e2e 113, todos verdes.
+- **Cards INI-01, 02, 04 e 05:** em "Pronto pra deploy". INI-03 e INI-06 a INI-10 continuam no Backlog do board https://trello.com/b/ufNoQ9bK.
+- **Demo no ar:** https://judisys-demo.draft.dev.br, ainda publicada pela `main` (`ace642c`). Nada do INI chegou à `main`. Só a INI-10 abre o PR `ini-redesign` → `main`.
+- **Especificação:** `docs/prd-inicio.md`, `docs/sdd-inicio.md` (prevalece sobre o PRD) e `docs/tasks-inicio.md`. Os args fixos dos lotes estão no topo das tarefas.
+- **Referência visual:** canvas https://claude.ai/artifact/GLuzrvfvB5HY7Wy1je9sbr, linhas "INI · Casca e início" e "INI · Fichas" (SDD §11).
 - **Outros cards em "A Fazer":**
-  - AJ-18 · `useBuscaAdiada` devolve o `limpar` (https://trello.com/c/iopAxPbg);
-  - AJ-19 · helper `rotaDoProcesso(id, aba)` (https://trello.com/c/eDQK6HAn).
+  - AJ-18 · `useBuscaAdiada` devolve o `limpar`;
+  - AJ-19 · helper `rotaDoProcesso(id, aba)`.
 
-  As duas vão mexer em arquivos que o INI também toca, então é melhor rodá-las depois do INI ou combinar a ordem com o usuário.
+  As duas tocam arquivos do INI. Rode depois do INI, ou combine a ordem com o usuário.
 
-## O que esta sessão fez
+## Decisões do lote 1 (já no SDD, nas tarefas e nos cards)
 
-- Comparou o dashboard atual com três direções no canvas. O usuário escolheu a "Pauta do dia", em versão montável.
-- Fechou 22 decisões no `grilling`. O resumo está no PRD §4 (D-01 a D-16).
-- Escreveu o PRD, o SDD e as tarefas, e criou os cards.
-- `/retro`: o `trello.sh` passou a aceitar a "Descrição" em várias linhas no `import` e ganhou os comandos `labels` e `new-label` (commit `fe9f086` no `~/code/claude-setup`, sem push).
+- **MNT-08:** montagem salva com todos os quadros descartados volta ao padrão do papel; a montagem vazia de propósito continua vazia. A regra fica no `normalizar`. Quadro fora do grid é reposicionado (MNT-05), não descartado (§5.4 corrigida).
+- **Frase-resumo:** "a AGC **de** <apelido>" (CAB-03, CAB-07 e RF-07). Ela olha só a 1ª convocação, como diz o §5.7.
+- **Busca do início:** fica no `CabecalhoInicio`, à direita, no mesmo padrão do `CabecalhoPagina`, e some abaixo de 901px. O Personalizar da INI-03 entra na prop `acoes`, à esquerda da busca.
+- **5ª cor dos gráficos:** a INI-08 cria o `--cor-grafico-5`. Hoje a 5ª série usa a cor do trilho e quase some no tema claro.
+- **`pnpm indicadores`:** é a fonte única dos números do seed e já imprime o `resumoDoDia`. Cálculo novo em `src/modulos/inicio/indicadores.ts` também entra no script.
 
 ## Decisões que continuam valendo
 
-- As da demo: SDD da demo §4 e os PRs #24 a #42. Cores só em `src/estilos/tokens.css`, chapadas, sem degradê; o guarda é o `cores.test.ts`. Sem meta de cobertura no CI.
-- AJ pequeno (uma linha e um e2e) se faz na própria sessão, com uma passada única de revisão. Lote só com duas tarefas ou mais.
-- **INI:** o usuário quer polidez visual acima de tudo. Cada quadro tem um desenho por largura e só fica pronto com capturas em 1280 (menu aberto), 1440, 834 e 390px, nos dois temas (SDD §5.3 e §10).
-- A versão "final" do Judisys vai ser outro projeto, em Node, NestJS, TypeScript e React, e lá o usuário quer aprender. A demo continua no modo "entregar" (memórias `user_profile` e `feedback_autonomia_demo`).
+- As da demo: SDD da demo §4 e os PRs #24 a #42. Cores só em `src/estilos/tokens.css`, chapadas e sem degradê; o guarda é o `cores.test.ts`. Sem meta de cobertura no CI.
+- **INI:** polidez visual acima de tudo. Cada quadro tem um desenho por largura e só fica pronto com capturas em 1280 (menu aberto), 1440, 834 e 390, nos dois temas.
+- A versão "final" do Judisys vai ser outro projeto, em Node, NestJS, TypeScript e React, e lá o usuário quer aprender. A demo continua no modo "entregar".
+- **Merge e push dos PRs:** a autorização do lote 1 foi excepcional. Confirme com o usuário antes de mergear no lote 2.
 
 ## Pegadinhas
 
-- **Arquivos do canvas:** ficam em `.canvas-propostas/` no repo, fora do git (está em `.git/info/exclude`). Para revisar, publique com `root` nessa pasta, e leia antes o `project/canvas.json` publicado (action `read`). A ferramenta de Artifact recusa a pasta temporária do job como `root`.
-- **INI-03, prova de conceito:** o `react-grid-layout` 2.3 limita o `x` do quadro em vez de recusar. A recusa vem da posição do ponteiro (SDD §5.6 e Q-01). Se não ficar estável, a alternativa é um grid próprio.
-- **`/code-review` em fork:** `(none)` ou `(nenhum)` quer dizer **sem achados**, não falha. Ele deixa os arquivos de teste de fora; quando o teste é a própria mudança, revise o teste à mão. Para diff com lógica, use `medium`.
-- **Commit do orquestrador depois do revisor:** passa pelo `/code-review`. Se mexe no visual, refaça as capturas (passo 6.2 da `execucao-paralela`).
-- **Card de AJ:** confira com `grep` a rota, o arquivo e o teste antes de escrever.
-- **PR empilhado:** mergeie o de baixo apagando a branch, para o GitHub mudar a base do de cima.
-- **Biome:** também verifica SVG (exige `<title>` em todo `<svg>`) e recusa `export` em arquivo de teste.
-- **Captura de hover com Playwright:** espere a tela terminar de carregar antes do `hover()`.
-- **Workflow de lote:** copie o `workflow-lote.js` da skill para o scratchpad a cada lote.
+- **Capturas:** o `capturar.sh` agora aceita `--viewports` e `--tema claro,escuro --tema-chave tema`. O comando completo está na parte fixa da `tasks-inicio.md`.
+- **e2e nos lotes:** use `--workers=2` (já está no `run` da `tasks-demo.md`). Com os workers padrão, quatro agentes sobrecarregam a máquina, e o e2e falha por tempo.
+- **CI na `ini-redesign`:** o CI roda em PR e em push na `main`, não em push na `ini-redesign`. Vale o CI do último PR, desde que o head dele já contenha a base.
+- **`.canvas-propostas/`:** fica no repo, fora do git (`.git/info/exclude`). Para revisar, publique com `root` nessa pasta e leia antes o `project/canvas.json` publicado.
+- **`/code-review` em fork:** `(none)` quer dizer sem achados. Ele deixa os testes de fora; revise o teste à mão quando o teste for a própria mudança.
+- **Commit do orquestrador depois do revisor:** passa pelo `/code-review`. Se mexe no visual, refaça as capturas.
+- **Biome:** exige `<title>` em todo `<svg>` e recusa `export` em arquivo de teste.
 - **Fim de lote:** rode `git worktree prune` e remova as branches `worktree-wf_*`. Os `http.server` nas portas 8000 e 8765 não são do judisys; não os derrube.
 
 ## Skills sugeridas
 
 Leia este arquivo no início da sessão.
 
-- `execucao-paralela`: rodar o lote 1 do INI, a partir da `ini-redesign`.
-- `sdd-para-trello`: mover os cards INI e criar cards novos.
-- `comparacao-visual`: toda tarefa INI. Use `--rolagem-interna` e os dois temas.
+- `execucao-paralela`: lote 2 (INI-03), a partir da `ini-redesign`.
+- `sdd-para-trello`: mover o card da INI-03.
+- `comparacao-visual`: toda tarefa INI, com `--rolagem-interna`, as quatro larguras e os dois temas.
 - `simplify`, `revisao-spec`, `code-review` e `security-review`: o checklist antes de qualquer PR.
-- `grilling`: se aparecer decisão nova de produto no meio do INI.
+- `grilling`: se aparecer decisão nova de produto, como a Q-01, se o grid próprio mudar o escopo.
