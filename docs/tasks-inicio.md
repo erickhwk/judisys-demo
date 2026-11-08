@@ -241,6 +241,8 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] Quadros provisórios da INI-03 removidos; os 12 quadros reais no catálogo.
   - [ ] Primeira carga dentro do RNF-03 da demo (3 s em 4G), medida e registrada no PR. Se passar, o modo de edição vai para `lazy` (S-10).
   - [ ] Capturas finais: início em 1280 (menu aberto), 1440, 834 e 390, nos dois temas; o Personalizar com a recusa; uma lista com a casca nova.
+  - [ ] `--cor-grafico-4` com contraste de pelo menos 3:1 sobre a superfície nos dois temas, com o par no `tokens.test.ts` (decidido com o usuário no lote 3; hoje 1,6:1 no claro e 2,1:1 no escuro).
+  - [ ] Decidir com o usuário se os quadros 1×1, 1×2 e a Carteira adotam no celular o `ResumoNoCorpo` dos quadros 2×1 (lote 3).
   - [ ] Handoff atualizado e PR `ini-redesign` → `main` aberto, com a seção "Revisão automática".
 - **Testes:**
   - [ ] MNT-01 · montagem por usuário (e2e, trocando de papel)
