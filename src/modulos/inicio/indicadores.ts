@@ -123,7 +123,6 @@ export const MESES_NA_SERIE = 12
 export interface PassivoDoProcesso {
   processoId: string
   apelido: string
-  tipo: TipoProcesso
   /** Soma da relação do AJ dos credores, em centavos. */
   valor: number
 }
@@ -158,7 +157,6 @@ export function passivoPorProcesso(
     .map((p) => ({
       processoId: p.id,
       apelido: p.apelido,
-      tipo: p.tipo,
       valor: somas.get(p.id) ?? 0,
     }))
     .sort((a, b) => b.valor - a.valor || a.apelido.localeCompare(b.apelido, 'pt-BR'))

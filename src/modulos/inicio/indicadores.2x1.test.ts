@@ -106,7 +106,7 @@ describe('passivoPorProcesso (Q-08)', () => {
       ['c', 100_00],
       ['d', 50_00],
     ])
-    expect(passivo.maiores[0]).toMatchObject({ apelido: 'Processo b', tipo: 'falencia' })
+    expect(passivo.maiores[0]).toMatchObject({ apelido: 'Processo b' })
     expect(passivo.semRelacao).toBe(2)
     expect(passivo.total).toBe(1560_00)
   })
@@ -118,9 +118,7 @@ describe('passivoPorProcesso (Q-08)', () => {
 
   it('relação com valor zero conta como relação', () => {
     const passivo = passivoPorProcesso([processo('z', 'rj', 'pedido')], [credor('z1', 'z', 0)])
-    expect(passivo.maiores).toEqual([
-      { processoId: 'z', apelido: 'Processo z', tipo: 'rj', valor: 0 },
-    ])
+    expect(passivo.maiores).toEqual([{ processoId: 'z', apelido: 'Processo z', valor: 0 }])
     expect(passivo.semRelacao).toBe(0)
   })
 
