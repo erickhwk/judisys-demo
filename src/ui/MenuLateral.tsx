@@ -1,6 +1,7 @@
-// Menu lateral (DESIGN.md §Dashboard): seções Principal e Administração, item ativo em dourado.
-// Recolhível no desktop (só os ícones); no celular vira gaveta (o Layout decide). Itens sem
-// permissão de leitura não aparecem (RF-40).
+// Menu lateral (INI-01, RF-01): claro, com as seções Principal e Administração, o item ativo em
+// azul-claro com o ícone dourado e os contadores de Processos e de prazos vencidos na Agenda. No pé,
+// o interruptor de tema e a conta. Recolhível no desktop (só os ícones); abaixo de 901px vira gaveta
+// (o Layout decide). Itens sem permissão de leitura não aparecem (RF-40).
 import {
   Building2,
   CalendarDays,
@@ -14,10 +15,16 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import { type ComponentType, useId } from 'react'
 import { NavLink } from 'react-router'
+import { useTodos } from '../dados/contexto'
+import { noPeriodo } from '../modulos/prazos/regras'
 import { type Modulo, type Papel, pode } from '../regras/permissoes'
+import { hoje } from '../regras/relogio'
+import { InterruptorTema } from './BotaoTema'
 import { juntarClasses } from './classes'
 import { Logo } from './Logo'
+import { MenuConta } from './MenuConta'
 import estilos from './MenuLateral.module.css'
 
 interface Item {
@@ -25,17 +32,79 @@ interface Item {
   caminho: string
   modulo: Modulo
   icone: LucideIcon
+  contador?: ComponentType<PropsContador>
+}
+
+interface PropsContador {
+  /** Id do texto que descreve o contador para o leitor de tela (`aria-describedby` do link). */
+  idDescricao: string
+}
+
+/** Total de processos (RF-01, CAS-02). Mesma consulta do início (`useTodos('processos')`). */
+function ContadorProcessos({ idDescricao }: PropsContador) {
+  const total = useTodos('processos').data?.length
+  if (total === undefined) return null
+  return (
+    <>
+      <span className={estilos.contador} data-contador="processos" aria-hidden="true">
+        {total}
+      </span>
+      <span id={idDescricao} hidden>
+        {total === 1 ? '1 processo' : `${total} processos`}
+      </span>
+    </>
+  )
+}
+
+/** Prazos vencidos, em vermelho; some sem vencidos (RF-01, CAS-02, CAS-03). */
+function ContadorVencidos({ idDescricao }: PropsContador) {
+  const prazos = useTodos('prazos').data
+  if (!prazos) return null
+  const dia = hoje()
+  const vencidos = prazos.filter((prazo) => noPeriodo(prazo, 'vencidos', dia)).length
+  if (vencidos === 0)
+    return (
+      <span id={idDescricao} hidden>
+        nenhum prazo vencido
+      </span>
+    )
+  return (
+    <>
+      <span
+        className={juntarClasses(estilos.contador, estilos.contadorAlerta)}
+        data-contador="vencidos"
+        aria-hidden="true"
+      >
+        {vencidos}
+      </span>
+      <span id={idDescricao} hidden>
+        {vencidos === 1 ? '1 prazo vencido' : `${vencidos} prazos vencidos`}
+      </span>
+    </>
+  )
 }
 
 const SECOES: { titulo: string; itens: Item[] }[] = [
   {
     titulo: 'Principal',
     itens: [
-      { rotulo: 'Dashboard', caminho: '/', modulo: 'dashboard', icone: Gauge },
-      { rotulo: 'Processos', caminho: '/processos', modulo: 'processos', icone: Scale },
+      { rotulo: 'Início', caminho: '/', modulo: 'dashboard', icone: Gauge },
+      {
+        rotulo: 'Processos',
+        caminho: '/processos',
+        modulo: 'processos',
+        icone: Scale,
+        contador: ContadorProcessos,
+      },
       { rotulo: 'Empresas', caminho: '/empresas', modulo: 'empresas', icone: Building2 },
       { rotulo: 'Informes', caminho: '/informes', modulo: 'informes', icone: FileText },
-      { rotulo: 'Agenda', caminho: '/agenda', modulo: 'prazos', icone: CalendarDays },
+      {
+        rotulo: 'Agenda',
+        caminho: '/agenda',
+        modulo: 'prazos',
+        icone: CalendarDays,
+        contador: ContadorVencidos,
+      },
     ],
   },
   {
@@ -50,6 +119,11 @@ const SECOES: { titulo: string; itens: Item[] }[] = [
 export type PropsMenuLateral = {
   id: string
   papel: Papel
+  /** Conta no pé do menu: nome e papel por extenso. */
+  nome: string
+  nomePapel: string
+  aoTrocarDePapel: () => void
+  aoResetar: () => void
   /** Desktop: só os ícones. */
   recolhido: boolean
   aoAlternarRecolhido: () => void
@@ -61,11 +135,18 @@ export type PropsMenuLateral = {
 export function MenuLateral({
   id,
   papel,
+  nome,
+  nomePapel,
+  aoTrocarDePapel,
+  aoResetar,
   recolhido,
   aoAlternarRecolhido,
   gavetaAberta,
   aoFecharGaveta,
 }: PropsMenuLateral) {
+  const idBase = useId()
+  // A gaveta (abaixo de 901px) mostra sempre o menu inteiro, mesmo recolhido no desktop.
+  const soIcones = recolhido && !gavetaAberta
   return (
     <aside
       id={id}
@@ -79,10 +160,10 @@ export function MenuLateral({
     >
       <div className={estilos.topo}>
         <span className={estilos.logoCompleta}>
-          <Logo fundo="escuro" altura={38} />
+          <Logo altura={34} />
         </span>
         <span className={estilos.logoMarca}>
-          <Logo variante="marca" fundo="escuro" altura={34} />
+          <Logo variante="marca" altura={32} />
         </span>
         <button
           type="button"
@@ -92,9 +173,9 @@ export function MenuLateral({
           onClick={aoAlternarRecolhido}
         >
           {recolhido ? (
-            <PanelLeftOpen size={22} aria-hidden="true" />
+            <PanelLeftOpen size={20} aria-hidden="true" />
           ) : (
-            <PanelLeftClose size={22} aria-hidden="true" />
+            <PanelLeftClose size={20} aria-hidden="true" />
           )}
         </button>
         <button
@@ -113,22 +194,39 @@ export function MenuLateral({
           return (
             <nav key={secao.titulo} aria-label={secao.titulo} className={estilos.secao}>
               <span className={estilos.tituloSecao}>{secao.titulo}</span>
-              {itens.map(({ rotulo, caminho, icone: Icone }) => (
-                <NavLink
-                  key={caminho}
-                  to={caminho}
-                  end={caminho === '/'}
-                  className={estilos.item}
-                  title={recolhido ? rotulo : undefined}
-                  onClick={aoFecharGaveta}
-                >
-                  <Icone size={20} strokeWidth={1.8} aria-hidden="true" />
-                  <span className={estilos.rotulo}>{rotulo}</span>
-                </NavLink>
-              ))}
+              {itens.map(({ rotulo, caminho, icone: Icone, contador: Contador }) => {
+                const idDescricao = `${idBase}${caminho}`
+                return (
+                  <NavLink
+                    key={caminho}
+                    to={caminho}
+                    end={caminho === '/'}
+                    className={estilos.item}
+                    title={soIcones ? rotulo : undefined}
+                    aria-describedby={Contador ? idDescricao : undefined}
+                    onClick={aoFecharGaveta}
+                  >
+                    <Icone size={20} strokeWidth={1.8} aria-hidden="true" />
+                    <span className={estilos.rotulo}>{rotulo}</span>
+                    {Contador && <Contador idDescricao={idDescricao} />}
+                  </NavLink>
+                )
+              })}
             </nav>
           )
         })}
+      </div>
+      <div className={estilos.pe}>
+        <InterruptorTema soIcone={soIcones} className={estilos.tema} />
+        <MenuConta
+          nome={nome}
+          papel={nomePapel}
+          aoTrocarDePapel={aoTrocarDePapel}
+          aoResetar={aoResetar}
+          variante={soIcones ? 'avatar' : 'menu'}
+          painelPara="cima"
+          className={estilos.conta}
+        />
       </div>
     </aside>
   )

@@ -1,6 +1,8 @@
 // Menu da conta (RF-06): nome, papel, Trocar de papel (volta ao login) e Resetar demo.
 // Botão que abre um painel (padrão "disclosure"): Esc e clique fora fecham.
-import { ChevronDown, Repeat, RotateCcw, UserRound } from 'lucide-react'
+// INI-01: mora no pé do menu lateral (avatar, nome e papel; o painel abre para cima) e, no tablet e
+// no celular, também no avatar da barra do topo.
+import { ChevronsUpDown, Repeat, RotateCcw } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { juntarClasses } from './classes'
 import estilos from './MenuConta.module.css'
@@ -10,9 +12,33 @@ export type PropsMenuConta = {
   papel: string
   aoTrocarDePapel: () => void
   aoResetar: () => void
+  /**
+   * `menu`: pé do menu lateral, com nome e papel; o painel abre para cima.
+   * `avatar`: só o avatar (menu recolhido e barra do topo).
+   */
+  variante?: 'menu' | 'avatar'
+  /** Para onde o painel abre (padrão: para cima no `menu`, para baixo no `avatar`). */
+  painelPara?: 'cima' | 'baixo'
+  className?: string
 }
 
-export function MenuConta({ nome, papel, aoTrocarDePapel, aoResetar }: PropsMenuConta) {
+/** Iniciais do avatar: primeira letra do primeiro e do último nome ("Otávio Reis" → "OR"). */
+export function iniciais(nome: string): string {
+  const partes = nome.trim().split(/\s+/).filter(Boolean)
+  const primeira = partes[0]?.[0] ?? ''
+  const ultima = partes.length > 1 ? (partes.at(-1)?.[0] ?? '') : ''
+  return `${primeira}${ultima}`.toLocaleUpperCase('pt-BR')
+}
+
+export function MenuConta({
+  nome,
+  papel,
+  aoTrocarDePapel,
+  aoResetar,
+  variante = 'menu',
+  painelPara = variante === 'menu' ? 'cima' : 'baixo',
+  className,
+}: PropsMenuConta) {
   const [aberto, setAberto] = useState(false)
   const raiz = useRef<HTMLDivElement>(null)
   const botao = useRef<HTMLButtonElement>(null)
@@ -42,28 +68,35 @@ export function MenuConta({ nome, papel, aoTrocarDePapel, aoResetar }: PropsMenu
   }
 
   return (
-    <div className={estilos.raiz} ref={raiz}>
+    <div className={juntarClasses(estilos.raiz, className)} ref={raiz}>
       <button
         ref={botao}
         type="button"
-        className={estilos.botao}
+        className={juntarClasses(estilos.botao, variante === 'avatar' && estilos.soAvatar)}
         aria-label="Menu da conta"
         aria-expanded={aberto}
         aria-controls={idPainel}
+        title={variante === 'avatar' ? nome : undefined}
         onClick={() => setAberto((valor) => !valor)}
       >
         <span className={estilos.avatar} aria-hidden="true">
-          <UserRound size={20} strokeWidth={1.8} />
+          {iniciais(nome)}
         </span>
-        <span className={estilos.nomeCurto}>{nome}</span>
-        <ChevronDown
-          size={16}
-          strokeWidth={2.2}
-          aria-hidden="true"
-          className={juntarClasses(estilos.seta, aberto && estilos.setaAberta)}
-        />
+        {variante === 'menu' && (
+          <>
+            <span className={estilos.identidade}>
+              <span className={estilos.nomeCurto}>{nome}</span>
+              <span className={estilos.papelCurto}>{papel}</span>
+            </span>
+            <ChevronsUpDown size={16} strokeWidth={2} aria-hidden="true" className={estilos.seta} />
+          </>
+        )}
       </button>
-      <div id={idPainel} className={estilos.painel} hidden={!aberto}>
+      <div
+        id={idPainel}
+        className={juntarClasses(estilos.painel, painelPara === 'cima' && estilos.paraCima)}
+        hidden={!aberto}
+      >
         <div className={estilos.quem}>
           <p className={estilos.nome}>{nome}</p>
           <p className={estilos.papel}>{papel}</p>

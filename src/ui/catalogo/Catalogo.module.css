@@ -52,8 +52,9 @@
   gap: 24px;
   padding: 16px 24px;
   border-radius: var(--raio-card);
-  /* Fica escuro nos dois temas (AJ-11): o azul-900 vira claro no tema escuro. */
-  background: var(--cor-menu-fundo);
+  /* Fica escuro nos dois temas (AJ-11): o azul-900 vira claro no tema escuro. O menu deixou de ser
+     escuro (INI-01), então o fundo é o da faixa da demo. */
+  background: var(--cor-azul-login);
 }
 
 .cores {

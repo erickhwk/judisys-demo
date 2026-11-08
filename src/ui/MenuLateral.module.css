@@ -1,12 +1,13 @@
+/* Menu claro (INI-01, S-09): só as seções rolam; o topo (logo) e o pé (tema e conta) ficam parados.
+   Sem `overflow` no próprio menu, para o painel da conta poder sair dele quando está recolhido. */
 .menu {
   flex: none;
   width: var(--largura-menu);
   display: flex;
   flex-direction: column;
+  border-right: 1px solid var(--cor-borda);
   background: var(--cor-menu-fundo);
-  color: var(--cor-escuro-texto-suave);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  color: var(--cor-texto-forte);
   transition: width 0.2s ease;
 }
 
@@ -15,9 +16,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 82px;
-  padding: 18px 16px 18px 24px;
-  border-bottom: 1px solid var(--cor-escuro-divisoria);
+  min-height: 76px;
+  padding: 16px 12px 12px 22px;
 }
 
 .logoMarca {
@@ -34,13 +34,13 @@
   border: 0;
   border-radius: var(--raio-campo);
   background: transparent;
-  color: var(--cor-escuro-texto-apagado);
+  color: var(--cor-texto-muted);
   cursor: pointer;
 }
 
 .botaoTopo:hover {
-  background: var(--cor-escuro-realce);
-  color: var(--cor-escuro-texto);
+  background: var(--cor-hover-fantasma);
+  color: var(--cor-texto);
 }
 
 .fecharGaveta {
@@ -48,54 +48,101 @@
 }
 
 .secoes {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding: 28px 14px 24px;
+  gap: 24px;
+  padding: 12px 12px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .secao {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .tituloSecao {
-  padding: 0 14px 10px;
+  padding: 0 12px 8px;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cor-escuro-rotulo);
+  color: var(--cor-texto-muted);
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-height: 46px;
-  padding: 0 14px;
-  border-radius: var(--raio-item-menu);
-  font-size: 15px;
+  gap: 12px;
+  min-height: var(--alvo-minimo);
+  padding: 0 12px;
+  border-radius: var(--raio-campo);
+  font-size: var(--tamanho-texto-pequeno);
   font-weight: 500;
-  color: var(--cor-escuro-texto-suave);
+  color: var(--cor-texto-forte);
   white-space: nowrap;
 }
 
 .item svg {
   flex: none;
+  color: var(--cor-texto-muted);
 }
 
 .item:hover {
-  background: var(--cor-escuro-realce);
-  color: var(--cor-escuro-texto);
+  background: var(--cor-hover-fantasma);
+  color: var(--cor-texto);
   text-decoration: none;
 }
 
+/* Item ativo: fundo azul-claro e ícone dourado, sem bloco dourado (RF-01) */
 .item[aria-current="page"] {
-  background: var(--cor-dourado-500);
-  color: var(--cor-sobre-dourado);
+  background: var(--cor-menu-ativo);
+  color: var(--cor-texto);
+  font-weight: 600;
+}
+
+.item[aria-current="page"] svg {
+  color: var(--cor-menu-icone-ativo);
+}
+
+.rotulo {
+  flex: 1;
+}
+
+/* Contadores: total em cinza; vencidos numa pílula vermelha */
+.contador {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-muted);
+}
+
+.contadorAlerta {
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-perigo);
+  color: var(--cor-texto-invertido);
+  font-size: 12px;
   font-weight: 700;
+}
+
+/* Pé: tema e conta */
+.pe {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 14px;
+  border-top: 1px solid var(--cor-borda-linha);
 }
 
 /* Recolhido (desktop): só os ícones */
@@ -105,12 +152,13 @@
 
 .recolhido .topo {
   flex-direction: column;
-  padding: 18px 8px 12px;
+  padding: 16px 8px 8px;
 }
 
 .recolhido .logoCompleta,
 .recolhido .tituloSecao,
-.recolhido .rotulo {
+.recolhido .rotulo,
+.recolhido .contador {
   display: none;
 }
 
@@ -127,7 +175,12 @@
   padding: 0;
 }
 
-/* Celular: gaveta sobre o conteúdo */
+.recolhido .pe {
+  align-items: center;
+  padding-inline: 8px;
+}
+
+/* Abaixo de 901px: gaveta sobre o conteúdo, sempre com o menu inteiro */
 @media (max-width: 900px) {
   .menu,
   .recolhido {
@@ -135,6 +188,7 @@
     inset: 0 auto 0 0;
     z-index: 50;
     width: min(var(--largura-menu), 86vw);
+    border-right: 0;
     transform: translateX(-100%);
     visibility: hidden;
     transition:
@@ -152,13 +206,18 @@
 
   .recolhido .topo {
     flex-direction: row;
-    padding: 18px 16px 18px 24px;
+    padding: 16px 12px 12px 22px;
   }
 
   .recolhido .logoCompleta,
   .recolhido .tituloSecao,
-  .recolhido .rotulo {
+  .recolhido .rotulo,
+  .recolhido .contador {
     display: revert;
+  }
+
+  .recolhido .contadorAlerta {
+    display: flex;
   }
 
   .recolhido .logoMarca,
@@ -168,7 +227,12 @@
 
   .recolhido .item {
     justify-content: flex-start;
-    padding: 0 14px;
+    padding: 0 12px;
+  }
+
+  .recolhido .pe {
+    align-items: stretch;
+    padding-inline: 12px;
   }
 
   .fecharGaveta {

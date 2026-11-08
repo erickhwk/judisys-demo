@@ -12,6 +12,8 @@ test.beforeEach(async ({ page }) => {
 const html = (page: Page) => page.locator('html')
 const botaoEscuro = (page: Page) => page.getByRole('button', { name: 'Ativar modo escuro' })
 const botaoClaro = (page: Page) => page.getByRole('button', { name: 'Ativar modo claro' })
+const interruptorDoMenu = (page: Page) =>
+  page.getByRole('complementary', { name: 'Menu' }).getByRole('switch', { name: 'Tema escuro' })
 const escolhaSalva = (page: Page) => page.evaluate(() => localStorage.getItem('tema'))
 
 test('TEM-01 · sem escolha salva, segue o sistema e acompanha a mudança dele', async ({ page }) => {
@@ -31,10 +33,12 @@ test('TEM-02 · o botão alterna o tema, e a escolha salva sobrevive ao recarreg
 }) => {
   await page.emulateMedia({ colorScheme: 'light' })
   await entrarComo(page, 'advogado')
-  const topo = page.getByRole('banner')
-  await topo.getByRole('button', { name: 'Ativar modo escuro' }).click()
+  // INI-01: na área logada, o tema é o interruptor do pé do menu lateral.
+  const interruptor = interruptorDoMenu(page)
+  await expect(interruptor).toHaveAttribute('aria-checked', 'false')
+  await interruptor.click()
   await expect(html(page)).toHaveAttribute('data-theme', 'dark')
-  await expect(topo.getByRole('button', { name: 'Ativar modo claro' })).toBeVisible()
+  await expect(interruptor).toHaveAttribute('aria-checked', 'true')
   expect(await escolhaSalva(page)).toBe('dark')
   // O fundo troca de verdade (tokens do tema escuro).
   const fundo = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
@@ -79,7 +83,7 @@ test('TEM-04 · a escolha feita numa aba vale nas outras', async ({ context, pag
 test('TEM-05 · o reset da demo mantém a escolha de tema', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' })
   await entrarComo(page, 'aj')
-  await page.getByRole('banner').getByRole('button', { name: 'Ativar modo escuro' }).click()
+  await interruptorDoMenu(page).click()
   await page
     .getByRole('region', { name: 'Demonstração' })
     .getByRole('button', { name: 'Resetar demo' })

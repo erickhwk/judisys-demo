@@ -82,11 +82,13 @@ const PARES: readonly (readonly [string, string])[] = [
   ['--cor-sucesso', '--cor-sucesso-claro'],
   ['--cor-alerta', '--cor-superficie'],
   ['--cor-alerta', '--cor-alerta-claro'],
-  // Áreas sempre escuras: menu lateral, faixa da demo e painel da entrada
-  ['--cor-escuro-texto', '--cor-menu-fundo'],
-  ['--cor-escuro-texto-suave', '--cor-menu-fundo'],
-  ['--cor-escuro-texto-apagado', '--cor-menu-fundo'],
-  ['--cor-escuro-rotulo', '--cor-menu-fundo'],
+  // Menu lateral (INI-01, CAS-06): itens, títulos das seções, contadores e item ativo
+  ['--cor-texto', '--cor-menu-fundo'],
+  ['--cor-texto-forte', '--cor-menu-fundo'],
+  ['--cor-texto-muted', '--cor-menu-fundo'],
+  ['--cor-texto', '--cor-menu-ativo'],
+  ['--cor-texto-muted', '--cor-menu-ativo'],
+  // Áreas sempre escuras: faixa da demo e painel da entrada
   ['--cor-escuro-texto', '--cor-azul-login'],
   ['--cor-escuro-texto-suave', '--cor-azul-login'],
   ['--cor-dourado-200', '--cor-azul-login'],
@@ -105,6 +107,34 @@ describe.each([
 ])('tokens do tema %s', (_tema, tokens) => {
   it.each(PARES)('%s sobre %s tem contraste de pelo menos 4,5:1 (RNF-01)', (texto, fundo) => {
     expect(contraste(cor(tokens, texto), cor(tokens, fundo))).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+/** [elemento gráfico, fundo]: ícones e marcas não textuais pedem 3:1 (WCAG 1.4.11). */
+const PARES_GRAFICOS: readonly (readonly [string, string])[] = [
+  ['--cor-menu-icone-ativo', '--cor-menu-ativo'],
+]
+
+describe.each([
+  ['claro', claro],
+  ['escuro', escuro],
+])('elementos gráficos do tema %s', (_tema, tokens) => {
+  it.each(PARES_GRAFICOS)('%s sobre %s tem contraste de pelo menos 3:1', (grafico, fundo) => {
+    expect(contraste(cor(tokens, grafico), cor(tokens, fundo))).toBeGreaterThanOrEqual(3)
+  })
+})
+
+describe('menu lateral (CAS-06)', () => {
+  it('no escuro, o fundo do menu fica um tom acima do fundo da página (RF-04)', () => {
+    const menu = luminancia(cor(escuro, '--cor-menu-fundo'))
+    const fundo = luminancia(cor(escuro, '--cor-fundo'))
+    const superficie = luminancia(cor(escuro, '--cor-superficie'))
+    expect(menu).toBeGreaterThan(fundo)
+    expect(menu).toBeLessThan(superficie)
+  })
+
+  it('os tokens sempre escuros só do menu saíram (S-09)', () => {
+    expect(css).not.toMatch(/--cor-escuro-(texto-apagado|rotulo):/)
   })
 })
 

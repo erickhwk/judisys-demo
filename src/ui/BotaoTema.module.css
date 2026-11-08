@@ -18,7 +18,74 @@
   background: var(--cor-hover-fantasma);
 }
 
+/* Interruptor do pé do menu lateral (INI-01) */
+.interruptor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--alvo-minimo);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--raio-campo);
+  background: transparent;
+  color: var(--cor-texto-forte);
+  font-size: var(--tamanho-texto-pequeno);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.interruptor:hover {
+  background: var(--cor-hover-fantasma);
+  color: var(--cor-texto);
+}
+
+.interruptor svg {
+  flex: none;
+  color: var(--cor-texto-muted);
+}
+
+.soIcone {
+  justify-content: center;
+  padding: 0;
+}
+
+.rotulo {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Trilho chapado: cinza-azulado desligado, dourado ligado */
+.trilho {
+  flex: none;
+  width: 36px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-borda-campo);
+}
+
+.pino {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--cor-superficie);
+  transition: transform 0.15s ease;
+}
+
+.interruptor[aria-checked="true"] .trilho {
+  background: var(--cor-dourado-500);
+}
+
+.interruptor[aria-checked="true"] .pino {
+  transform: translateX(16px);
+}
+
 /* Sem o script do tema, o tema não alterna: o botão some (como no site da Draft). */
-:global(:root:not([data-theme])) .botao {
+:global(:root:not([data-theme])) .botao,
+:global(:root:not([data-theme])) .interruptor {
   display: none;
 }
