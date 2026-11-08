@@ -171,7 +171,7 @@ Todos puros, com `hoje` por parâmetro:
 - **`pedidosPorStatus(pedidos)`:** pendentes, acolhidos e rejeitados, e o processo com mais pendentes. Para Q-03.
 - **`proximaAgc(agcs, hoje)`:** a primeira AGC `agendada` com `dataPrimeira >= hoje`. Para Q-02.
 - **`prazosDoMes(prazos, agcs, hoje)`:** mapa dia → tipo (vencido, hoje, prazo, AGC) do mês de `hoje`. Para Q-05.
-- **`passivoPorProcesso(processos, credores)`:** os quatro maiores processos ativos pela relação do AJ e a contagem dos ativos sem relação. O total é o de `numerosDoTopo`. Para Q-08.
+- **`passivoPorProcesso(processos, credores)`:** os quatro maiores processos ativos pela relação do AJ e a contagem dos ativos sem relação. O total é a soma da relação do AJ dos credores dos processos ativos. Para Q-08.
 - **`informesPorMes(informes, hoje)`:** os 12 meses até o mês de `hoje`, inclusive. Para Q-09.
 - **`cumpridosPorMes(prazos, hoje)`:** os 12 meses fechados antes do mês de `hoje`, pelo vencimento (C-01). Para Q-10.
 - **`carteiraPorFase(processos)`:** contagem por fase, para todas as fases de cada tipo do RF-14 da demo, sem as finais alternativas. Para Q-12.
@@ -254,7 +254,7 @@ Todos puros, com `hoje` por parâmetro:
 | QDR-06 | F | seed | Q-05 | Novembro de 2026 com 5 vencido, 7 hoje, 12, 15 e 27 prazo, 13 e 20 AGC. |
 | QDR-07 | F | seed | Q-06 | Seis ações mais recentes, com quem, o quê e onde, cada uma levando ao registro. |
 | QDR-08 | F | seed | Q-07 | Cinco informes, do mais novo ao mais antigo. |
-| QDR-09 | F | seed | Q-08 | Total igual ao `numerosDoTopo`; quatro barras; "4 processos sem relação do AJ". |
+| QDR-09 | F | seed | Q-08 | Total igual à soma da relação do AJ dos ativos; quatro barras; "4 processos sem relação do AJ". |
 | QDR-10 | F | seed | Q-09 | 12 colunas com 1, 5, 3, 1, 3, 0, 3, 5, 5, 8, 8, 1 (dez/25 a nov/26); no celular, as 6 últimas. |
 | QDR-11 | F | seed | Q-10 | 12 pontos (nov/25 a out/26): 3, 2, 2, 3, 5, 2, 1, 2, 5, 4, 6, 5; recorde em set. |
 | QDR-12 | F | seed | Q-11 | Cinco classes somando R$ 389,5 mi, com os percentuais 56, 20, 13, 7 e 4 (maiores restos, somando 100, como a `Barra100`; corrigido com o usuário na INI-08). |

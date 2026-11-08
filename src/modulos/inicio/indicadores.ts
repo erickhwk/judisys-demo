@@ -19,51 +19,12 @@ type Prazo = Tipos['prazos']
 type Agc = Tipos['agcs']
 type Informe = Tipos['informes']
 
-/** Quantos itens cada lista mostra. Prazos: 8 (RF-10); as outras seguem o tamanho do guia. */
-export const LIMITE_PRAZOS = 8
-export const LIMITE_AGCS = 5
+/** Quantos informes a lista de últimos informes mostra (tamanho do guia). */
 export const LIMITE_INFORMES = 5
-export const LIMITE_ATIVIDADE = 8
 
 /** Processo ativo: fora das fases finais (DSH-05, T-27). */
 export function ehAtivo(processo: Pick<Processo, 'faseAtual'>): boolean {
   return !ehFaseFinal(processo.faseAtual)
-}
-
-// ---------------------------------------------------------------------------------------------
-// Números do topo (RF-07, DSH-01, DSH-05)
-
-export interface NumerosDoTopo {
-  ativosRj: number
-  ativosFalencia: number
-  /** Soma da relação do AJ (`valorAj`) dos credores dos processos ativos, em centavos. */
-  passivo: number
-  credores: number
-  prazosVencidos: number
-  prazosProximos: number
-}
-
-export function numerosDoTopo(
-  dados: {
-    processos: readonly Processo[]
-    credores: readonly Credor[]
-    prazos: readonly Prazo[]
-  },
-  hoje: DataIso,
-): NumerosDoTopo {
-  const ativos = dados.processos.filter(ehAtivo)
-  const idsAtivos = new Set(ativos.map((p) => p.id))
-  return {
-    ativosRj: ativos.filter((p) => p.tipo === 'rj').length,
-    ativosFalencia: ativos.filter((p) => p.tipo === 'falencia').length,
-    passivo: dados.credores
-      .filter((c) => idsAtivos.has(c.processoId))
-      .reduce((soma, c) => soma + (c.valorAj ?? 0), 0),
-    credores: dados.credores.length,
-    // Os mesmos períodos da agenda (PRZ-08), para onde os números levam: "7 dias" vai de hoje a D+7.
-    prazosVencidos: dados.prazos.filter((p) => noPeriodo(p, 'vencidos', hoje)).length,
-    prazosProximos: dados.prazos.filter((p) => noPeriodo(p, '7-dias', hoje)).length,
-  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -155,7 +116,7 @@ export interface PassivoPorProcesso {
   maiores: PassivoDoProcesso[]
   /** Processos ativos sem nenhum credor com valor na relação do AJ (ficam fora da soma). */
   semRelacao: number
-  /** Centavos: o mesmo `passivo` de `numerosDoTopo` (QDR-09). */
+  /** Centavos: a relação do AJ de todos os processos ativos (QDR-09). */
   total: number
 }
 
@@ -256,43 +217,6 @@ export function rotuloDoMes(mes: string, comAno = false): string {
 
 // ---------------------------------------------------------------------------------------------
 // Listas (RF-10, DSH-02, DSH-03)
-
-/** Os prazos em aberto mais próximos (8, ou `limite`): vencidos primeiro, depois por data (DSH-03). */
-export function proximosPrazos(
-  prazos: readonly Prazo[],
-  hoje: DataIso,
-  limite: number = LIMITE_PRAZOS,
-): Prazo[] {
-  // Por vencimento, os vencidos (antes de hoje) já vêm na frente.
-  return prazos
-    .filter((p) => noPeriodo(p, 'abertos', hoje))
-    .sort(compararPrazos)
-    .slice(0, limite)
-}
-
-export interface ProximaAgc {
-  agc: Agc
-  /** Data da próxima convocação ainda por vir. */
-  data: DataIso
-  convocacao: 1 | 2
-}
-
-/**
- * AGCs não encerradas com convocação de hoje em diante, pela data. Passada a 1ª, vale a 2ª
- * (DSH-02: a do vitrine aparece em D+6, na 1ª convocação).
- */
-export function proximasAgcs(agcs: readonly Agc[], hoje: DataIso): ProximaAgc[] {
-  return agcs
-    .flatMap((agc): ProximaAgc[] => {
-      if (agc.status === 'encerrada') return []
-      // Instalada numa convocação, a outra não acontece mais.
-      const convocacao = agc.convocacaoInstalada ?? (agc.dataPrimeira >= hoje ? 1 : 2)
-      const data = convocacao === 1 ? agc.dataPrimeira : agc.dataSegunda
-      return data >= hoje ? [{ agc, data, convocacao }] : []
-    })
-    .sort((a, b) => a.data.localeCompare(b.data) || a.agc.id.localeCompare(b.agc.id))
-    .slice(0, LIMITE_AGCS)
-}
 
 // ---------------------------------------------------------------------------------------------
 // INI-06 · quadros 1×1: prazos em aberto (Q-01), próxima AGC (Q-02) e pedidos de crédito (Q-03)
@@ -406,11 +330,14 @@ export interface ProximosDoQuadro {
   restantes: number
 }
 
-/** Os 6 próximos prazos em aberto, na ordem da `proximosPrazos`, e quantos sobram na agenda. */
+/**
+ * Os 6 próximos prazos em aberto, por vencimento (os vencidos já vêm na frente), e quantos sobram
+ * na agenda.
+ */
 export function proximosDoQuadro(prazos: readonly Prazo[], hoje: DataIso): ProximosDoQuadro {
-  const abertos = prazos.filter((p) => noPeriodo(p, 'abertos', hoje)).length
-  const mostrados = proximosPrazos(prazos, hoje, LIMITE_PROXIMOS_DO_QUADRO)
-  return { prazos: mostrados, restantes: abertos - mostrados.length }
+  const abertos = prazos.filter((p) => noPeriodo(p, 'abertos', hoje)).sort(compararPrazos)
+  const mostrados = abertos.slice(0, LIMITE_PROXIMOS_DO_QUADRO)
+  return { prazos: mostrados, restantes: abertos.length - mostrados.length }
 }
 
 /** Marca de um dia no calendário do mês (Q-05): a cor da célula. */
@@ -433,7 +360,7 @@ export interface ConvocacaoDoDia {
 /**
  * Datas de AGC que o calendário marca: a convocação instalada, se houve (mesmo de AGC encerrada: ela
  * aconteceu naquele dia); senão, as convocações de hoje em diante da AGC não encerrada (a 1ª que
- * passou sem instalar não acontece mais), como na `proximasAgcs`.
+ * passou sem instalar não acontece mais).
  */
 export function datasDeAgc(agc: Agc, hoje: DataIso): ConvocacaoDoDia[] {
   const primeira = { data: agc.dataPrimeira, convocacao: 1 } as const

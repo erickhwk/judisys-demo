@@ -6,9 +6,7 @@
 //   `quadros/`, que busca os próprios dados e devolve um `<Quadro>` (moldura em `Quadro.tsx`);
 // - a moldura cuida do cabeçalho, do link (com a permissão), do modo de edição e do estado vazio:
 //   o quadro não sabe se está em edição;
-// - para registrar, troque o `provisorio('<id>')` da sua linha pelo componente e importe-o no
-//   bloco de imports da sua tarefa. As linhas estão agrupadas por tarefa para os merges do lote 3
-//   não se cruzarem.
+// - para registrar, acrescente o componente na linha do seu `IdQuadro`.
 import type { ComponentType } from 'react'
 import type { IdQuadro } from '../montagem'
 import type { Variante } from './Quadro'

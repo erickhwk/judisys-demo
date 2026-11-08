@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { type ArquivoSeed, gerarSeed } from '../../scripts/seed/gerar'
 import { gravarTabelas, prepararSeed, type TabelasSeed } from '../dados/carga'
 import { ArmazenamentoMemoria } from '../dados/memoria'
-import { numerosDoTopo } from '../modulos/inicio/indicadores'
+import { noPeriodo } from '../modulos/prazos/regras'
 import type { Papel } from '../regras/permissoes'
 import { hoje as hojeDoRelogio } from '../regras/relogio'
 import { iniciais } from './MenuConta'
@@ -92,10 +92,9 @@ describe('menu lateral (INI-01)', () => {
 
   it('CAS-02 · Processos mostra 12 e Agenda mostra 3 vencidos, descritos para o leitor', async () => {
     const hoje = hojeDoRelogio()
-    const numeros = numerosDoTopo(tabelas, hoje)
-    // Os números saem do seed real (as mesmas funções do início).
+    // Os números saem do seed real, pelo mesmo período da agenda (PRZ-08).
     expect(tabelas.processos).toHaveLength(12)
-    expect(numeros.prazosVencidos).toBe(3)
+    expect(tabelas.prazos.filter((p) => noPeriodo(p, 'vencidos', hoje))).toHaveLength(3)
 
     const html = await menu()
     expect(contador(html, 'processos')).toBe('12')

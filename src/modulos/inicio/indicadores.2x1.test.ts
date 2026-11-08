@@ -9,7 +9,6 @@ import { percentuaisArredondados } from '../../ui/graficos/calculos'
 import {
   cumpridosPorMes,
   informesPorMes,
-  numerosDoTopo,
   passivoPorClasse,
   passivoPorProcesso,
   rotuloDoMes,
@@ -111,11 +110,6 @@ describe('passivoPorProcesso (Q-08)', () => {
     expect(passivo.total).toBe(1560_00)
   })
 
-  it('o total é o passivo dos números do topo (QDR-09)', () => {
-    const { total } = passivoPorProcesso(processos, credores)
-    expect(total).toBe(numerosDoTopo({ processos, credores, prazos: [] }, HOJE).passivo)
-  })
-
   it('relação com valor zero conta como relação', () => {
     const passivo = passivoPorProcesso([processo('z', 'rj', 'pedido')], [credor('z1', 'z', 0)])
     expect(passivo.maiores).toEqual([{ processoId: 'z', apelido: 'Processo z', valor: 0 }])
@@ -211,9 +205,8 @@ describe('números do seed no relógio fixo (pnpm indicadores)', () => {
     tabelas = tabelasDoSeed(HOJE_FIXO)
   })
 
-  it('QDR-09 · total igual ao do topo, quatro barras e 4 processos sem relação do AJ', () => {
+  it('QDR-09 · total da relação do AJ dos ativos, quatro barras e 4 processos sem relação do AJ', () => {
     const passivo = passivoPorProcesso(tabelas.processos, tabelas.credores)
-    expect(passivo.total).toBe(numerosDoTopo(tabelas, HOJE_FIXO).passivo)
     expect(passivo.total).toBe(54_647_924_641)
     expect(passivo.maiores.map((p) => p.apelido)).toEqual([
       'Grupo Lontra Azul',

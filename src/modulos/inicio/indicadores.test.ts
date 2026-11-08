@@ -1,13 +1,7 @@
 // Regras do início (antes dashboard: RF-07 a RF-10, SDD §7.7) com dados pequenos e "hoje" por parâmetro.
 import { describe, expect, it } from 'vitest'
 import type { Tipos } from '../../dados/schemas'
-import {
-  numerosDoTopo,
-  passivoPorClasse,
-  proximasAgcs,
-  proximosPrazos,
-  ultimosInformes,
-} from './indicadores'
+import { passivoPorClasse, proximosDoQuadro, ultimosInformes } from './indicadores'
 
 const HOJE = '2026-11-07'
 const base = {
@@ -65,15 +59,6 @@ function prazo(id: string, vencimento: string, status: 'aberto' | 'cumprido' = '
   } satisfies Tipos['prazos']
 }
 
-function agc(
-  id: string,
-  dataPrimeira: string,
-  dataSegunda: string,
-  status: Tipos['agcs']['status'] = 'agendada',
-): Tipos['agcs'] {
-  return { ...base, id, processoId: 'prc-1', dataPrimeira, dataSegunda, pauta: 'Plano', status }
-}
-
 const PROCESSOS = [
   processo('prc-1', 'rj', 'plano-apresentado'),
   processo('prc-2', 'falencia', 'decretada'),
@@ -89,35 +74,6 @@ const CREDORES = [
   credor('c6', 'prc-4', 'quirografario', 7_777_00),
 ]
 
-describe('numerosDoTopo (RF-07)', () => {
-  it('DSH-01 · ativos por tipo, passivo da relação do AJ, credores e prazos', () => {
-    const prazos = [
-      prazo('vencido', '2026-11-06'),
-      prazo('hoje', HOJE),
-      prazo('d7', '2026-11-14'),
-      prazo('d8', '2026-11-15'),
-      prazo('cumprido-vencido', '2026-11-01', 'cumprido'),
-      prazo('cumprido-proximo', '2026-11-10', 'cumprido'),
-    ]
-    expect(numerosDoTopo({ processos: PROCESSOS, credores: CREDORES, prazos }, HOJE)).toEqual({
-      ativosRj: 1,
-      ativosFalencia: 1,
-      passivo: 100_00 + 250_00 + 1_000_00,
-      credores: 6,
-      prazosVencidos: 1,
-      prazosProximos: 2,
-    })
-  })
-
-  it('DSH-05 · processo em fase final fica fora dos ativos e do passivo', () => {
-    const encerrado = PROCESSOS.map((p) =>
-      p.id === 'prc-2' ? { ...p, faseAtual: 'encerrada' as const } : p,
-    )
-    const numeros = numerosDoTopo({ processos: encerrado, credores: CREDORES, prazos: [] }, HOJE)
-    expect(numeros).toMatchObject({ ativosRj: 1, ativosFalencia: 0, passivo: 350_00 })
-  })
-})
-
 describe('passivoPorClasse (RF-09)', () => {
   it('soma a relação do AJ das RJs ativas por classe, com as cinco classes da RJ', () => {
     expect(passivoPorClasse(PROCESSOS, CREDORES)).toEqual([
@@ -130,8 +86,8 @@ describe('passivoPorClasse (RF-09)', () => {
   })
 })
 
-describe('proximosPrazos (RF-10)', () => {
-  it('DSH-03 · 8 em aberto, vencidos primeiro, depois por data', () => {
+describe('proximosDoQuadro (RF-10)', () => {
+  it('DSH-03 · 6 em aberto, vencidos primeiro, depois por data; o resto conta na agenda', () => {
     const prazos = [
       prazo('d+20', '2026-11-27'),
       prazo('d-1', '2026-11-06'),
@@ -144,41 +100,9 @@ describe('proximosPrazos (RF-10)', () => {
       prazo('d+60', '2027-01-06'),
       prazo('cumprido', '2026-11-07', 'cumprido'),
     ]
-    expect(proximosPrazos(prazos, HOJE).map((p) => p.id)).toEqual([
-      'd-30',
-      'd-1',
-      'd0',
-      'd+1',
-      'd+3',
-      'd+5',
-      'd+9',
-      'd+20',
-    ])
-  })
-})
-
-describe('proximasAgcs (RF-10)', () => {
-  it('DSH-02 · não encerradas, pela próxima convocação; passada a 1ª, vale a 2ª', () => {
-    const agcs = [
-      agc('agc-d6', '2026-11-13', '2026-11-20'),
-      agc('agc-2a', '2026-11-05', '2026-11-12', 'instalada'),
-      agc('agc-passada', '2026-10-01', '2026-10-08'),
-      agc('agc-encerrada', '2026-11-08', '2026-11-15', 'encerrada'),
-    ]
-    expect(proximasAgcs(agcs, HOJE).map((p) => [p.agc.id, p.data, p.convocacao])).toEqual([
-      ['agc-2a', '2026-11-12', 2],
-      ['agc-d6', '2026-11-13', 1],
-    ])
-  })
-
-  it('instalada numa convocação: vale a data dela, sem passar para a outra', () => {
-    const agcs = [
-      { ...agc('agc-1a-passada', '2026-11-05', '2026-11-12', 'instalada'), convocacaoInstalada: 1 },
-      { ...agc('agc-1a-hoje', '2026-11-07', '2026-11-14', 'instalada'), convocacaoInstalada: 1 },
-    ] satisfies Tipos['agcs'][]
-    expect(proximasAgcs(agcs, HOJE).map((p) => [p.agc.id, p.data, p.convocacao])).toEqual([
-      ['agc-1a-hoje', '2026-11-07', 1],
-    ])
+    const { prazos: mostrados, restantes } = proximosDoQuadro(prazos, HOJE)
+    expect(mostrados.map((p) => p.id)).toEqual(['d-30', 'd-1', 'd0', 'd+1', 'd+3', 'd+5'])
+    expect(restantes).toBe(3)
   })
 })
 
