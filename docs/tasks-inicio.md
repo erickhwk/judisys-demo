@@ -91,7 +91,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 - **Descrição:** primeiro, provar a recusa por cima do `react-grid-layout` 2.3 (Q-01); se não ficar estável, decidir pelo grid próprio na própria tarefa e registrar no SDD. Depois, entregar a grade nas três larguras com quadros provisórios (só moldura e título), o modo Personalizar completo e a moldura comum `Quadro.tsx`, que as tarefas de quadros usam.
 - **Critérios de aceite:**
   - [ ] Q-01 decidida e registrada no SDD (§3 resolvida e §4 com a decisão), com o motivo.
-  - [ ] Grade de 4, 2 e 1 colunas pela largura do contêiner (§5.3), com largura máxima de 1240px e altura de unidade de 176px.
+  - [ ] Grade de 4, 2 e 1 colunas pela largura do contêiner (§5.3), com largura máxima de 1240px (2200px desde a AJ-21; teto da casca desde a AJ-22) e altura de unidade de 176px.
   - [ ] `noCompactor`: buracos ficam e colisão empurra para baixo.
   - [ ] `Quadro.tsx` com cabeçalho (título, destaque opcional e link), modo de edição (alça e ×, links desligados), estado vazio e a prop `variante`.
   - [ ] Personalizar (só em 4 colunas): faixa com ajuda, Restaurar, Cancelar, Concluir e catálogo com tamanhos; guias das células; rascunho.
@@ -107,7 +107,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] GRD-06 · uma coluna no celular
   - [ ] GRD-07 · link do cabeçalho do quadro leva à origem
   - [ ] GRD-08 · buraco continua
-  - [ ] GRD-09 · largura máxima de 1240px
+  - [ ] GRD-09 · largura máxima de 1240px (2200px desde a AJ-21)
   - [ ] PRS-01 · entrar no Personalizar
   - [ ] PRS-02 · arrastar para lugar livre
   - [ ] PRS-03 · arrastar sobre outro empurra para baixo

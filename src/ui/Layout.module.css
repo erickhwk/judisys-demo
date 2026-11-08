@@ -52,8 +52,10 @@
   margin-right: auto;
 }
 
-/* Sem o topo antigo, o conteúdo começa logo abaixo da faixa. */
+/* Sem o topo antigo, o conteúdo começa logo abaixo da faixa. O teto de largura (AJ-22) vem do
+   Layout.tsx (`LARGURA_CONTEUDO`) e vale para a área de dentro do padding: daí o `content-box`. */
 .conteudo {
+  box-sizing: content-box;
   display: flex;
   flex-direction: column;
   gap: 32px;
