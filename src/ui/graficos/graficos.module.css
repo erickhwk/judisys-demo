@@ -225,7 +225,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 12px;
+  font-size: var(--legenda-fonte, 12px);
   color: var(--cor-texto-forte);
 }
 
@@ -235,10 +235,17 @@
   gap: 7px;
 }
 
+/* Duas colunas (Q-11): a da esquerda pode ganhar mais largura com --legenda-coluna-1 (em fr). */
+.legendaEmDuasColunas {
+  display: grid;
+  grid-template-columns: minmax(0, var(--legenda-coluna-1, 1fr)) minmax(0, 1fr);
+  gap: 6px var(--legenda-vao-colunas, 20px);
+}
+
 .itemLegenda {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--legenda-vao-item, 6px);
   min-width: 0;
 }
 

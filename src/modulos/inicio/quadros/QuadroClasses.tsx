@@ -37,22 +37,25 @@ export function QuadroClasses({ variante }: PropsDoQuadro) {
   const celular = variante === 'celular'
   return (
     <Quadro {...moldura} destaque={celular ? undefined : formatarMoedaCurta(total)}>
-      <div className={estilos.corpo} data-variante={variante}>
-        {celular && <ResumoNoCorpo numero={formatarMoedaCurta(total)} texto="nas RJ ativas" />}
-        {/* Sem tom próprio: a barra e a legenda pegam as cinco séries pela posição. */}
-        <Barra100
-          descricao="Relação do AJ das RJ ativas por classe"
-          segmentos={classes}
-          formatar={formatarMoedaCurta}
-        />
-        <Legenda
-          emColuna={celular}
-          itens={classes.map((c, i) => ({
-            rotulo: c.rotulo,
-            detalhe: formatarMoedaCurta(c.valor),
-            valor: `${percentuais[i]}%`,
-          }))}
-        />
+      <div className={estilos.corpo}>
+        <div className={estilos.conteudo} data-variante={variante}>
+          {celular && <ResumoNoCorpo numero={formatarMoedaCurta(total)} texto="nas RJ ativas" />}
+          {/* Sem tom próprio: a barra e a legenda pegam as cinco séries pela posição. */}
+          <Barra100
+            descricao="Relação do AJ das RJ ativas por classe"
+            segmentos={classes}
+            formatar={formatarMoedaCurta}
+          />
+          <Legenda
+            emColuna={celular}
+            duasColunas={!celular}
+            itens={classes.map((c, i) => ({
+              rotulo: c.rotulo,
+              detalhe: formatarMoedaCurta(c.valor),
+              valor: `${percentuais[i]}%`,
+            }))}
+          />
+        </div>
       </div>
     </Quadro>
   )
