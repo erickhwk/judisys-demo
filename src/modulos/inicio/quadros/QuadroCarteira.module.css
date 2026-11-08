@@ -1,0 +1,237 @@
+/* Q-12 · Carteira por fase, conforme a ficha "carteira" do canvas (SDD-INI §11). Fase com processo
+   no tom do tipo (RJ azul, falência dourada); fase vazia apagada. As medidas do canvas são de
+   unidade de 272px; as daqui valem de 208 a 298px no desktop e de 292 a 432px no tablet (SDD §5.3). */
+
+.carteira {
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+.trilha {
+  min-width: 0;
+}
+
+.tipo {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--cor-texto-muted);
+}
+
+.nomeTipo {
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+.fases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+.fase {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  color: var(--cor-texto-muted);
+  text-decoration: none;
+}
+
+.numero {
+  font-variant-numeric: tabular-nums;
+}
+
+.nome {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Desktop e tablet: células com o número em cima e o nome curto embaixo. */
+
+.desktop .fase,
+.tablet .fase {
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  background: var(--cor-superficie-suave);
+}
+
+.desktop .numero,
+.tablet .numero {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.desktop .nome,
+.tablet .nome {
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+
+.desktop .apagada,
+.tablet .apagada {
+  opacity: 0.75;
+}
+
+.rj .ocupada {
+  background: var(--cor-azul-claro);
+  color: var(--cor-texto);
+}
+
+.falencia .ocupada {
+  background: var(--cor-dourado-claro);
+  color: var(--cor-dourado-700);
+}
+
+/* Sem o sublinhado global dos links: no desktop e no tablet, a célula ganha um contorno; no
+   celular, só o nome se sublinha. */
+a.fase:hover {
+  text-decoration: none;
+}
+
+.desktop a.ocupada:hover,
+.tablet a.ocupada:hover {
+  box-shadow: inset 0 0 0 1px var(--cor-quadro-sombra);
+}
+
+/* Desktop (4×1): duas faixas, com o tipo e o resumo numa coluna à esquerda. */
+
+.desktop {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.desktop .trilha {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.desktop .tipo {
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop .nomeTipo {
+  font-size: 12.5px;
+}
+
+.desktop .resumo {
+  font-size: 11.5px;
+}
+
+.desktop .separador {
+  display: none;
+}
+
+.desktop .fases {
+  display: flex;
+  gap: 3px;
+}
+
+/* Células de largura igual, mas nunca menores que o nome: com unidade de 208px, as dez fases da RJ
+   não cabem iguais ("Relação do AJ" pede uns 87px), e as curtas cedem o espaço que sobra. */
+.desktop .item {
+  flex: 1 1 0;
+  min-width: max-content;
+}
+
+/* Tablet (2×2): as fases de cada tipo em grade de cinco. */
+
+/* A célula 2×2 tem 368px de altura: as células e o vão entre os tipos crescem um pouco em relação
+   ao canvas, para o conteúdo não deixar uma faixa vazia embaixo. */
+.tablet {
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.tablet .fase {
+  padding-block: 10px;
+}
+
+.tablet .trilha {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tablet .fases {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+}
+
+/* Unidade estreita do tablet (de 292 a uns 340px): células de uns 110px, e "Prestação de contas"
+   só cabe com o nome em 10px e a borda interna menor. */
+@container (max-width: 640px) {
+  .tablet .fase {
+    padding-inline: 6px;
+  }
+
+  .tablet .nome {
+    font-size: 10px;
+  }
+}
+
+/* Celular: lista de fases com a contagem à direita. */
+
+.celular {
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.celular .fases {
+  margin-top: 6px;
+}
+
+.celular .fase {
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--cor-borda-linha);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.celular .ocupada {
+  background: none;
+  color: var(--cor-texto);
+}
+
+.celular .nome {
+  flex: 1;
+}
+
+.ponto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--cor-grafico-4);
+}
+
+.rj .ocupada .ponto {
+  background: var(--cor-grafico-1);
+  box-shadow: none;
+}
+
+.falencia .ocupada .ponto {
+  background: var(--cor-grafico-2);
+  box-shadow: none;
+}
+
+.celular a.ocupada:hover .nome {
+  text-decoration: underline;
+}

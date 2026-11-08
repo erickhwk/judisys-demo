@@ -4,8 +4,9 @@ import type { Tipos } from '../../dados/schemas'
 import { type DataIso, somarDias, somarMeses } from '../../regras/datas'
 import {
   ehFaseFinal,
+  FASES_FALENCIA,
+  FASES_RJ,
   type Fase,
-  fasesDoTipo,
   ROTULOS_FASE,
   type TipoProcesso,
 } from '../../regras/fases'
@@ -66,22 +67,44 @@ export function numerosDoTopo(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Funil por fase (RF-08, T-35)
+// INI-09 · Carteira por fase (SDD-INI §5.7, Q-12), no lugar do antigo funil por fase (RF-08, T-35)
 
-export interface EtapaDoFunil {
+export interface FaseDaCarteira {
   fase: Fase
   rotulo: string
   quantidade: number
 }
 
-/** Toda fase do tipo, na ordem do RF-14, com quantos processos estão parados nela (zero também). */
-export function funilPorFase(processos: readonly Processo[], tipo: TipoProcesso): EtapaDoFunil[] {
-  const doTipo = processos.filter((p) => p.tipo === tipo)
-  return fasesDoTipo(tipo).map((fase) => ({
-    fase,
-    rotulo: ROTULOS_FASE[fase],
-    quantidade: doTipo.filter((p) => p.faseAtual === fase).length,
-  }))
+export interface CarteiraDoTipo {
+  tipo: TipoProcesso
+  /** Processos do tipo fora das fases finais. */
+  ativos: number
+  /** Processos do tipo na fase "Encerrada", a última da sequência. */
+  encerrados: number
+  /** Toda fase da sequência do RF-14, na ordem, com zero onde não há processo. */
+  fases: FaseDaCarteira[]
+}
+
+/**
+ * Contagem por fase da carteira, RJ e depois falência, com todas as fases da sequência do RF-14
+ * (as vazias também, para o quadro apagá-las). As finais alternativas da RJ (convolada em
+ * falência, desistência) ficam de fora (SDD-INI §5.7).
+ */
+export function carteiraPorFase(processos: readonly Processo[]): CarteiraDoTipo[] {
+  return (['rj', 'falencia'] as const).map((tipo) => {
+    const doTipo = processos.filter((p) => p.tipo === tipo)
+    const sequencia: readonly Fase[] = tipo === 'rj' ? FASES_RJ : FASES_FALENCIA
+    return {
+      tipo,
+      ativos: doTipo.filter(ehAtivo).length,
+      encerrados: doTipo.filter((p) => p.faseAtual === 'encerrada').length,
+      fases: sequencia.map((fase) => ({
+        fase,
+        rotulo: ROTULOS_FASE[fase],
+        quantidade: doTipo.filter((p) => p.faseAtual === fase).length,
+      })),
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -267,6 +290,98 @@ export function proximasAgcs(agcs: readonly Agc[], hoje: DataIso): ProximaAgc[] 
     .slice(0, LIMITE_AGCS)
 }
 
+// ---------------------------------------------------------------------------------------------
+// INI-06 · quadros 1×1: prazos em aberto (Q-01), próxima AGC (Q-02) e pedidos de crédito (Q-03)
+
+/** Prazos em aberto por urgência (Q-01). As faixas não se cruzam e somam `abertos`. */
+export interface PrazosPorUrgencia {
+  abertos: number
+  /** Vencimento antes de hoje (o período "vencidos" da agenda). */
+  vencidos: number
+  hoje: number
+  /** De D+1 a D+7. */
+  ate7Dias: number
+  /** De D+8 a D+30. */
+  ate30Dias: number
+  /** Depois de D+30. */
+  depois: number
+}
+
+export function prazosPorUrgencia(prazos: readonly Prazo[], hoje: DataIso): PrazosPorUrgencia {
+  const contagem: PrazosPorUrgencia = {
+    abertos: 0,
+    vencidos: 0,
+    hoje: 0,
+    ate7Dias: 0,
+    ate30Dias: 0,
+    depois: 0,
+  }
+  const em7 = somarDias(hoje, 7)
+  const em30 = somarDias(hoje, 30)
+  for (const prazo of prazos) {
+    if (!noPeriodo(prazo, 'abertos', hoje)) continue
+    const v = prazo.vencimento
+    contagem.abertos++
+    if (v < hoje) contagem.vencidos++
+    else if (v === hoje) contagem.hoje++
+    else if (v <= em7) contagem.ate7Dias++
+    else if (v <= em30) contagem.ate30Dias++
+    else contagem.depois++
+  }
+  return contagem
+}
+
+/**
+ * A primeira AGC `agendada` com a 1ª convocação de hoje em diante (SDD §5.7, Q-02): pela data e,
+ * no mesmo dia, pelo id. AGC instalada ou encerrada não é "próxima"; a de 1ª convocação já passada
+ * também não, como no `resumoDoDia`.
+ */
+export function proximaAgc(agcs: readonly Agc[], hoje: DataIso): Agc | null {
+  const [primeira] = agcs
+    .filter((a) => a.status === 'agendada' && a.dataPrimeira >= hoje)
+    .sort((a, b) => a.dataPrimeira.localeCompare(b.dataPrimeira) || a.id.localeCompare(b.id))
+  return primeira ?? null
+}
+
+type PedidoDeCredito = Tipos['pedidosDeCredito']
+
+export interface PedidosPorStatus {
+  pendentes: number
+  acolhidos: number
+  rejeitados: number
+  /** O processo com mais pedidos pendentes (no empate, o de menor id), ou `null` sem pendentes. */
+  maisPendentes: { processoId: string; pendentes: number } | null
+}
+
+export function pedidosPorStatus(pedidos: readonly PedidoDeCredito[]): PedidosPorStatus {
+  const pendentesPorProcesso = new Map<string, number>()
+  let acolhidos = 0
+  let rejeitados = 0
+  for (const pedido of pedidos) {
+    if (pedido.status === 'acolhido') acolhidos++
+    else if (pedido.status === 'rejeitado') rejeitados++
+    else {
+      pendentesPorProcesso.set(
+        pedido.processoId,
+        (pendentesPorProcesso.get(pedido.processoId) ?? 0) + 1,
+      )
+    }
+  }
+  let maisPendentes: PedidosPorStatus['maisPendentes'] = null
+  let pendentes = 0
+  for (const [processoId, quantidade] of pendentesPorProcesso) {
+    pendentes += quantidade
+    if (
+      !maisPendentes ||
+      quantidade > maisPendentes.pendentes ||
+      (quantidade === maisPendentes.pendentes && processoId < maisPendentes.processoId)
+    ) {
+      maisPendentes = { processoId, pendentes: quantidade }
+    }
+  }
+  return { pendentes, acolhidos, rejeitados, maisPendentes }
+}
+
 /** Informes mais recentes: pela data e, no mesmo dia, pelo cadastro mais novo. */
 export function ultimosInformes(informes: readonly Informe[]): Informe[] {
   return [...informes]
@@ -302,15 +417,11 @@ export function resumoDoDia(
 ): ResumoDoDia {
   const apelidos = new Map(processos.map((p) => [p.id, p.apelido]))
   const limite = somarDias(hoje, DIAS_AGC_NO_RESUMO)
-  const [agc] = agcs
-    .filter(
-      (a) =>
-        a.status === 'agendada' &&
-        a.dataPrimeira >= hoje &&
-        a.dataPrimeira <= limite &&
-        apelidos.has(a.processoId),
-    )
-    .sort((a, b) => a.dataPrimeira.localeCompare(b.dataPrimeira) || a.id.localeCompare(b.id))
+  const proxima = proximaAgc(
+    agcs.filter((a) => apelidos.has(a.processoId)),
+    hoje,
+  )
+  const agc = proxima && proxima.dataPrimeira <= limite ? proxima : null
   return {
     vencidos: prazos.filter((p) => noPeriodo(p, 'vencidos', hoje)).length,
     hoje: prazos.filter((p) => noPeriodo(p, 'hoje', hoje)).length,

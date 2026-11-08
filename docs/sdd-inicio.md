@@ -245,7 +245,7 @@ Todos puros, com `hoje` por parâmetro:
 
 | ID | Tipo | Dado | Quando | Então |
 |---|---|---|---|---|
-| QDR-01 | F | seed | Q-01 | 19 em aberto, 3 vencidos, 1 hoje; barra com 3, 1, 1, 4 e 10. |
+| QDR-01 | F | seed | Q-01 | 19 em aberto, 3 vencidos, 1 hoje; barra com 3, 1, 1, 6 e 8 (faixas do §5.7; corrigido com o usuário na INI-06). |
 | QDR-02 | F | seed | Q-02 | Grupo Lontra Azul, 13/11, "em 6 dias", 2ª convocação 20/11. |
 | QDR-03 | B | sem AGC agendada | Q-02 | "Nenhuma AGC agendada" e o link para a agenda (RF-15). |
 | QDR-04 | F | seed | Q-03 | Rosca 8, 25, 17 e "8 pendentes" no centro; nota do processo com mais pendentes. |

@@ -6,12 +6,15 @@ import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
+  carteiraPorFase,
   cumpridosPorMes,
-  funilPorFase,
   informesPorMes,
   numerosDoTopo,
   passivoPorClasse,
   passivoPorProcesso,
+  pedidosPorStatus,
+  prazosPorUrgencia,
+  proximaAgc,
   proximasAgcs,
   proximosPrazos,
   resumoDoDia,
@@ -104,12 +107,13 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         valor: m.quantidade,
       })),
     },
-    ...(['rj', 'falencia'] as const).map((tipo) => ({
-      titulo: `Funil por fase, ${tipo === 'rj' ? 'RJ' : 'falência'} (funilPorFase)`,
-      linhas: funilPorFase(tabelas.processos, tipo).map((e) => ({
-        rotulo: e.rotulo,
-        valor: e.quantidade,
-      })),
+    ...carteiraPorFase(tabelas.processos).map((c) => ({
+      titulo: `Carteira por fase, ${c.tipo === 'rj' ? 'RJ' : 'falência'} (carteiraPorFase)`,
+      linhas: [
+        { rotulo: 'Ativos', valor: c.ativos },
+        { rotulo: 'Encerrados', valor: c.encerrados },
+        ...c.fases.map((f) => ({ rotulo: f.rotulo, valor: f.quantidade })),
+      ],
     })),
     {
       titulo: 'Próximos prazos em aberto (proximosPrazos)',
@@ -125,12 +129,61 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         valor: `${a.convocacao}ª convocação`,
       })),
     },
+    ...blocosDosQuadros1x1(tabelas, hoje, processo),
     {
       titulo: 'Últimos informes (ultimosInformes)',
       linhas: ultimosInformes(tabelas.informes).map((i) => ({
         rotulo: `${i.data} · ${processo(i.processoId)}`,
         valor: i.titulo,
       })),
+    },
+  ]
+}
+
+/** INI-06 · Q-01 a Q-03: prazos por urgência, próxima AGC e pedidos de crédito. */
+function blocosDosQuadros1x1(
+  tabelas: TabelasSeed,
+  hoje: DataIso,
+  processo: (id: string) => string,
+): Bloco[] {
+  const urgencia = prazosPorUrgencia(tabelas.prazos, hoje)
+  const agc = proximaAgc(tabelas.agcs, hoje)
+  const pedidos = pedidosPorStatus(tabelas.pedidosDeCredito)
+  return [
+    {
+      titulo: 'Prazos em aberto por urgência (prazosPorUrgencia)',
+      linhas: [
+        { rotulo: 'Em aberto', valor: urgencia.abertos },
+        { rotulo: 'Vencidos', valor: urgencia.vencidos },
+        { rotulo: 'Hoje', valor: urgencia.hoje },
+        { rotulo: 'De D+1 a D+7', valor: urgencia.ate7Dias },
+        { rotulo: 'De D+8 a D+30', valor: urgencia.ate30Dias },
+        { rotulo: 'Depois', valor: urgencia.depois },
+      ],
+    },
+    {
+      titulo: 'Próxima AGC agendada (proximaAgc)',
+      linhas: agc
+        ? [
+            { rotulo: 'Processo', valor: processo(agc.processoId) },
+            { rotulo: '1ª convocação', valor: agc.dataPrimeira },
+            { rotulo: '2ª convocação', valor: agc.dataSegunda },
+          ]
+        : [],
+    },
+    {
+      titulo: 'Pedidos de crédito por status (pedidosPorStatus)',
+      linhas: [
+        { rotulo: 'Pendentes', valor: pedidos.pendentes },
+        { rotulo: 'Acolhidos', valor: pedidos.acolhidos },
+        { rotulo: 'Rejeitados', valor: pedidos.rejeitados },
+        {
+          rotulo: 'Processo com mais pendentes',
+          valor: pedidos.maisPendentes
+            ? `${processo(pedidos.maisPendentes.processoId)} (${pedidos.maisPendentes.pendentes})`
+            : '(nenhum)',
+        },
+      ],
     },
   ]
 }
