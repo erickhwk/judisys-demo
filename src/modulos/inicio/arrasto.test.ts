@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   colunaPretendida,
   colunasDaLargura,
+  deslocamentoNoGrid,
   larguraDaUnidade,
   linhaPretendida,
   recusa,
@@ -62,6 +63,13 @@ describe('célula pelo ponteiro (5.6, passo 2)', () => {
   it('a linha nunca fica acima da primeira', () => {
     expect(linhaPretendida(100, 10, 200)).toBe(0)
     expect(linhaPretendida(200 + 192 * 2 + 10, 10, 200)).toBe(2)
+  })
+
+  it('o desenho do arrastado não passa de um vão além das bordas do grid', () => {
+    // Célula de 300px a 500px da esquerda, num grid de 1000px: sobra 200px à direita, mais o vão.
+    expect(deslocamentoNoGrid(150, 500, 300, 1000)).toBe(150)
+    expect(deslocamentoNoGrid(600, 500, 300, 1000)).toBe(216)
+    expect(deslocamentoNoGrid(-900, 500, 300, 1000)).toBe(-516)
   })
 })
 

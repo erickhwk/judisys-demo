@@ -23,6 +23,7 @@ import {
   ALTURA_UNIDADE,
   type Colunas,
   colunaPretendida,
+  deslocamentoNoGrid,
   larguraDaUnidade,
   linhaPretendida,
   recusa as saiDoGrid,
@@ -159,6 +160,7 @@ interface Arrasto {
   /** Canto de cima à esquerda da célula de origem, dentro do grid: rolar não descola o quadro. */
   origemX: number
   origemY: number
+  larguraDaCelula: number
   /** Passou do limiar: daqui em diante, mostra sombra e prévia. */
   ativo: boolean
   dx: number
@@ -224,7 +226,12 @@ function GradeDesktop({
       atualizar({
         ...atual,
         ativo: true,
-        dx: clienteX - atual.deslocamentoX - caixa.left - atual.origemX,
+        dx: deslocamentoNoGrid(
+          clienteX - atual.deslocamentoX - caixa.left - atual.origemX,
+          atual.origemX,
+          atual.larguraDaCelula,
+          caixa.width,
+        ),
         dy: clienteY - atual.deslocamentoY - caixa.top - atual.origemY,
         coluna: colunaPretendida(clienteX, atual.deslocamentoX, caixa.left, unidadeRef.current),
         linha: linhaPretendida(clienteY, atual.deslocamentoY, caixa.top),
@@ -312,6 +319,7 @@ function GradeDesktop({
           deslocamentoY: evento.clientY - caixa.top,
           origemX: caixa.left - caixaGrade.left,
           origemY: caixa.top - caixaGrade.top,
+          larguraDaCelula: caixa.width,
           ativo: false,
           dx: 0,
           dy: 0,

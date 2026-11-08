@@ -210,6 +210,22 @@ test('PRS-04 · um 1×2 todo fora do grid pela direita: faixa na borda direita',
   expect(await posicoes(page)).toEqual(antes)
 })
 
+test('arrastar para fora pela direita não dá rolagem horizontal à página', async ({ page }) => {
+  await personalizar(page)
+  await arrastar(page, 'calendario', 7, 0, false)
+  // Nenhum ancestral da grade que rola (a coluna do Layout e a página) ganha largura a rolar.
+  const alargados = await page.locator('[data-colunas="4"]').evaluate((grade) => {
+    const largos: string[] = []
+    for (let el = grade.parentElement; el; el = el.parentElement) {
+      const rola = el === document.documentElement || getComputedStyle(el).overflowX !== 'visible'
+      if (rola && el.scrollWidth > el.clientWidth) largos.push(`${el.className} ${el.scrollWidth}`)
+    }
+    return largos
+  })
+  expect(alargados).toEqual([])
+  await page.mouse.up()
+})
+
 test('arrastar: a célula de origem mantém a altura enquanto a prévia encolhe o grid', async ({
   page,
 }) => {
