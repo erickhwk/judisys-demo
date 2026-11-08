@@ -32,6 +32,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - Referência visual: os artboards do canvas da SDD §11. Os valores de cor do canvas são aproximações; na implementação valem os tokens.
   - Número do seed usado em ficha, caso ou teste sai do `pnpm indicadores` (INI-02). Cálculo novo em `indicadores.ts` entra também na saída do script.
   - Capturas (SDD §10: 1280 com o menu aberto, 1440, 834 e 390, nos dois temas): `capturar.sh --url http://localhost:432{n}/ --login-clique "Entrar como Advogado" --relogio 2026-11-07T10:00:00 --rolagem-interna --viewports 1280x800,1440x900,834x1112,390x844 --tema claro,escuro --tema-chave tema --tela <nome>='#/<rota>'`, com o preview na porta 432{n}, derrubado no fim.
+  - O modo Personalizar (faixa, recusa e arrasto) depende de estado e sai do `node scripts/capturar-personalizar.mjs http://localhost:432{n}/ docs/capturas/<COD>/depois`. Tarefa que muda a moldura ou a edição recaptura com ele; acrescente ali os estados novos.
 
 ---
 
