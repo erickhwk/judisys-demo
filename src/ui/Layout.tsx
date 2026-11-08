@@ -49,7 +49,10 @@ export function Layout() {
     if (!gavetaAberta) return
     document.getElementById(idMenu)?.querySelector<HTMLElement>('a')?.focus()
     const aoTeclar = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') fecharGaveta()
+      // Esc já usado (o painel da conta, no pé do menu, fecha antes): a gaveta fica aberta.
+      if (evento.key === 'Escape') {
+        if (!evento.defaultPrevented) fecharGaveta()
+      }
       // A busca mora na coluna inerte: a gaveta fecha junto, sem roubar o foco do campo da busca.
       else if (ehAtalhoBusca(evento)) setGavetaAberta(false)
     }

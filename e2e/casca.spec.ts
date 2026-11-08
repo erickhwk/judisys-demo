@@ -92,6 +92,17 @@ test('CAS-05 · em 834px, a barra do topo tem o menu, a logo, a lupa e o avatar'
   await expect(menu(page).getByRole('link', { name: 'Início', exact: true })).toBeFocused()
   await expect(menu(page).getByRole('switch', { name: 'Tema escuro' })).toBeVisible()
   await expect(menu(page).getByRole('button', { name: 'Fechar menu' })).toBeVisible()
+
+  // Na gaveta, o Esc fecha primeiro só o painel da conta; o segundo fecha a gaveta.
+  const contaDoMenu = menu(page).getByRole('button', { name: 'Menu da conta' })
+  await contaDoMenu.click()
+  await expect(menu(page).getByRole('button', { name: 'Trocar de papel' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(menu(page).getByRole('button', { name: 'Trocar de papel' })).toBeHidden()
+  await expect(contaDoMenu).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu(page).getByRole('link', { name: 'Início', exact: true })).toBeHidden()
+  await expect(barra.getByRole('button', { name: 'Abrir menu' })).toBeFocused()
 })
 
 test('CAS-06 · no tema escuro, o menu fica um tom acima do fundo', async ({ page }) => {

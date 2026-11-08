@@ -49,16 +49,19 @@ export function MenuConta({
     const aoApertar = (evento: PointerEvent) => {
       if (!raiz.current?.contains(evento.target as Node)) setAberto(false)
     }
+    // Na captura e com `preventDefault`: o Esc fecha só o painel, e quem ouve depois (a gaveta do
+    // Layout, quando a conta está no pé do menu) sabe que ele já foi usado.
     const aoTeclar = (evento: KeyboardEvent) => {
       if (evento.key !== 'Escape') return
+      evento.preventDefault()
       setAberto(false)
       botao.current?.focus()
     }
     document.addEventListener('pointerdown', aoApertar)
-    document.addEventListener('keydown', aoTeclar)
+    document.addEventListener('keydown', aoTeclar, true)
     return () => {
       document.removeEventListener('pointerdown', aoApertar)
-      document.removeEventListener('keydown', aoTeclar)
+      document.removeEventListener('keydown', aoTeclar, true)
     }
   }, [aberto])
 
