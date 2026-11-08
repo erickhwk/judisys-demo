@@ -3,7 +3,13 @@
 // As abas do processo saem da lista ABAS (ordem, rótulo e permissão), com o conteúdo vindo do
 // módulo dono. O roteador (roteador.tsx) aplica a guarda de sessão e de permissão a todas.
 import { type DefinicaoRota, type RegistroDoModulo, rota } from './definicaoRotas'
-import { ABAS, type Aba, type ConteudoAba, DEFINICOES_ABAS } from './modulos/processos/abas'
+import {
+  ABAS,
+  type Aba,
+  type ConteudoAba,
+  DEFINICOES_ABAS,
+  rotaDoProcesso,
+} from './modulos/processos/abas'
 import { TelaDoProcesso } from './modulos/processos/TelaDoProcesso'
 
 /** O `registro` de cada `src/modulos/<m>/rotas.tsx` (ou `.ts`), por arquivo. */
@@ -39,7 +45,7 @@ export function juntarRegistros(registros: [arquivo: string, registro?: Registro
   const rotasDasAbas = ABAS.map((aba) => {
     const Conteudo = conteudos[aba] as ConteudoAba
     return rota(
-      `/processos/:id/${aba}`,
+      rotaDoProcesso(':id', aba),
       'ler',
       DEFINICOES_ABAS[aba].modulo,
       <TelaDoProcesso aba={aba} Conteudo={Conteudo} />,
