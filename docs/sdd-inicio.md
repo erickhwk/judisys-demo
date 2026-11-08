@@ -134,7 +134,7 @@ Medidas pela largura do contêiner do grid (`useContainerWidth`), com vão de 16
 - **`primeiroLugarLivre(quadro, montagem, cols)`:** percorre as linhas de 0 até a base da montagem e, em cada linha, as colunas de 0 a `cols - w`. Devolve a primeira posição em que `cabe`. Se nenhuma servir, devolve `{ x: 0, y: base }`.
 - **`ordemDeLeitura(montagem)`:** ordena por `y` e depois por `x`.
 - **`empacotar(montagem, cols, tamanho)`:** percorre a montagem em ordem de leitura e põe cada quadro, com o tamanho da largura de destino, no `primeiroLugarLivre` da montagem que vai se formando. Gera a montagem de tablet (2 colunas) sem buracos que não sejam inevitáveis. O celular usa só a `ordemDeLeitura`.
-- **`normalizar(montagemSalva, papel)`:** descarta itens de quadro inexistente, repetido ou sem permissão, e itens fora do grid (`x + w > 4`). Itens que se sobrepõem são reposicionados pelo `primeiroLugarLivre` na ordem de leitura. Montagem inválida (JSON quebrado ou de outro formato) é tratada como ausente, e vale o padrão do papel.
+- **`normalizar(montagemSalva, papel)`:** descarta itens de quadro inexistente, repetido ou sem permissão. Itens fora do grid (`x + w > 4`) ou que se sobrepõem são reposicionados pelo `primeiroLugarLivre` na ordem de leitura, para o usuário não perder o quadro (MNT-05). Se todos os itens de uma montagem salva forem descartados, vale o padrão do papel; a montagem salva vazia de propósito (PRS-11) continua vazia (MNT-08). Montagem inválida (JSON quebrado ou de outro formato) é tratada como ausente, e vale o padrão do papel.
 
 ### 5.5 Persistência (RF-24 a RF-26, C-03)
 
@@ -286,6 +286,7 @@ Todos puros, com `hoje` por parâmetro:
 | MNT-05 | B | itens sobrepostos ou fora do grid | abrir | `normalizar` reposiciona (INV-01). |
 | MNT-06 | B | sem `localStorage` | Concluir | Vale até recarregar, sem erro (5.5). |
 | MNT-07 | B | mudança de versão do seed | abrir | A montagem continua (só o reset apaga). |
+| MNT-08 | B | montagem salva com todos os quadros descartados | abrir | O padrão do papel; salva vazia de propósito continua vazia. |
 
 ---
 
@@ -317,7 +318,7 @@ O mesmo do PRD §9, mais:
 | RF-16 | QDR-17 |
 | RF-17 | GRD-01, GRD-02 |
 | RF-18 a RF-23 | PRS-01 a PRS-14 |
-| RF-24 a RF-26 | MNT-01 a MNT-07 |
+| RF-24 a RF-26 | MNT-01 a MNT-08 |
 | Q-01 a Q-12 | QDR-01 a QDR-13 |
 
 ---
