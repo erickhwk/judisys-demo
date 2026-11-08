@@ -44,16 +44,17 @@ interface PropsContador {
  * some quando é zero (CAS-03). */
 function Numero({
   idDescricao,
+  nome,
   valor,
   descricao,
   alerta = false,
-}: PropsContador & { valor: number; descricao: string; alerta?: boolean }) {
+}: PropsContador & { nome: string; valor: number; descricao: string; alerta?: boolean }) {
   return (
     <>
       {(valor > 0 || !alerta) && (
         <span
           className={juntarClasses(estilos.contador, alerta && estilos.contadorAlerta)}
-          data-contador={alerta ? 'vencidos' : 'processos'}
+          data-contador={nome}
           aria-hidden="true"
         >
           {valor}
@@ -73,6 +74,7 @@ function ContadorProcessos({ idDescricao }: PropsContador) {
   return (
     <Numero
       idDescricao={idDescricao}
+      nome="processos"
       valor={total}
       descricao={total === 1 ? '1 processo' : `${total} processos`}
     />
@@ -91,7 +93,15 @@ function ContadorVencidos({ idDescricao }: PropsContador) {
       : vencidos === 1
         ? '1 prazo vencido'
         : `${vencidos} prazos vencidos`
-  return <Numero idDescricao={idDescricao} valor={vencidos} descricao={descricao} alerta />
+  return (
+    <Numero
+      idDescricao={idDescricao}
+      nome="vencidos"
+      valor={vencidos}
+      descricao={descricao}
+      alerta
+    />
+  )
 }
 
 const SECOES: { titulo: string; itens: Item[] }[] = [
@@ -227,7 +237,7 @@ export function MenuLateral({
         })}
       </div>
       <div className={estilos.pe}>
-        <InterruptorTema soIcone={soIcones} className={estilos.tema} />
+        <InterruptorTema soIcone={soIcones} />
         <MenuConta
           nome={nome}
           papel={nomePapel}
@@ -235,7 +245,6 @@ export function MenuLateral({
           aoResetar={aoResetar}
           variante={soIcones ? 'avatar' : 'menu'}
           painelPara="cima"
-          className={estilos.conta}
         />
       </div>
     </aside>
