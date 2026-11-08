@@ -5,6 +5,9 @@
   gap: 8px;
   margin-top: auto;
   padding: 20px 44px 28px;
+  /* Em ultrawide, a marca para na borda direita do conteúdo (o teto do main mais o padding de 44px
+     dele), como as ações do cabeçalho (AJ-22). Abaixo do teto, vale o padding de 44px. */
+  padding-right: max(44px, calc(100% - var(--largura-conteudo, 100%) - 44px));
   border-top: 1px solid var(--cor-borda);
   font-size: 13px;
   color: var(--cor-texto-muted);

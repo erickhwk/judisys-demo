@@ -189,6 +189,11 @@ test.describe('AJ-22 · teto de 2200px no conteúdo', () => {
     // As ações do cabeçalho param na borda direita do conteúdo, e não na da janela.
     const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
     expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(conteudo.esquerda + 2200, 0)
+    // A marca do rodapé também para ali; a linha do rodapé continua indo de ponta a ponta.
+    const marca = await page.locator('footer a').boundingBox()
+    expect((marca?.x ?? 0) + (marca?.width ?? 0)).toBeCloseTo(conteudo.esquerda + 2200, 0)
+    const rodape = await page.locator('footer').boundingBox()
+    expect((rodape?.x ?? 0) + (rodape?.width ?? 0)).toBeGreaterThan(conteudo.esquerda + 2200 + 500)
   })
 
   test('CAS-09 · monitor de 2560px com o menu aberto: o conteúdo ocupa a coluna toda, como antes', async ({
@@ -201,5 +206,11 @@ test.describe('AJ-22 · teto de 2200px no conteúdo', () => {
     const conteudo = await medirConteudo(page)
     expect(conteudo.largura).toBeLessThan(2200)
     expect(conteudo.sobra).toBe(0)
+    // Rodapé como antes: a marca a 44px da borda da coluna.
+    const marca = await page.locator('footer a').boundingBox()
+    const rodape = await page.locator('footer').boundingBox()
+    expect(
+      (rodape?.x ?? 0) + (rodape?.width ?? 0) - ((marca?.x ?? 0) + (marca?.width ?? 0)),
+    ).toBeCloseTo(44, 0)
   })
 })
