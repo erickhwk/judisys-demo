@@ -1,0 +1,100 @@
+/* Faixa do Personalizar, conforme o artboard "INI · Personalizar": superfície com borda dourada,
+   ajuda e botões numa linha (quebra quando não cabe) e o catálogo em pílulas tracejadas. */
+
+.faixa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1240px;
+  padding: 14px 16px;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-dourado-500);
+  border-radius: 12px;
+}
+
+.faixa:focus {
+  outline: none;
+}
+
+.faixa:focus-visible {
+  outline: var(--foco-contorno);
+  outline-offset: 2px;
+}
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ajuda {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--cor-texto);
+}
+
+.apoio {
+  color: var(--cor-texto-muted);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.botao {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 13.5px;
+}
+
+.catalogo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.rotulo {
+  margin-right: 4px;
+  color: var(--cor-texto-muted);
+}
+
+.lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px dashed var(--cor-quadro-sombra);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.item:hover {
+  border-style: solid;
+  background: var(--cor-hover-fantasma);
+}
+
+.tamanho {
+  font-weight: 500;
+  color: var(--cor-texto-muted);
+}

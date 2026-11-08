@@ -1,0 +1,134 @@
+/* Moldura do quadro, conforme o componente "Quadro" do canvas (SDD-INI §11): superfície com borda
+   fina e raio de 12px; no desktop e no tablet ocupa a célula inteira (altura fixa, D-06), no
+   celular a altura é livre. Na edição, a borda fica tracejada. */
+
+.quadro {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  padding: 14px 16px 16px;
+  overflow: hidden;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  box-shadow: var(--sombra-card);
+}
+
+.celular {
+  height: auto;
+  min-height: 120px;
+}
+
+.editando {
+  border-style: dashed;
+  border-color: var(--cor-quadro-sombra);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.alca {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 26px;
+  margin-left: -6px;
+  color: var(--cor-texto-muted);
+  cursor: grab;
+  /* Sem rolagem nem zoom do toque na alça: o gesto é do arrasto. */
+  touch-action: none;
+  user-select: none;
+}
+
+.alca:active {
+  cursor: grabbing;
+}
+
+.titulo {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--fonte-texto);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  color: var(--cor-texto);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.destaque {
+  flex: none;
+  font-family: var(--fonte-titulo);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+  white-space: nowrap;
+}
+
+.link {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cor-azul-900);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* × de 28px no desenho, com a área de toque estendida até os 44px do alvo mínimo (RNF-01). */
+.tirar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--cor-borda);
+  border-radius: 7px;
+  background: var(--cor-superficie);
+  color: var(--cor-texto-forte);
+  cursor: pointer;
+}
+
+.tirar::after {
+  position: absolute;
+  inset: -8px;
+  content: "";
+}
+
+.tirar:hover {
+  border-color: var(--cor-perigo-borda);
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+.corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.vazio {
+  margin: auto 0;
+  padding: 12px 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--cor-texto-muted);
+  text-align: center;
+}
