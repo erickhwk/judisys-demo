@@ -1,4 +1,8 @@
 .rodape {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
   margin-top: auto;
   padding: 20px 44px 28px;
   border-top: 1px solid var(--cor-borda);
@@ -6,8 +10,12 @@
   color: var(--cor-texto-muted);
 }
 
-.rodape a {
-  font-weight: 600;
+.marca {
+  display: inline-flex;
+  color: var(--cor-texto);
+}
+
+.marca:hover {
   color: var(--cor-dourado-700);
 }
 
