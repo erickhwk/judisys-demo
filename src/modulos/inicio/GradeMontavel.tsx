@@ -205,7 +205,7 @@ function GradeDesktop({
   const unidadeRef = useRef(unidade)
   unidadeRef.current = unidade
   const arrastando = arrasto !== null
-  const sombra = ativo && recusado ? sombraCortada(ativo, unidade, linhas) : null
+  const recusa = ativo && recusado ? sombraCortada(ativo, unidade, linhas) : null
 
   // Sai da edição no meio do arrasto (Cancelar não dá, mas o contêiner pode encolher): esquece.
   useEffect(() => {
@@ -381,7 +381,7 @@ function GradeDesktop({
           />
         )}
 
-        {ativo && sombra && (
+        {ativo && recusa && (
           <>
             <div
               aria-hidden="true"
@@ -395,12 +395,12 @@ function GradeDesktop({
               De onde o quadro saiu
             </div>
             {/* A sombra é cortada na borda do grid (5.6, passo 3): fica só a parte de dentro. */}
-            {sombra.fora === null ? (
+            {recusa.fora === null ? (
               <div
                 aria-hidden="true"
                 className={estilos.recusa}
                 data-recusa=""
-                style={sombra.estilo}
+                style={recusa.estilo}
               >
                 {avisoDeRecusa(ativo.quadro)}
               </div>
@@ -410,15 +410,15 @@ function GradeDesktop({
                   aria-hidden="true"
                   className={estilos.recusaFaixa}
                   data-recusa="faixa"
-                  style={sombra.estilo}
+                  style={recusa.estilo}
                 />
                 <div
                   aria-hidden="true"
                   className={estilos.recusaAviso}
                   data-recusa-aviso=""
                   style={{
-                    top: sombra.estilo.top,
-                    [sombra.fora === 'esquerda' ? 'left' : 'right']: LARGURA_FAIXA + 8,
+                    top: recusa.estilo.top,
+                    [recusa.fora === 'esquerda' ? 'left' : 'right']: LARGURA_FAIXA + 8,
                   }}
                 >
                   {avisoDeRecusa(ativo.quadro)}
@@ -429,7 +429,7 @@ function GradeDesktop({
         )}
 
         <p className="somente-leitor" role="status">
-          {ativo && recusado ? avisoDeRecusa(ativo.quadro) : ''}
+          {ativo && recusa ? avisoDeRecusa(ativo.quadro) : ''}
         </p>
       </div>
     </ContextoEdicao.Provider>
@@ -466,9 +466,12 @@ function sombraCortada(ativo: Arrasto, unidade: number, linhas: number): SombraD
   }
   if (fim > inicio)
     return { estilo: { left: inicio, width: fim - inicio, ...vertical }, fora: null }
+  // A faixa e o aviso se ancoram na mesma borda da caixa real do grid (left ou right: 0).
   const fora = esquerda < 0 ? 'esquerda' : 'direita'
-  const left = fora === 'esquerda' ? 0 : larguraDoGrid - LARGURA_FAIXA
-  return { estilo: { left, width: LARGURA_FAIXA, ...vertical }, fora }
+  return {
+    estilo: { [fora === 'esquerda' ? 'left' : 'right']: 0, width: LARGURA_FAIXA, ...vertical },
+    fora,
+  }
 }
 
 function avisoDeRecusa(quadro: IdQuadro): string {

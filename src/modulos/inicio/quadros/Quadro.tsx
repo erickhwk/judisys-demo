@@ -62,7 +62,10 @@ export function Quadro({ id, titulo, variante, destaque, link, vazio, children }
           </span>
         )}
         <h2 className={estilos.titulo}>{titulo}</h2>
-        {destaque !== undefined && <span className={estilos.destaque}>{destaque}</span>}
+        {/* Na edição, o destaque sai como o link: em 208px de unidade, o título precisa do espaço. */}
+        {destaque !== undefined && !editando && (
+          <span className={estilos.destaque}>{destaque}</span>
+        )}
         {mostraLink && (
           <Link to={link.para} className={estilos.link}>
             {link.rotulo}

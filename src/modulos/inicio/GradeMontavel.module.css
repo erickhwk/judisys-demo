@@ -66,9 +66,19 @@
 
 /* Sombra vermelha da recusa, já cortada na borda do grid (5.6, passo 3). Fica por cima do quadro
    arrastado, para o aviso não sumir embaixo dele. */
-.recusa {
+.recusa,
+.recusaAviso {
   position: absolute;
   z-index: 6;
+  background: var(--cor-perigo-claro);
+  pointer-events: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--cor-quadro-recusa);
+}
+
+.recusa {
   opacity: 0.96;
   box-sizing: border-box;
   display: flex;
@@ -77,12 +87,6 @@
   padding: 12px;
   border: 2px solid var(--cor-quadro-recusa);
   border-radius: 12px;
-  background: var(--cor-perigo-claro);
-  pointer-events: none;
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--cor-quadro-recusa);
 }
 
 /* Quadro todo fora do grid: faixa na borda por onde saiu e o aviso ao lado, dentro do grid. */
@@ -95,17 +99,9 @@
 }
 
 .recusaAviso {
-  position: absolute;
-  z-index: 6;
   max-width: 240px;
   margin-top: 8px;
   padding: 8px 10px;
   border: 1px solid var(--cor-quadro-recusa);
   border-radius: 8px;
-  background: var(--cor-perigo-claro);
-  pointer-events: none;
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--cor-quadro-recusa);
 }

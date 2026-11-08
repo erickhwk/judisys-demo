@@ -191,6 +191,23 @@ test('PRS-04 · um 1×1 todo fora do grid: faixa na borda, aviso visível e volt
   expect(await posicoes(page)).toEqual(antes)
 })
 
+test('PRS-04 · um 1×2 todo fora do grid pela direita: faixa na borda direita', async ({ page }) => {
+  await personalizar(page)
+  const antes = await posicoes(page)
+  await arrastar(page, 'calendario', 5, 0, false)
+  const faixa = page.locator('[data-recusa="faixa"]')
+  await expect(faixa).toBeVisible()
+  const caixaFaixa = await faixa.boundingBox()
+  const caixaGrade = await page.locator('[data-colunas="4"]').boundingBox()
+  if (!caixaFaixa || !caixaGrade) throw new Error('sem caixa')
+  expect(caixaFaixa.x + caixaFaixa.width).toBeCloseTo(caixaGrade.x + caixaGrade.width, 0)
+  const aviso = await page.locator('[data-recusa-aviso]').boundingBox()
+  if (!aviso) throw new Error('sem aviso')
+  expect(aviso.x + aviso.width).toBeLessThan(caixaFaixa.x)
+  await page.mouse.up()
+  expect(await posicoes(page)).toEqual(antes)
+})
+
 test('arrastar: a célula de origem mantém a altura enquanto a prévia encolhe o grid', async ({
   page,
 }) => {

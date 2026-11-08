@@ -48,6 +48,10 @@ test.describe('larguras', () => {
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await entrarComo(page, 'advogado')
+    await expect(page.getByRole('button', { name: 'Recolher menu' })).toBeVisible()
+    // Com o menu de 280px, sobram cerca de 912px: acima dos 880px das 4 colunas (5.3).
+    const largura = (await grade(page).boundingBox())?.width ?? 0
+    expect(largura, `contêiner de ${largura}px`).toBeGreaterThanOrEqual(880)
     await expect(grade(page)).toHaveAttribute('data-colunas', '4')
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
   })
