@@ -116,4 +116,26 @@ describe('pnpm indicadores', () => {
     expect(resumo.get('Prazos de hoje')).toBe('1')
     expect(resumo.get('AGC nos próximos 7 dias')).toBe('2026-11-13 · Grupo Lontra Azul')
   })
+
+  it('QDR-01/QDR-02/QDR-04 · imprime os números dos quadros 1×1 (INI-06)', () => {
+    expect(Object.fromEntries(bloco('Prazos em aberto por urgência'))).toEqual({
+      'Em aberto': '19',
+      Vencidos: '3',
+      Hoje: '1',
+      'De D+1 a D+7': '1',
+      'De D+8 a D+30': '6',
+      Depois: '8',
+    })
+    expect(Object.fromEntries(bloco('Próxima AGC agendada'))).toEqual({
+      Processo: 'Grupo Lontra Azul',
+      '1ª convocação': '2026-11-13',
+      '2ª convocação': '2026-11-20',
+    })
+    expect(Object.fromEntries(bloco('Pedidos de crédito por status'))).toEqual({
+      Pendentes: '8',
+      Acolhidos: '25',
+      Rejeitados: '17',
+      'Processo com mais pendentes': 'Transportes Jabuticaba (5)',
+    })
+  })
 })
