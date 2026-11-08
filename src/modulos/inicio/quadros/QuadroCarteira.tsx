@@ -4,11 +4,11 @@
 // contagem. Cada fase com processo leva a Processos filtrada por tipo e fase (QDR-14, F-08).
 import { Link } from 'react-router'
 import { useTodos } from '../../../dados/contexto'
-import { type Fase, ROTULOS_FASE, type TipoProcesso } from '../../../regras/fases'
+import type { Fase, TipoProcesso } from '../../../regras/fases'
 import { pode } from '../../../regras/permissoes'
 import { juntarClasses } from '../../../ui/classes'
 import { useSessao } from '../../entrada/sessao'
-import { ROTULOS_TIPO } from '../../processos/rotulos'
+import { plural, ROTULOS_TIPO } from '../../processos/rotulos'
 import { type CarteiraDoTipo, carteiraPorFase, type FaseDaCarteira } from '../indicadores'
 import { CATALOGO } from '../montagem'
 import { Quadro, type Variante } from './Quadro'
@@ -27,14 +27,11 @@ const ROTULOS_CURTOS: Partial<Record<Fase, string>> = {
   'plano-apresentado': 'Plano',
   'prazo-objecoes': 'Objeções',
   'plano-homologado': 'Homologado',
-  'quadro-credores': 'Quadro de credores',
   'realizacao-ativo': 'Realização',
 }
 
 export const VAZIO_CARTEIRA = 'Nenhum processo na carteira'
 export const ERRO_CARTEIRA = 'Não foi possível carregar os processos.'
-
-const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
 
 /** "5 ativas · 1 encerrada", como no canvas; sem encerradas, só as ativas. */
 export function resumoDoTipo(carteira: Pick<CarteiraDoTipo, 'ativos' | 'encerrados'>): string {
@@ -144,7 +141,7 @@ function CelulaDaFase({
         {fase.quantidade}
       </b>
       <span className={estilos.nome} aria-hidden="true">
-        {ROTULOS_CURTOS[fase.fase] ?? ROTULOS_FASE[fase.fase]}
+        {ROTULOS_CURTOS[fase.fase] ?? fase.rotulo}
       </span>
     </>
   )
