@@ -2,6 +2,7 @@
 // seed com as datas do relógio fixo dos e2e (2026-11-07 10:00) e imprime, por bloco e com rótulo, o
 // que as funções reais de `indicadores.ts` devolvem. É a fonte única desses números: nada de cálculo
 // avulso fora do código do app. Cálculo novo em `indicadores.ts` entra também aqui.
+import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
@@ -104,7 +105,8 @@ export function formatarBlocos(blocos: readonly Bloco[], hoje: DataIso): string 
   return partes.join('\n')
 }
 
-// Só imprime quando roda como script; o teste importa as funções.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Só imprime quando roda como script; o teste importa as funções. O `import.meta.url` vem com os
+// links simbólicos resolvidos, o `argv[1]` não: compara pelo caminho real.
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   console.log(formatarBlocos(blocosDeIndicadores(tabelasDoSeed(HOJE_FIXO), HOJE_FIXO), HOJE_FIXO))
 }

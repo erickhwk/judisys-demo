@@ -1,6 +1,8 @@
 // `pnpm indicadores` (SDD-INI §10): roda o script de verdade e confere os números do topo e o
 // passivo por classe contra a conta do teste do dashboard (DSH-01), feita aqui à mão sobre o seed.
 import { execFileSync } from 'node:child_process'
+import { mkdtempSync, rmSync, symlinkSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { TabelasSeed } from '../src/dados/carga'
@@ -41,6 +43,22 @@ function bloco(titulo: string): Map<string, string> {
 const centavos = (valor: string | undefined) => Number(/^(\d+) centavos/.exec(valor ?? '')?.[1])
 
 describe('pnpm indicadores', () => {
+  it('imprime também quando o caminho do script passa por um link simbólico', () => {
+    const pasta = mkdtempSync(join(tmpdir(), 'indicadores-'))
+    try {
+      const link = join(pasta, 'repo')
+      symlinkSync(raiz, link)
+      const viaLink = execFileSync(
+        join(raiz, 'node_modules', '.bin', 'tsx'),
+        [join(link, 'scripts', 'indicadores.ts')],
+        { cwd: raiz, encoding: 'utf8' },
+      )
+      expect(viaLink).toBe(saida)
+    } finally {
+      rmSync(pasta, { recursive: true, force: true })
+    }
+  }, 60_000)
+
   it(`usa o relógio fixo dos e2e (${HOJE_FIXO})`, () => {
     expect(saida.split('\n')[0]).toBe('Indicadores do seed com hoje = 2026-11-07')
   })
