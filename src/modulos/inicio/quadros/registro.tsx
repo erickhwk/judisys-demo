@@ -12,6 +12,7 @@
 import type { ComponentType } from 'react'
 import type { IdQuadro } from '../montagem'
 import type { Variante } from './Quadro'
+import { QuadroCarteira } from './QuadroCarteira'
 import { provisorio } from './QuadroProvisorio'
 
 export interface PropsDoQuadro {
@@ -38,5 +39,5 @@ export const QUADROS: Readonly<Record<IdQuadro, ComponentType<PropsDoQuadro>>> =
   classes: provisorio('classes'),
 
   // INI-09 · carteira por fase (4×1)
-  carteira: provisorio('carteira'),
+  carteira: QuadroCarteira,
 }
