@@ -29,8 +29,10 @@ test('PER-01 · entrar como analista vai ao início e o menu da conta mostra nom
   await expect(painel.getByText('Lia Campos', { exact: true })).toBeVisible()
   await expect(painel.getByText('Analista', { exact: true })).toBeVisible()
   // Analista não vê Usuários no menu (RF-40: sem permissão, escondido).
-  await expect(page.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
-  await expect(page.getByRole('link', { name: 'Logs' })).toBeVisible()
+  // No menu: o quadro Atividade recente do início também tem um link "Logs" (INI-03).
+  const menu = page.getByRole('complementary', { name: 'Menu' })
+  await expect(menu.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
+  await expect(menu.getByRole('link', { name: 'Logs' })).toBeVisible()
 })
 
 test('PER-02 · trocar de papel limpa a sessão e volta ao login', async ({ page }) => {
@@ -107,7 +109,10 @@ test('moldura: faixa da demo, link do WhatsApp e rodapé com a Draft', async ({ 
 test('celular: o menu lateral abre como gaveta e fecha ao navegar', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await entrarComo(page, 'aj')
-  const processos = page.getByRole('link', { name: 'Processos' })
+  // No menu: os quadros do início também têm links "Processos" (INI-03).
+  const processos = page.getByRole('complementary', { name: 'Menu' }).getByRole('link', {
+    name: 'Processos',
+  })
   await expect(processos).toBeHidden()
   const abrirMenu = page.getByRole('button', { name: 'Abrir menu' })
   // Teclado: o foco entra na gaveta e, com Esc, volta ao botão que a abriu.
