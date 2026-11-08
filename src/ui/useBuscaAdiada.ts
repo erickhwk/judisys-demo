@@ -8,7 +8,8 @@ export const ATRASO_BUSCA_MS = 250
 
 /**
  * Devolve o texto do campo, o seu setter e o `limpar`. `valor` é a busca que está na URL; `gravar`
- * a põe lá. O `limpar` zera o campo e descarta a gravação pendente (AJ-18); quem chama limpa a URL.
+ * a põe lá. O `limpar` zera o campo, e o texto que esperava a pausa não chega à URL (AJ-18); quem
+ * chama limpa a URL no mesmo handler, e é essa mudança que cancela também uma gravação de '' pendente.
  * Mudança na URL que não veio daqui (voltar, "Limpar busca") volta para o campo; o eco das
  * próprias gravações não, para não apagar o que se digitou enquanto elas chegavam.
  */
