@@ -31,6 +31,8 @@ export interface PropsColunas {
 
 /** Largura da coluna em relação à faixa dela (o resto é o vão). */
 const OCUPACAO = 0.6
+/** Largura de cada faixa no viewBox (a coluna e o vão dela). */
+const FAIXA = 10
 
 export function Colunas({
   descricao,
@@ -41,8 +43,9 @@ export function Colunas({
 }: PropsColunas) {
   const idTitulo = useId()
   const proporcoes = proporcoesPeloMaximo(colunas.map((c) => c.valor))
-  const largura = Math.max(1, colunas.length) * 10
-  const grade = { gridTemplateColumns: `repeat(${Math.max(1, colunas.length)}, minmax(0, 1fr))` }
+  const faixas = Math.max(1, colunas.length)
+  const largura = faixas * FAIXA
+  const grade = { gridTemplateColumns: `repeat(${faixas}, minmax(0, 1fr))` }
   return (
     <div className={estilos.colunas} data-grafico="colunas">
       <div className={estilos.areaColunas} style={{ height: altura }}>
@@ -61,9 +64,9 @@ export function Colunas({
               <rect
                 key={coluna.rotulo}
                 data-coluna={i}
-                x={i * 10 + (10 * (1 - OCUPACAO)) / 2}
+                x={i * FAIXA + (FAIXA * (1 - OCUPACAO)) / 2}
                 y={100 - alturaColuna}
-                width={10 * OCUPACAO}
+                width={FAIXA * OCUPACAO}
                 height={alturaColuna}
                 fill={corDoTom(coluna.tom ?? (coluna.destaque ? 'serie-2' : 'serie-1'))}
               />

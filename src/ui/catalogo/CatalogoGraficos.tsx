@@ -23,9 +23,10 @@ const MESES = ['dez', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 's
 const PUBLICADOS = [1, 5, 3, 1, 3, 0, 3, 5, 5, 8, 8, 1]
 const CUMPRIDOS = [3, 2, 2, 3, 5, 2, 1, 2, 5, 4, 6, 5]
 
+const PICO = Math.max(...PUBLICADOS)
 const colunas = MESES.map((rotulo, i) => {
   const valor = PUBLICADOS[i] ?? 0
-  return { rotulo, valor, destaque: valor === Math.max(...PUBLICADOS) }
+  return { rotulo, valor, destaque: PICO > 0 && valor === PICO }
 })
 const pontos = MESES.map((rotulo, i) => ({ rotulo, valor: CUMPRIDOS[i] ?? 0 }))
 const recorde = CUMPRIDOS.indexOf(Math.max(...CUMPRIDOS))
