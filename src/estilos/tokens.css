@@ -21,6 +21,9 @@
 
   /* Laranja da marca da Draft (site draft.dev.br): só no hover da marca no rodapé */
   --cor-draft-laranja: #ff5a36;
+
+  /* Texto e borda no papel (blocos @media print dos componentes): a impressão é sempre clara */
+  --cor-impressao-texto: #000000;
   --cor-dourado-200: #f0cf8e;
   --cor-dourado-700: #7f5a17;
   --cor-dourado-600: #a9791f;

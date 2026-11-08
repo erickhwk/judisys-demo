@@ -135,7 +135,7 @@
   .tabela td {
     padding: 6px 8px;
     height: auto;
-    color: #000000;
+    color: var(--cor-impressao-texto);
     background: none;
   }
 }
