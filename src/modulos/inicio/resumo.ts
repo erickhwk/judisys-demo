@@ -24,7 +24,8 @@ export function primeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? ''
 }
 
-function maiuscula(texto: string): string {
+/** Primeira letra maiúscula ("novembro de 2026" → "Novembro de 2026"). */
+export function maiuscula(texto: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1)
 }
 

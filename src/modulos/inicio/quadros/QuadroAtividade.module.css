@@ -1,0 +1,92 @@
+/* Atividade recente (Q-06), conforme a ficha "atividade" do canvas: avatar com as iniciais, quem e
+   quando na primeira linha, o quê e onde na segunda. Nos 368px do desktop e do tablet, cada ação
+   cabe em duas linhas (a segunda com reticências); no celular, a frase quebra inteira. Em unidade
+   estreita, a hora e o avatar saem para o nome e o processo caberem (regras no fim). */
+
+.linha {
+  grid-template-columns: 26px minmax(0, 1fr);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cor-azul-claro);
+  color: var(--cor-texto);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.topo {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.quem {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  color: var(--cor-texto);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.quando {
+  flex: none;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+}
+
+.frase {
+  overflow: hidden;
+  color: var(--cor-texto-forte);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.frase b {
+  font-weight: 600;
+  color: var(--cor-texto);
+}
+
+a:hover .frase b {
+  text-decoration: underline;
+}
+
+[data-variante="celular"] .frase {
+  white-space: normal;
+}
+
+/* Até 260px de lista (unidade de cerca de 292px), a hora sai; até 200px (unidade de cerca de
+   232px), sai também o avatar. Assim o nome cabe ao lado da data. */
+@container (max-width: 260px) {
+  .hora {
+    display: none;
+  }
+}
+
+@container (max-width: 200px) {
+  .linha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .avatar {
+    display: none;
+  }
+}

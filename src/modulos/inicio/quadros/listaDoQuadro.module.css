@@ -1,0 +1,91 @@
+/* Lista dos quadros 1×2 (INI-07: Próximos prazos, Atividade recente e Últimos informes), conforme
+   as fichas do canvas: linhas separadas por um fio, cada uma levando ao registro. No desktop e no
+   tablet a altura do quadro é fixa (368px): as linhas dividem a altura por igual, então a lista
+   ocupa o corpo inteiro com 6 (ou 5) linhas de duas ou três linhas de texto em qualquer unidade de
+   208 a 432px. No celular, a altura é livre e as linhas ficam no tamanho do conteúdo. */
+
+.lista {
+  container-type: inline-size;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  border-top: 1px solid var(--cor-borda-linha);
+}
+
+[data-variante="celular"] .item {
+  flex: none;
+}
+
+/* A linha inteira é o alvo do link (ou o texto, sem permissão de leitura). */
+.linha {
+  display: grid;
+  align-items: start;
+  gap: 10px;
+  padding: 6px 0;
+  color: var(--cor-texto);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+[data-variante="celular"] .linha {
+  padding: 9px 0;
+}
+
+a.linha:focus-visible {
+  outline: var(--foco-contorno);
+  outline-offset: 2px;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.principal {
+  overflow: hidden;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.apoio {
+  overflow: hidden;
+  font-size: 11.5px;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Rodapé que leva à origem com o que não coube ("+ 13 prazos na agenda"). */
+.rodape {
+  flex: none;
+  padding-top: 8px;
+  border-top: 1px solid var(--cor-borda-linha);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cor-azul-900);
+  text-decoration: none;
+}
+
+a.rodape:hover {
+  text-decoration: underline;
+}
+
+a.linha:hover .principal {
+  text-decoration: underline;
+}

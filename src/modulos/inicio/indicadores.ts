@@ -257,13 +257,17 @@ export function rotuloDoMes(mes: string, comAno = false): string {
 // ---------------------------------------------------------------------------------------------
 // Listas (RF-10, DSH-02, DSH-03)
 
-/** Os 8 prazos em aberto mais próximos: vencidos primeiro, depois por data (DSH-03). */
-export function proximosPrazos(prazos: readonly Prazo[], hoje: DataIso): Prazo[] {
+/** Os prazos em aberto mais próximos (8, ou `limite`): vencidos primeiro, depois por data (DSH-03). */
+export function proximosPrazos(
+  prazos: readonly Prazo[],
+  hoje: DataIso,
+  limite: number = LIMITE_PRAZOS,
+): Prazo[] {
   // Por vencimento, os vencidos (antes de hoje) já vêm na frente.
   return prazos
     .filter((p) => noPeriodo(p, 'abertos', hoje))
     .sort(compararPrazos)
-    .slice(0, LIMITE_PRAZOS)
+    .slice(0, limite)
 }
 
 export interface ProximaAgc {
@@ -387,6 +391,119 @@ export function ultimosInformes(informes: readonly Informe[]): Informe[] {
   return [...informes]
     .sort((a, b) => b.data.localeCompare(a.data) || b.criadoEm.localeCompare(a.criadoEm))
     .slice(0, LIMITE_INFORMES)
+}
+
+// ---------------------------------------------------------------------------------------------
+// INI-07 · quadros 1×2: próximos prazos, calendário do mês e atividade recente (SDD-INI §5.7, C-05)
+
+/** Linhas do quadro Próximos prazos (C-05: 6, no lugar dos 8 do dashboard) e da Atividade recente. */
+export const LIMITE_PROXIMOS_DO_QUADRO = 6
+export const LIMITE_ATIVIDADE_DO_QUADRO = 6
+
+export interface ProximosDoQuadro {
+  prazos: Prazo[]
+  /** Os prazos em aberto que não couberam: o rodapé "+ 13 prazos na agenda" (QDR-05). */
+  restantes: number
+}
+
+/** Os 6 próximos prazos em aberto, na ordem da `proximosPrazos`, e quantos sobram na agenda. */
+export function proximosDoQuadro(prazos: readonly Prazo[], hoje: DataIso): ProximosDoQuadro {
+  const abertos = prazos.filter((p) => noPeriodo(p, 'abertos', hoje)).length
+  const mostrados = proximosPrazos(prazos, hoje, LIMITE_PROXIMOS_DO_QUADRO)
+  return { prazos: mostrados, restantes: abertos - mostrados.length }
+}
+
+/** Marca de um dia no calendário do mês (Q-05): a cor da célula. */
+export type MarcaDoDia = 'vencido' | 'hoje' | 'prazo' | 'agc'
+
+/** No mesmo dia, vale a marca mais urgente: vencido e hoje antes da AGC, a AGC antes do prazo. */
+const PESO_DA_MARCA: Readonly<Record<MarcaDoDia, number>> = {
+  vencido: 3,
+  hoje: 3,
+  agc: 2,
+  prazo: 1,
+}
+
+/** Uma convocação de AGC no calendário: a data e qual das duas é. */
+export interface ConvocacaoDoDia {
+  data: DataIso
+  convocacao: 1 | 2
+}
+
+/**
+ * Datas de AGC que o calendário marca: a convocação instalada, se houve (mesmo de AGC encerrada: ela
+ * aconteceu naquele dia); senão, as convocações de hoje em diante da AGC não encerrada (a 1ª que
+ * passou sem instalar não acontece mais), como na `proximasAgcs`.
+ */
+export function datasDeAgc(agc: Agc, hoje: DataIso): ConvocacaoDoDia[] {
+  const primeira = { data: agc.dataPrimeira, convocacao: 1 } as const
+  const segunda = { data: agc.dataSegunda, convocacao: 2 } as const
+  if (agc.convocacaoInstalada) return [agc.convocacaoInstalada === 1 ? primeira : segunda]
+  if (agc.status === 'encerrada') return []
+  // As duas no mesmo dia (o schema permite): um evento só, o da 1ª.
+  const datas = agc.dataSegunda === agc.dataPrimeira ? [primeira] : [primeira, segunda]
+  return datas.filter((c) => c.data >= hoje)
+}
+
+/**
+ * Dia → marca, no mês de `hoje` (Q-05, QDR-06). Prazos em aberto: antes de hoje, vencido; hoje,
+ * hoje; depois, prazo (os cumpridos ficam de fora). AGCs pelas `datasDeAgc`.
+ */
+export function prazosDoMes(
+  prazos: readonly Prazo[],
+  agcs: readonly Agc[],
+  hoje: DataIso,
+): Map<DataIso, MarcaDoDia> {
+  const mes = hoje.slice(0, 7)
+  const marcas = new Map<DataIso, MarcaDoDia>()
+  const marcar = (data: DataIso, marca: MarcaDoDia) => {
+    if (data.slice(0, 7) !== mes) return
+    const atual = marcas.get(data)
+    if (!atual || PESO_DA_MARCA[marca] > PESO_DA_MARCA[atual]) marcas.set(data, marca)
+  }
+  for (const prazo of prazos) {
+    if (!noPeriodo(prazo, 'abertos', hoje)) continue
+    const v = prazo.vencimento
+    marcar(v, v < hoje ? 'vencido' : v === hoje ? 'hoje' : 'prazo')
+  }
+  for (const agc of agcs) for (const { data } of datasDeAgc(agc, hoje)) marcar(data, 'agc')
+  return new Map([...marcas].sort(([a], [b]) => a.localeCompare(b)))
+}
+
+export type DestaqueDoMes =
+  | { tipo: 'prazo'; data: DataIso; prazo: Prazo; outros: number }
+  | { tipo: 'agc'; data: DataIso; agc: Agc; convocacao: 1 | 2; outros: number }
+
+/**
+ * O cartão do pé do calendário: o primeiro dia de hoje até o fim do mês com prazo em aberto ou
+ * AGC; no dia, o primeiro prazo (pela ordem da agenda) e quantos outros eventos há nele. `null`
+ * quando o resto do mês está livre.
+ */
+export function destaqueDoMes(
+  prazos: readonly Prazo[],
+  agcs: readonly Agc[],
+  hoje: DataIso,
+): DestaqueDoMes | null {
+  const mes = hoje.slice(0, 7)
+  const noMes = (data: DataIso) => data >= hoje && data.slice(0, 7) === mes
+  const abertos = prazos
+    .filter((p) => noPeriodo(p, 'abertos', hoje) && noMes(p.vencimento))
+    .sort(compararPrazos)
+  const convocacoes = agcs
+    .flatMap((agc) => datasDeAgc(agc, hoje).map((c) => ({ ...c, agc })))
+    .filter((c) => noMes(c.data))
+    .sort((a, b) => a.data.localeCompare(b.data) || a.agc.id.localeCompare(b.agc.id))
+  const [prazo] = abertos
+  const [convocacao] = convocacoes
+  const dia = [prazo?.vencimento, convocacao?.data].filter((d) => d !== undefined).sort()[0]
+  if (dia === undefined) return null
+  const eventos =
+    abertos.filter((p) => p.vencimento === dia).length +
+    convocacoes.filter((c) => c.data === dia).length
+  if (prazo && prazo.vencimento === dia)
+    return { tipo: 'prazo', data: dia, prazo, outros: eventos - 1 }
+  if (!convocacao) return null
+  return { ...convocacao, tipo: 'agc', outros: eventos - 1 }
 }
 
 // ---------------------------------------------------------------------------------------------

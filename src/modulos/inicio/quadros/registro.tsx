@@ -13,13 +13,16 @@ import type { ComponentType } from 'react'
 import type { IdQuadro } from '../montagem'
 import type { Variante } from './Quadro'
 import { QuadroAgc } from './QuadroAgc'
+import { QuadroAtividade } from './QuadroAtividade'
+import { QuadroCalendario } from './QuadroCalendario'
 import { QuadroCarteira } from './QuadroCarteira'
 import { QuadroClasses } from './QuadroClasses'
 import { QuadroCumpridos } from './QuadroCumpridos'
+import { QuadroInformes } from './QuadroInformes'
 import { QuadroPassivo } from './QuadroPassivo'
 import { QuadroPedidos } from './QuadroPedidos'
 import { QuadroPrazos } from './QuadroPrazos'
-import { provisorio } from './QuadroProvisorio'
+import { QuadroProximos } from './QuadroProximos'
 import { QuadroPublicados } from './QuadroPublicados'
 
 export interface PropsDoQuadro {
@@ -34,10 +37,10 @@ export const QUADROS: Readonly<Record<IdQuadro, ComponentType<PropsDoQuadro>>> =
   pedidos: QuadroPedidos,
 
   // INI-07 · quadros 1×2
-  proximos: provisorio('proximos'),
-  calendario: provisorio('calendario'),
-  atividade: provisorio('atividade'),
-  informes: provisorio('informes'),
+  proximos: QuadroProximos,
+  calendario: QuadroCalendario,
+  atividade: QuadroAtividade,
+  informes: QuadroInformes,
 
   // INI-08 · quadros 2×1
   passivo: QuadroPassivo,

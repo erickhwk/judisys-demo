@@ -70,6 +70,10 @@ const PARES: readonly (readonly [string, string])[] = [
   ['--cor-azul-900', '--cor-azul-claro'],
   ['--cor-azul-900', '--cor-dourado-claro'],
   ['--cor-texto', '--cor-azul-claro'],
+  // Pé do calendário do início (INI-07): o próximo evento em azul-claro, o de hoje em dourado-claro
+  ['--cor-texto-forte', '--cor-azul-claro'],
+  ['--cor-texto', '--cor-dourado-claro'],
+  ['--cor-texto-forte', '--cor-dourado-claro'],
   ['--cor-texto-forte', '--cor-trilho'],
   ['--cor-azul-800', '--cor-azul-claro'],
   ['--cor-texto-invertido', '--cor-azul-900'],
