@@ -23,7 +23,7 @@ type Informe = Tipos['informes']
 export const LIMITE_INFORMES = 5
 
 /** Processo ativo: fora das fases finais (DSH-05, T-27). */
-export function ehAtivo(processo: Pick<Processo, 'faseAtual'>): boolean {
+function ehAtivo(processo: Pick<Processo, 'faseAtual'>): boolean {
   return !ehFaseFinal(processo.faseAtual)
 }
 
@@ -78,7 +78,7 @@ export interface PassivoDaClasse {
   valor: number
 }
 
-/** Relação do AJ das RJs ativas, somada por classe do RF-26 (mesma base do passivo do topo). */
+/** Relação do AJ das RJs ativas, somada por classe do RF-26 (a mesma base do `passivoPorProcesso`). */
 export function passivoPorClasse(
   processos: readonly Processo[],
   credores: readonly Credor[],
@@ -214,9 +214,6 @@ export function rotuloDoMes(mes: string, comAno = false): string {
   const nome = MESES_CURTOS[Number(mes.slice(5, 7)) - 1] ?? mes
   return comAno ? `${nome}/${mes.slice(2, 4)}` : nome
 }
-
-// ---------------------------------------------------------------------------------------------
-// Listas (RF-10, DSH-02, DSH-03)
 
 // ---------------------------------------------------------------------------------------------
 // INI-06 · quadros 1×1: prazos em aberto (Q-01), próxima AGC (Q-02) e pedidos de crédito (Q-03)

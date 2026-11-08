@@ -1,5 +1,5 @@
 // Q-08 · Passivo sob administração (SDD-INI §5.7, QDR-09): o total da relação do AJ dos processos
-// ativos no cabeçalho (o mesmo dos números do topo) e as barras dos quatro maiores. No celular, nome
+// ativos no cabeçalho e as barras dos quatro maiores. No celular, nome
 // e valor em cima e a barra embaixo. Os ativos ainda sem relação ficam numa nota, fora da soma.
 import { useTodos } from '../../../dados/contexto'
 import { formatarMoedaCurta } from '../../../regras/moeda'

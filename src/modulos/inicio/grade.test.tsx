@@ -1,6 +1,6 @@
 // Grade do início em HTML (SDD-INI §7.3, GRD; PRS-12; INV-06). No HTML do servidor não há layout:
-// a largura do contêiner é injetada (`larguraForcada`, SDD §10). Os quadros desta etapa são os
-// provisórios (moldura e título), então o armazenamento pode ficar vazio.
+// a largura do contêiner é injetada (`larguraForcada`, SDD §10). O armazenamento fica vazio (cada
+// quadro mostra o estado vazio): aqui vale a posição dos quadros, não o corpo.
 import { afterEach, describe, expect, it } from 'vitest'
 import { ArmazenamentoMemoria } from '../../dados/memoria'
 import { PAPEIS, type Papel } from '../../regras/permissoes'

@@ -35,6 +35,18 @@ export async function trocarPara(page: Page, papel: keyof typeof PAPEIS): Promis
   await expect(tituloDoInicio(page)).toBeVisible()
 }
 
+/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
+export async function resetarPelaFaixa(page: Page): Promise<void> {
+  await page
+    .getByRole('region', { name: 'Demonstração' })
+    .getByRole('button', { name: 'Resetar demo' })
+    .click()
+  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
+  await expect(confirmacao).toBeVisible()
+  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
+  await expect(confirmacao).toBeHidden()
+}
+
 // --- Credor do vitrine com impugnação pendente --------------------------------------------------
 
 /** Isadora Costa Batista, do vitrine: impugnação pendente e sem valor no QGC (SED-04). */

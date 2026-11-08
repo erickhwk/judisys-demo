@@ -27,7 +27,7 @@ import {
   padraoDoPapel,
   primeiroLugarLivre,
 } from './montagem'
-import { gravarMontagem, lerMontagem, useGeracaoDasMontagens } from './persistencia'
+import { gravarMontagem, lerMontagem } from './persistencia'
 import { fraseDoResumo, horaDoCarimbo } from './resumo'
 import { useLargura } from './useLargura'
 
@@ -38,16 +38,9 @@ export interface PropsInicio {
 
 export function Inicio({ larguraForcada }: PropsInicio) {
   const { sessao } = useSessao()
-  const geracao = useGeracaoDasMontagens()
   if (!sessao) return null
-  // Por usuário: trocar de papel remonta a tela com a montagem do outro; o reset, com o padrão.
-  return (
-    <InicioDoUsuario
-      key={`${sessao.usuarioId}:${geracao}`}
-      sessao={sessao}
-      larguraForcada={larguraForcada}
-    />
-  )
+  // Por usuário: trocar de papel remonta a tela com a montagem do outro.
+  return <InicioDoUsuario key={sessao.usuarioId} sessao={sessao} larguraForcada={larguraForcada} />
 }
 
 /** Aviso de quando o contêiner encolhe para menos de 4 colunas no meio da edição (PRS-13). */

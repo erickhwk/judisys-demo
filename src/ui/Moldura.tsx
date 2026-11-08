@@ -16,6 +16,11 @@ export const BancoFechado = createContext<{ fechado: boolean; marcar: () => void
 interface ValorMoldura {
   /** Abre a confirmação do reset (RF-02). */
   pedirReset: () => void
+  /**
+   * Quantos resets deram certo nesta aba. Na `key` da tela, faz ela remontar: o reset volta a `/`, e
+   * a tela que já estava ali (o início, com a montagem lida ao montar) não veria o seed (MNT-02).
+   */
+  resets: number
 }
 
 const Contexto = createContext<ValorMoldura | null>(null)
@@ -32,6 +37,7 @@ export function MolduraProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
   const navegar = useNavigate()
   const [aberto, setAberto] = useState(false)
+  const [resets, setResets] = useState(0)
   const [ocupado, setOcupado] = useState(false)
   const [falhou, setFalhou] = useState(false)
 
@@ -50,6 +56,7 @@ export function MolduraProvider({ children }: { children: ReactNode }) {
       await resetar()
       // Depois do reset, tudo o que estava em cache é do banco antigo (T-22, CAR-04).
       await queryClient.invalidateQueries()
+      setResets((n) => n + 1)
       setAberto(false)
       navegar('/')
     } catch (erro) {
@@ -63,7 +70,7 @@ export function MolduraProvider({ children }: { children: ReactNode }) {
     }
   }, [resetar, queryClient, navegar, bancoFechado])
 
-  const valor = useMemo(() => ({ pedirReset }), [pedirReset])
+  const valor = useMemo(() => ({ pedirReset, resets }), [pedirReset, resets])
   return (
     <Contexto.Provider value={valor}>
       {children}

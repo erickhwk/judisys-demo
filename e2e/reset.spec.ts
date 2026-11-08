@@ -10,6 +10,7 @@ import {
   type Linha,
   lerTabela,
   pedidosDeIsadora,
+  resetarPelaFaixa,
   tituloDoInicio,
 } from './apoio'
 
@@ -183,18 +184,6 @@ async function entrarEAlterar(page: Page): Promise<{ id: string; apelido: unknow
   if (!processo) throw new Error('seed sem processos')
   await gravarLinha(page, 'processos', { ...processo, apelido: 'Alterado na demo' })
   return { id: processo.id, apelido: processo.apelido }
-}
-
-/** Reseta a demo pela faixa e confirma; espera o diálogo fechar. */
-async function resetarPelaFaixa(page: Page): Promise<void> {
-  await page
-    .getByRole('region', { name: 'Demonstração' })
-    .getByRole('button', { name: 'Resetar demo' })
-    .click()
-  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
-  await expect(confirmacao).toBeVisible()
-  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-  await expect(confirmacao).toBeHidden()
 }
 
 test('CAR-04 · Resetar demo → confirmar volta ao seed e ao início', async ({ page }) => {

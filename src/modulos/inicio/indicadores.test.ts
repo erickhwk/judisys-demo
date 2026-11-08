@@ -1,9 +1,8 @@
 // Regras do início (antes dashboard: RF-07 a RF-10, SDD §7.7) com dados pequenos e "hoje" por parâmetro.
 import { describe, expect, it } from 'vitest'
 import type { Tipos } from '../../dados/schemas'
-import { passivoPorClasse, proximosDoQuadro, ultimosInformes } from './indicadores'
+import { passivoPorClasse, ultimosInformes } from './indicadores'
 
-const HOJE = '2026-11-07'
 const base = {
   escritorioId: 'esc-1',
   criadoEm: '2026-11-01T10:00',
@@ -47,18 +46,6 @@ function credor(
   }
 }
 
-function prazo(id: string, vencimento: string, status: 'aberto' | 'cumprido' = 'aberto') {
-  return {
-    ...base,
-    id,
-    processoId: 'prc-1',
-    titulo: id,
-    vencimento,
-    origem: 'manual',
-    status,
-  } satisfies Tipos['prazos']
-}
-
 const PROCESSOS = [
   processo('prc-1', 'rj', 'plano-apresentado'),
   processo('prc-2', 'falencia', 'decretada'),
@@ -83,26 +70,6 @@ describe('passivoPorClasse (RF-09)', () => {
       { classe: 'me-epp', rotulo: 'IV · ME/EPP', valor: 0 },
       { classe: 'nao-sujeito', rotulo: 'Não sujeito', valor: 0 },
     ])
-  })
-})
-
-describe('proximosDoQuadro (RF-10)', () => {
-  it('DSH-03 · 6 em aberto, vencidos primeiro, depois por data; o resto conta na agenda', () => {
-    const prazos = [
-      prazo('d+20', '2026-11-27'),
-      prazo('d-1', '2026-11-06'),
-      prazo('d+1', '2026-11-08'),
-      prazo('d-30', '2026-10-08'),
-      prazo('d0', HOJE),
-      prazo('d+3', '2026-11-10'),
-      prazo('d+5', '2026-11-12'),
-      prazo('d+9', '2026-11-16'),
-      prazo('d+60', '2027-01-06'),
-      prazo('cumprido', '2026-11-07', 'cumprido'),
-    ]
-    const { prazos: mostrados, restantes } = proximosDoQuadro(prazos, HOJE)
-    expect(mostrados.map((p) => p.id)).toEqual(['d-30', 'd-1', 'd0', 'd+1', 'd+3', 'd+5'])
-    expect(restantes).toBe(3)
   })
 })
 

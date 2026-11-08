@@ -23,7 +23,7 @@ const PONTO_GAVETA = 900
 
 export function Layout() {
   const { sessao, sair } = useSessao()
-  const { pedirReset } = useMoldura()
+  const { pedirReset, resets } = useMoldura()
   const navegar = useNavigate()
   const idMenu = useId()
   const [recolhido, setRecolhido] = useState(false)
@@ -129,7 +129,7 @@ export function Layout() {
               <MenuConta {...conta} variante="avatar" />
             </header>
             <main className={estilos.conteudo}>
-              <Outlet />
+              <Outlet key={resets} />
             </main>
             <Rodape />
           </div>

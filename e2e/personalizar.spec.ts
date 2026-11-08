@@ -3,7 +3,7 @@
 // no fim, o padrão de cada papel e a montagem por usuário (GRD-02, MNT-01, MNT-02). As
 // regras puras do arrasto (coluna pelo ponteiro, recusa, empurrão) estão em arrasto.test.ts.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio, trocarPara } from './apoio'
+import { AGORA, entrarComo, resetarPelaFaixa, tituloDoInicio, trocarPara } from './apoio'
 
 interface Item {
   quadro: string
@@ -486,13 +486,7 @@ test('MNT-02 · Resetar demo apaga as montagens de todos', async ({ page }) => {
   await tirarEConcluir(page, 'Carteira por fase')
   expect(await posicoes(page)).toEqual(sem(PADRAO_AJ, 'carteira'))
 
-  await page
-    .getByRole('region', { name: 'Demonstração' })
-    .getByRole('button', { name: 'Resetar demo' })
-    .click()
-  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
-  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-  await expect(confirmacao).toBeHidden()
+  await resetarPelaFaixa(page)
   await expect(tituloDoInicio(page)).toBeVisible()
   expect(await gravada(page)).toBeNull()
   await expect.poll(() => posicoes(page), { timeout: 5000 }).toEqual(PADRAO_AJ)
