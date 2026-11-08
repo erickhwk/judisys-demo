@@ -106,7 +106,7 @@ export function Catalogo() {
       titulo: 'Tipo',
       largura: '20%',
       celula: (p) => (
-        <Selo forma="pilula" tom={p.tipo === 'Falência' ? 'azul' : 'dourado'}>
+        <Selo forma="pilula" tom={p.tipo === 'Falência' ? 'dourado' : 'azul'}>
           {p.tipo}
         </Selo>
       ),
@@ -198,10 +198,10 @@ export function Catalogo() {
           <Selo tom="alerta">urgente</Selo>
           <Selo tom="perigo">vencido</Selo>
           <Selo>normal</Selo>
-          <Selo forma="pilula" tom="azul">
+          <Selo forma="pilula" tom="dourado">
             Falência
           </Selo>
-          <Selo forma="pilula" tom="dourado">
+          <Selo forma="pilula" tom="azul">
             Recuperação Judicial
           </Selo>
           <Selo forma="pilula" tom="sucesso">
