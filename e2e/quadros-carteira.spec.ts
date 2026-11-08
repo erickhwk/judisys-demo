@@ -57,7 +57,16 @@ test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ p
     await page.setViewportSize({ width: janela, height: 900 })
     await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
     if ('conteiner' in extremo) {
-      // A casca medida em 1440px vale nesta janela: o contêiner é mesmo o extremo pedido.
+      // A casca muda com a largura (a lista do celular tem outras margens): acerta a janela até o
+      // contêiner ser mesmo o extremo pedido.
+      let ajustada = janela
+      for (let tentativa = 0; tentativa < 3; tentativa++) {
+        const largura = (await grade.boundingBox())?.width ?? 0
+        if (Math.abs(largura - extremo.conteiner) <= 1) break
+        ajustada += Math.round(extremo.conteiner - largura)
+        await page.setViewportSize({ width: ajustada, height: 900 })
+      }
+      await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
       const largura = (await grade.boundingBox())?.width ?? 0
       expect(Math.abs(largura - extremo.conteiner), extremo.nome).toBeLessThanOrEqual(1)
     }
