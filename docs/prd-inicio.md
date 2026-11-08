@@ -93,7 +93,7 @@ A **seção 7.1 (Moldura da demo)** continua valendo: a faixa da demo, o "Reseta
 - **RF-07** Abaixo da saudação vai uma frase-resumo calculada, que cita só o que existe, nesta ordem:
   - prazos vencidos, em destaque vermelho;
   - prazos que vencem hoje;
-  - a próxima AGC, se for nos próximos 7 dias ("a AGC do Grupo Lontra Azul é na sexta").
+  - a próxima AGC, se for nos próximos 7 dias ("a AGC de Grupo Lontra Azul é na sexta").
 
   Sem nenhum desses, a frase diz que não há pendências para hoje.
 - **RF-08** No desktop, o cabeçalho tem a busca e o botão **Personalizar**.

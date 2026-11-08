@@ -213,11 +213,11 @@ Todos puros, com `hoje` por parâmetro:
 |---|---|---|---|---|
 | CAB-01 | F | 10h, Otávio | abrir o início | "Bom dia, Otávio" e "Sábado, 7 de novembro" (RF-05, RF-06). |
 | CAB-02 | B | 12h00 e 18h00 | abrir | "Boa tarde" a partir de 12h; "Boa noite" a partir de 18h. |
-| CAB-03 | F | seed | abrir | "3 prazos vencidos, 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta." (RF-07). |
+| CAB-03 | F | seed | abrir | "3 prazos vencidos, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta." (RF-07). |
 | CAB-04 | B | 1 vencido, nenhum hoje, sem AGC em 7 dias | abrir | "1 prazo vencido." (singular, sem as outras partes). |
 | CAB-05 | B | AGC daqui a 8 dias | abrir | O resumo não cita a AGC. |
 | CAB-06 | B | nada vencido, nada hoje, sem AGC | abrir | "Nenhuma pendência para hoje." |
-| CAB-07 | B | AGC amanhã ou hoje | abrir | "…a AGC do X é amanhã" ou "…é hoje". |
+| CAB-07 | B | AGC amanhã ou hoje | abrir | "…a AGC de X é amanhã" ou "…é hoje". |
 
 ### 7.3 Grid — GRD
 
