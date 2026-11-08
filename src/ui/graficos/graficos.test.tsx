@@ -233,6 +233,21 @@ describe('Colunas e Linha: escala e largura', () => {
     expect(html).toContain('points="0,100 50,100 100,100"')
   })
 
+  it('Linha: o rótulo do eixo não sai da área (ponto só, marca perto da ponta)', () => {
+    const umPonto = renderToString(<Linha descricao="l" pontos={[{ rotulo: 'nov', valor: 3 }]} />)
+    expect(umPonto).toContain('left:50%;transform:translateX(-50%)')
+    // Marca no 2º de 5 pontos (x = 25%): a âncora fica a 25% do texto, não no meio dele.
+    const pertoDaPonta = renderToString(
+      <Linha
+        descricao="l"
+        pontos={MESES.slice(0, 5).map((rotulo, i) => ({ rotulo, valor: i === 1 ? 6 : 1 }))}
+        marca={{ indice: 1, rotulo: 'recorde (6)' }}
+      />,
+    )
+    expect(pertoDaPonta).toContain('left:25%;transform:translateX(-25%)')
+    expect(pertoDaPonta).toContain('left:100%;transform:translateX(-100%)')
+  })
+
   it('Linha: sem pontos não quebra', () => {
     const html = renderToString(<Linha descricao="l" pontos={[]} />)
     expect(nomeAcessivel(html)).toBe('l: sem dados')

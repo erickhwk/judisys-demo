@@ -40,7 +40,6 @@ export function Linha({
   const coordenadas = pontosDaLinha(pontos.map((p) => p.valor))
   const marcado = marca ? coordenadas[marca.indice] : undefined
   const noEixo = rotulosNoEixo ?? rotulosPadraoDoEixo(pontos.length, marca?.indice)
-  const ultimo = pontos.length - 1
   return (
     <div className={estilos.linha} data-grafico="linha">
       <div className={estilos.areaLinha} style={{ height: altura }}>
@@ -94,12 +93,11 @@ export function Linha({
         {noEixo.map((i) => {
           const ponto = coordenadas[i]
           if (!ponto) return null
-          const deslocamento = i === 0 ? '0' : i === ultimo ? '-100%' : '-50%'
           return (
             <span
               key={i}
               className={marca?.indice === i ? estilos.rotuloMarca : undefined}
-              style={{ left: `${ponto.x}%`, transform: `translateX(${deslocamento})` }}
+              style={estiloDoRotulo(ponto.x)}
             >
               {marca?.indice === i && marca.rotulo ? marca.rotulo : pontos[i]?.rotulo}
             </span>
@@ -108,4 +106,13 @@ export function Linha({
       </div>
     </div>
   )
+}
+
+/**
+ * Rótulo do eixo no ponto x (%): a âncora anda com o x (começa no ponto na ponta esquerda, centra
+ * no meio, termina no ponto na ponta direita), então o texto nunca sai da área, nem o da marca
+ * perto de uma ponta nem o de um ponto só.
+ */
+export function estiloDoRotulo(x: number) {
+  return { left: `${x}%`, transform: `translateX(-${x}%)` }
 }
