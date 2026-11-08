@@ -11,8 +11,9 @@ import {
   passivoPorClasse,
   proximasAgcs,
   proximosPrazos,
+  resumoDoDia,
   ultimosInformes,
-} from '../src/modulos/dashboard/indicadores'
+} from '../src/modulos/inicio/indicadores'
 import type { DataIso } from '../src/regras/datas'
 import { formatarMoedaCurta } from '../src/regras/moeda'
 import { gerarSeed } from './seed/gerar'
@@ -43,6 +44,7 @@ function dinheiro(centavos: number): string {
 export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[] {
   const topo = numerosDoTopo(tabelas, hoje)
   const classes = passivoPorClasse(tabelas.processos, tabelas.credores)
+  const resumo = resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje)
   const processo = (id: string) => tabelas.processos.find((p) => p.id === id)?.apelido ?? id
   return [
     {
@@ -55,6 +57,17 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         { rotulo: 'Credores', valor: topo.credores },
         { rotulo: 'Prazos vencidos', valor: topo.prazosVencidos },
         { rotulo: 'Prazos nos próximos 7 dias', valor: topo.prazosProximos },
+      ],
+    },
+    {
+      titulo: 'Frase-resumo do início (resumoDoDia)',
+      linhas: [
+        { rotulo: 'Prazos vencidos', valor: resumo.vencidos },
+        { rotulo: 'Prazos de hoje', valor: resumo.hoje },
+        {
+          rotulo: 'AGC nos próximos 7 dias',
+          valor: resumo.agc ? `${resumo.agc.data} · ${resumo.agc.apelido}` : '(nenhuma)',
+        },
       ],
     },
     {
