@@ -18,7 +18,8 @@
     "e2e": "playwright test",
     "seed": "tsx scripts/gerar-seed.ts",
     "pdfs": "tsx scripts/gerar-pdfs.ts",
-    "favicons": "tsx scripts/gerar-favicons.ts"
+    "favicons": "tsx scripts/gerar-favicons.ts",
+    "indicadores": "tsx scripts/indicadores.ts"
   },
   "packageManager": "pnpm@11.0.9",
   "dependencies": {
