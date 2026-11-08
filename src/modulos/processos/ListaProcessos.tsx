@@ -99,11 +99,13 @@ export function ListaProcessos() {
   }
 
   // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07, AJ-12).
-  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) => mudar({ busca: texto }))
+  const [textoBusca, setTextoBusca, limparTextoBusca] = useBuscaAdiada(busca, (texto) =>
+    mudar({ busca: texto }),
+  )
 
   function limpar() {
     // Zera o campo também quando o texto ainda não chegou à URL.
-    setTextoBusca('')
+    limparTextoBusca()
     setParametros({}, { replace: true })
   }
 

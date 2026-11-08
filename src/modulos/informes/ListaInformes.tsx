@@ -66,11 +66,13 @@ export function ListaInformes() {
   }
 
   // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07, AJ-12).
-  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) => mudar('busca', texto))
+  const [textoBusca, setTextoBusca, limparTextoBusca] = useBuscaAdiada(busca, (texto) =>
+    mudar('busca', texto),
+  )
 
   function limpar() {
     // Zera o campo também quando o texto ainda não chegou à URL.
-    setTextoBusca('')
+    limparTextoBusca()
     const proximos = new URLSearchParams(parametros)
     for (const chave of ['busca', 'categoria', 'processo', 'pagina']) proximos.delete(chave)
     setParametros(proximos, { replace: true })

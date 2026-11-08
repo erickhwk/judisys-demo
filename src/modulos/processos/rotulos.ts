@@ -7,10 +7,13 @@ export const ROTULOS_TIPO: Readonly<Record<TipoProcesso, string>> = {
   falencia: 'Falência',
 }
 
-/** Pílula do tipo, como a "Categoria" de `processos-lista.html`: RJ dourada, falência azul. */
+/**
+ * Pílula do tipo (lista e tela do processo): RJ azul, falência dourada, as mesmas cores da
+ * Carteira por fase do início (INI-09, canvas aprovado), para o tipo não trocar de cor no clique.
+ */
 export const TOM_TIPO: Readonly<Record<TipoProcesso, TomSelo>> = {
-  rj: 'dourado',
-  falencia: 'azul',
+  rj: 'azul',
+  falencia: 'dourado',
 }
 
 export const ROTULOS_CONSOLIDACAO = {
