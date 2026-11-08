@@ -20,6 +20,7 @@ import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
 import { Selo } from '../../ui/Selo'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import { TOM_TIPO } from '../processos/rotulos'
 import estilos from './Empresas.module.css'
 import { useExclusaoEmpresa } from './ExclusaoEmpresa'
@@ -258,7 +259,7 @@ function ProcessosDaEmpresa({ empresaId }: { empresaId: string }) {
           {daEmpresa.map((processo) => (
             <li key={processo.id} className={estilos.processo}>
               <span className={estilos.identificacao}>
-                <Link to={`/processos/${processo.id}/visao-geral`}>{processo.apelido}</Link>
+                <Link to={rotaDoProcesso(processo.id, 'visao-geral')}>{processo.apelido}</Link>
                 <span className={estilos.numero}>{formatarCnj(processo.numeroCnj)}</span>
               </span>
               <span className={estilos.detalhes}>

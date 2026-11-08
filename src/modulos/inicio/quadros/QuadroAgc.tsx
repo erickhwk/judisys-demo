@@ -6,6 +6,7 @@ import { ptBR } from 'date-fns/locale'
 import { useTodos } from '../../../dados/contexto'
 import { type DataIso, diasEntre } from '../../../regras/datas'
 import { hoje as hojeDoRelogio } from '../../../regras/relogio'
+import { rotaDoProcesso } from '../../processos/abas'
 import { proximaAgc } from '../indicadores'
 import { type LinkDoQuadro, Quadro } from './Quadro'
 import estilos from './QuadroAgc.module.css'
@@ -49,7 +50,11 @@ export function QuadroAgc({ variante }: PropsDoQuadro) {
   return (
     <Quadro
       {...comum}
-      link={{ para: `/processos/${agc.processoId}/agc/${agc.id}`, rotulo: 'Abrir', modulo: 'agc' }}
+      link={{
+        para: `${rotaDoProcesso(agc.processoId, 'agc')}/${agc.id}`,
+        rotulo: 'Abrir',
+        modulo: 'agc',
+      }}
     >
       <div className={estilos.corpo}>
         <div className={estilos.topo}>

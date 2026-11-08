@@ -23,6 +23,7 @@ import { Confirmacao } from '../../ui/Confirmacao'
 import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import { useCredor, usePedidosDoCredor, useProcesso, useRelacaoPublicada } from './consultas'
 import estilos from './credores.module.css'
 import { DialogoCredor } from './DialogoCredor'
@@ -57,7 +58,7 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
   const [erroExclusao, setErroExclusao] = useState<{ mensagem: string; vinculos: Vinculo[] }>()
 
   const variacoes = variacao(credor)
-  const aba = `/processos/${processo.id}/credores`
+  const aba = rotaDoProcesso(processo.id, 'credores')
 
   async function confirmarExclusao() {
     setOcupado(true)
@@ -79,7 +80,7 @@ function ConteudoCredor({ processo, credor }: { processo: Processo; credor: Cred
       <CabecalhoPagina
         trilha={[
           { rotulo: 'Processos', para: '/processos' },
-          { rotulo: processo.apelido, para: `/processos/${processo.id}/visao-geral` },
+          { rotulo: processo.apelido, para: rotaDoProcesso(processo.id, 'visao-geral') },
           { rotulo: 'Credores', para: aba },
         ]}
         titulo={credor.nome}

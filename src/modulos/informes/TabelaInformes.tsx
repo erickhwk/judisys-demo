@@ -8,6 +8,7 @@ import { formatarData } from '../../regras/datas'
 import { ROTULOS_FASE } from '../../regras/fases'
 import { Selo } from '../../ui/Selo'
 import { type ColunaTabela, Tabela } from '../../ui/Tabela'
+import { rotaDoProcesso } from '../processos/abas'
 import type { Informe } from './informes'
 import estilos from './informes.module.css'
 
@@ -65,7 +66,7 @@ export function TabelaInformes({
       celula: (informe) => {
         const processo = processos.get(informe.processoId)
         return processo ? (
-          <Link to={`/processos/${processo.id}/informes`}>{processo.apelido}</Link>
+          <Link to={rotaDoProcesso(processo.id, 'informes')}>{processo.apelido}</Link>
         ) : (
           '—'
         )

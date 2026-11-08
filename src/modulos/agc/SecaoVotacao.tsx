@@ -19,6 +19,7 @@ import { Confirmacao } from '../../ui/Confirmacao'
 import { Erro } from '../../ui/Erro'
 import { Vazio } from '../../ui/Vazio'
 import { mensagemDeErro } from '../credores/erros'
+import { rotaDoProcesso } from '../processos/abas'
 import type { Agc } from './agc'
 import estilos from './agc.module.css'
 import { useVotos } from './consultas'
@@ -276,7 +277,7 @@ function Encerrada({
           {ataId ? (
             <Link to={`/informes/${ataId}`}>Ver a ata em Informes</Link>
           ) : (
-            <Link to={`/processos/${agc.processoId}/informes`}>Ver as atas em Informes</Link>
+            <Link to={rotaDoProcesso(agc.processoId, 'informes')}>Ver as atas em Informes</Link>
           )}
         </span>
       </p>

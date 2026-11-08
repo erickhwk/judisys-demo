@@ -5,6 +5,7 @@ import { COLECOES } from '../../dados/repositorio'
 import type { Log } from '../../dados/schemas'
 import type { DataIso } from '../../regras/datas'
 import { MODULOS, type Modulo } from '../../regras/permissoes'
+import { type Aba, rotaDoProcesso } from '../processos/abas'
 
 export interface FiltrosLogs {
   usuarioId?: Id
@@ -75,26 +76,27 @@ export function destinoDoRegistro(
 ): string | null {
   const id = texto(registro.id)
   const processo = texto(registro.processoId) ?? log.processoId
-  const doProcesso = (resto: string) => (processo ? `/processos/${processo}/${resto}` : null)
+  const doProcesso = (aba: Aba, sub?: string) =>
+    processo ? `${rotaDoProcesso(processo, aba)}${sub ? `/${sub}` : ''}` : null
   switch (log.colecao) {
     case 'processos':
-      return id ? `/processos/${id}/visao-geral` : null
+      return id ? rotaDoProcesso(id, 'visao-geral') : null
     case 'marcosDeFase':
       return doProcesso('visao-geral')
     case 'prazos':
       return doProcesso('prazos')
     case 'credores':
-      return id ? doProcesso(`credores/${id}`) : null
+      return id ? doProcesso('credores', id) : null
     case 'pedidosDeCredito': {
       const credor = texto(registro.credorId)
-      return doProcesso(credor ? `credores/${credor}` : 'credores')
+      return doProcesso('credores', credor)
     }
     case 'agcs':
-      return id ? doProcesso(`agc/${id}`) : null
+      return id ? doProcesso('agc', id) : null
     case 'presencas':
     case 'votos': {
       const agc = texto(registro.agcId)
-      return agc ? doProcesso(`agc/${agc}`) : null
+      return agc ? doProcesso('agc', agc) : null
     }
     case 'informes':
       return id ? `/informes/${id}` : null

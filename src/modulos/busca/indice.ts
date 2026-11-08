@@ -3,6 +3,7 @@
 import type { Credor, Empresa, Processo } from '../../dados/schemas'
 import { formatarCnj, formatarCnpj, formatarDocumento } from '../../regras/documentos'
 import { normalizar } from '../../regras/normalizar'
+import { rotaDoProcesso } from '../processos/abas'
 
 export const TIPOS_RESULTADO = ['processos', 'empresas', 'credores'] as const
 export type TipoResultado = (typeof TIPOS_RESULTADO)[number]
@@ -60,7 +61,7 @@ export function montarIndice({ processos, empresas, credores }: DadosIndice): In
         id: processo.id,
         titulo: processo.apelido,
         detalhe: formatarCnj(processo.numeroCnj),
-        destino: `/processos/${processo.id}/visao-geral`,
+        destino: rotaDoProcesso(processo.id, 'visao-geral'),
         textos: textos(processo.apelido, processo.numeroCnj),
       }))
       .sort(porTitulo),
@@ -82,7 +83,7 @@ export function montarIndice({ processos, empresas, credores }: DadosIndice): In
           id: credor.id,
           titulo: credor.nome,
           detalhe: [formatarDocumento(credor.documento), apelido].filter(Boolean).join(' · '),
-          destino: `/processos/${credor.processoId}/credores/${credor.id}`,
+          destino: `${rotaDoProcesso(credor.processoId, 'credores')}/${credor.id}`,
           textos: textos(credor.nome, credor.documento),
         }
       })

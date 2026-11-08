@@ -21,6 +21,7 @@ import { useBuscaAdiada } from '../../ui/useBuscaAdiada'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import {
   useCredoresDoProcesso,
   usePaginaDeCredores,
@@ -182,7 +183,9 @@ function ConteudoAba({ processo }: { processo: Processo }) {
             titulo: 'Credor',
             destaque: true,
             celula: (credor) => (
-              <Link to={`/processos/${processoId}/credores/${credor.id}`}>{credor.nome}</Link>
+              <Link to={`${rotaDoProcesso(processoId, 'credores')}/${credor.id}`}>
+                {credor.nome}
+              </Link>
             ),
           },
           {
