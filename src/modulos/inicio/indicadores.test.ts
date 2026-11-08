@@ -1,4 +1,4 @@
-// Regras do dashboard (RF-07 a RF-10, SDD §7.7) com dados pequenos e "hoje" por parâmetro.
+// Regras do início (antes dashboard: RF-07 a RF-10, SDD §7.7) com dados pequenos e "hoje" por parâmetro.
 import { describe, expect, it } from 'vitest'
 import type { Tipos } from '../../dados/schemas'
 import {

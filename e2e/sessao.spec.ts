@@ -1,13 +1,13 @@
 // Sessão, papéis e guardas de rota (SDD §7.2, §5.6; DMO-10). Cada teste começa com o armazenamento
 // limpo (contexto novo do Playwright).
 import { expect, test } from '@playwright/test'
-import { AGORA, entrarComo, trocarPara } from './apoio'
+import { AGORA, entrarComo, tituloDoInicio, trocarPara } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
 })
 
-test('PER-01 · entrar como analista vai ao dashboard e o menu da conta mostra nome e papel', async ({
+test('PER-01 · entrar como analista vai ao início e o menu da conta mostra nome e papel', async ({
   page,
 }) => {
   await page.goto('./')
@@ -18,7 +18,7 @@ test('PER-01 · entrar como analista vai ao dashboard e o menu da conta mostra n
   await page.getByRole('button', { name: /Entrar como Analista/ }).click()
 
   await expect(page).toHaveURL(/#\/$/)
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
   const sessao = await page.evaluate(() => sessionStorage.getItem('judisys:sessao'))
   expect(JSON.parse(sessao ?? '{}')).toMatchObject({ nome: 'Lia Campos', papel: 'analista' })
 
@@ -78,15 +78,15 @@ test('PER-09 · a sessão é por aba: outra aba pede login', async ({ page, cont
 
   // A primeira aba continua dentro.
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 })
 
 test('rota desconhecida com sessão mostra "Página não encontrada"', async ({ page }) => {
   await entrarComo(page, 'aj')
   await page.goto('./#/nao-existe')
   await expect(page.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible()
-  await page.getByRole('link', { name: 'Voltar ao dashboard' }).click()
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: 'Voltar ao início' }).click()
+  await expect(tituloDoInicio(page)).toBeVisible()
 })
 
 test('moldura: faixa da demo, link do WhatsApp e rodapé com a Draft', async ({ page }) => {

@@ -129,7 +129,7 @@ function PainelDecorativo() {
             ))}
           </div>
           <div className={estilos.janelaConteudo}>
-            <span className={estilos.janelaTitulo}>Dashboard</span>
+            <span className={estilos.janelaTitulo}>Início</span>
             <div className={estilos.janelaCards}>
               {['Processos', 'Credores', 'Prazos'].map((rotulo) => (
                 <div key={rotulo} className={estilos.miniCard}>

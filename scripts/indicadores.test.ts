@@ -109,4 +109,11 @@ describe('pnpm indicadores', () => {
     expect(centavos(classes.get('Total'))).toBe(total)
     expect(classes.get('Total')).toContain('R$ 389,5 mi')
   })
+
+  it('imprime a frase-resumo do início igual à do CAB-03', () => {
+    const resumo = bloco('Frase-resumo do início')
+    expect(resumo.get('Prazos vencidos')).toBe('3')
+    expect(resumo.get('Prazos de hoje')).toBe('1')
+    expect(resumo.get('AGC nos próximos 7 dias')).toBe('2026-11-13 · Grupo Lontra Azul')
+  })
 })

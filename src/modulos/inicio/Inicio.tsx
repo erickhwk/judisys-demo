@@ -1,7 +1,8 @@
-// Dashboard executivo (RF-07 a RF-10, SDD §7.7), no visual do `dashboard.html` do guia: números do
-// topo, próximos prazos e AGCs, funil por fase, passivo por classe, últimos informes e atividade
-// recente. Toda gravação invalida as consultas (T-22), então voltar ao dashboard já mostra a
-// mudança (DSH-04).
+// Início (SDD do início §5.1): o cabeçalho com saudação, data e resumo do dia (CAB) e, abaixo dele,
+// o conteúdo do antigo dashboard executivo (RF-07 a RF-10 da demo, SDD §7.7) até a grade
+// montável da INI-03: números do topo, próximos prazos e AGCs, funil por fase, passivo por
+// classe, últimos informes e atividade recente. Toda gravação invalida as consultas (T-22), então
+// voltar ao início já mostra a mudança (DSH-04).
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
   AlarmClock,
@@ -24,8 +25,7 @@ import type { TipoProcesso } from '../../regras/fases'
 import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
 import { type Modulo, pode } from '../../regras/permissoes'
 import { situacao } from '../../regras/prazos'
-import { hoje as hojeDoRelogio } from '../../regras/relogio'
-import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
+import { agora, hoje as hojeDoRelogio } from '../../regras/relogio'
 import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
@@ -39,7 +39,7 @@ import {
 import { rotuloSituacao, TOM_SITUACAO } from '../prazos/regras'
 import { ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
 import { ROTULOS_TIPO } from '../processos/rotulos'
-import estilos from './dashboard.module.css'
+import { CabecalhoInicio } from './CabecalhoInicio'
 import { GraficoPassivo } from './GraficoPassivo'
 import {
   type EtapaDoFunil,
@@ -49,8 +49,11 @@ import {
   passivoPorClasse,
   proximasAgcs,
   proximosPrazos,
+  resumoDoDia,
   ultimosInformes,
 } from './indicadores'
+import estilos from './inicio.module.css'
+import { type FraseDoResumo, fraseDoResumo, horaDoCarimbo } from './resumo'
 
 /** Só os logs mostrados, do mais novo ao mais antigo (a ordem do repositório, como na TelaLogs). */
 const LOGS_RECENTES = {
@@ -58,7 +61,7 @@ const LOGS_RECENTES = {
   porPagina: LIMITE_ATIVIDADE,
 } as const
 
-export function Dashboard() {
+export function Inicio() {
   const hoje = hojeDoRelogio()
   const { sessao } = useSessao()
   const podeLer = (modulo: Modulo) => (sessao ? pode(sessao.papel, 'ler', modulo) : false)
@@ -75,11 +78,21 @@ export function Dashboard() {
   const recentes = logs.data?.itens ?? []
   const registros = useRegistrosDosLogs(recentes)
 
+  // A saudação e a data não dependem dos dados: aparecem já no carregamento e no erro.
+  const cabecalho = (resumo?: FraseDoResumo) => (
+    <CabecalhoInicio
+      nome={sessao?.nome ?? ''}
+      hora={horaDoCarimbo(agora())}
+      hoje={hoje}
+      resumo={resumo}
+    />
+  )
+
   if (consultas.some((c) => c.isError)) {
     return (
       <div className={estilos.tela}>
-        <CabecalhoPagina titulo="Dashboard" />
-        <Erro mensagem="Não foi possível carregar o dashboard." />
+        {cabecalho()}
+        <Erro mensagem="Não foi possível carregar o início." />
       </div>
     )
   }
@@ -94,7 +107,7 @@ export function Dashboard() {
   ) {
     return (
       <div className={estilos.tela}>
-        <CabecalhoPagina titulo="Dashboard" />
+        {cabecalho()}
         <p className={estilos.apoio}>Carregando…</p>
       </div>
     )
@@ -110,7 +123,7 @@ export function Dashboard() {
 
   return (
     <div className={estilos.tela}>
-      <CabecalhoPagina titulo="Dashboard" />
+      {cabecalho(fraseDoResumo(resumoDoDia(prazos.data, agcs.data, processos.data, hoje), hoje))}
 
       <section aria-label="Números do escritório" className={estilos.numeros}>
         <Numero

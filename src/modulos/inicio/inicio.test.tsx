@@ -1,4 +1,4 @@
-// Dashboard renderizado em HTML com o seed completo da demo (DSH-01 a DSH-05, PER-07). O seed é
+// Início renderizado em HTML com o seed completo da demo (DSH-01 a DSH-05, PER-07, CAB-03). O seed é
 // relativo a hoje (T-24), então a carga usa o mesmo relógio que a tela.
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { type ArquivoSeed, gerarSeed } from '../../../scripts/seed/gerar'
@@ -9,8 +9,9 @@ import { type DataIso, formatarData, somarDias } from '../../regras/datas'
 import { type Papel, pode } from '../../regras/permissoes'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
 import { renderizarComDados } from '../../ui/renderizarParaTeste'
-import { Dashboard } from './Dashboard'
-import { ehAtivo } from './indicadores'
+import { Inicio } from './Inicio'
+import { ehAtivo, resumoDoDia } from './indicadores'
+import { fraseDoResumo } from './resumo'
 import { registro } from './rotas'
 
 let seed: ArquivoSeed
@@ -29,8 +30,7 @@ beforeEach(async () => {
   await gravarTabelas(armazenamento, tabelas)
 })
 
-const tela = (papel: Papel = 'advogado') =>
-  renderizarComDados(<Dashboard />, { armazenamento, papel })
+const tela = (papel: Papel = 'advogado') => renderizarComDados(<Inicio />, { armazenamento, papel })
 
 function stat(html: string, nome: string): string {
   const achado = new RegExp(`data-stat="${nome}"[^>]*>([^<]*)<`).exec(html)
@@ -54,7 +54,7 @@ function itens(html: string, secao: string): string[] {
 
 const numero = (texto: string) => Number(texto.replace(/\D/g, ''))
 
-describe('Dashboard com o seed', () => {
+describe('Início com o seed (conteúdo do antigo dashboard)', () => {
   it('DSH-01 · números do topo, todos > 0', async () => {
     const html = await tela()
     for (const nome of [
@@ -162,7 +162,30 @@ describe('Dashboard com o seed', () => {
   })
 })
 
-describe('rota do dashboard', () => {
+describe('cabeçalho do início com o seed', () => {
+  it('CAB-03 · resumo do seed no relógio fixo (sábado, 7/11/2026)', () => {
+    const fixo = '2026-11-07'
+    const doDia = prepararSeed(structuredClone(seed), fixo).tabelas
+    const resumo = resumoDoDia(doDia.prazos, doDia.agcs, doDia.processos, fixo)
+    const { destaque, resto } = fraseDoResumo(resumo, fixo)
+    expect(destaque + resto).toBe(
+      '3 prazos vencidos, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
+    )
+  })
+
+  it('a tela mostra a saudação no h1 e o resumo de hoje', async () => {
+    const html = await tela()
+    const { destaque, resto } = fraseDoResumo(
+      resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje),
+      hoje,
+    )
+    expect(html).toMatch(/<h1[^>]*>(Bom dia|Boa tarde|Boa noite), Teste<\/h1>/)
+    expect(html).toContain(`>${destaque}</b>${resto}</p>`)
+    expect(html).not.toContain('Dashboard')
+  })
+})
+
+describe('rota do início', () => {
   it.each(['aj', 'advogado', 'analista'] as const)('PER-04 · %s abre "/"', (papel) => {
     const [rota] = registro.rotas ?? []
     expect(rota).toMatchObject({ caminho: '/', acao: 'ler', modulo: 'dashboard' })

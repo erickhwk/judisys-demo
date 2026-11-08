@@ -1,11 +1,21 @@
-// Dashboard no navegador (SDD §7.7, DMO-18): números, listas com link, gráfico e a volta ao
-// dashboard depois de editar (T-22). Os casos com contagem exata ficam em
-// src/modulos/dashboard/dashboard.test.tsx.
+// Início no navegador: o cabeçalho (CAB-01, CAB-03 do SDD do início) e, abaixo dele, o conteúdo do
+// antigo dashboard (SDD §7.7 da demo, DMO-18): números, listas com link, gráfico e a volta ao
+// início depois de editar (T-22). Os casos com contagem exata ficam em
+// src/modulos/inicio/inicio.test.tsx e resumo.test.ts.
 import { expect, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, entrarComo, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
+})
+
+test('CAB-01/CAB-03 · saudação, data por extenso e resumo do seed às 10h', async ({ page }) => {
+  await entrarComo(page, 'advogado')
+  await expect(tituloDoInicio(page)).toHaveText('Bom dia, Otávio')
+  await expect(page.getByText('Sábado, 7 de novembro', { exact: true })).toBeVisible()
+  await expect(page.locator('[data-resumo]')).toHaveText(
+    '3 prazos vencidos, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
+  )
 })
 
 test('DSH-01/DSH-02 · números do topo e AGC do vitrine em D+6, com link', async ({ page }) => {
