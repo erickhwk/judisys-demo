@@ -46,6 +46,23 @@
   gap: 8px;
 }
 
+/* Vazio quando não há ações e a busca está escondida (fora do Layout ou abaixo de 901px, onde ela
+   fica na barra do topo), como no CabecalhoPagina. */
+.acoes:empty {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  /* Regras separadas: navegador sem :has() descarta só a segunda, e a busca continua escondida. */
+  .busca {
+    display: none;
+  }
+
+  .acoes:not(:has(> :not(.busca))) {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .saudacao {
     font-size: 22px;

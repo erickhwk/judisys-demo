@@ -1,17 +1,18 @@
 // Layout das telas internas (RF-01, RF-04, RF-06; DESIGN.md §Dashboard): faixa da demo fixa no
-// topo, menu lateral (recolhível; gaveta no celular), topo com a busca global, o botão do tema
-// (AJ-11) e o menu da conta, conteúdo e rodapé.
+// topo, menu lateral (recolhível; gaveta abaixo de 901px) com o tema e a conta no pé, conteúdo e
+// rodapé. INI-01: o topo do desktop saiu; a busca global abre pelo `CabecalhoPagina` e pelo ⌘K, e
+// abaixo de 901px uma barra no topo traz o menu, a logo, a lupa da busca e o avatar da conta.
 // A faixa fica fora da área que rola, então nunca sai da tela.
 import { Menu } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { BuscaGlobal, ehAtalhoBusca } from '../modulos/busca/BuscaGlobal'
+import { BotaoBuscaGlobal, BuscaGlobal, ehAtalhoBusca } from '../modulos/busca/BuscaGlobal'
 import { NOMES_PAPEIS } from '../modulos/entrada/papeis'
 import { useSessao } from '../modulos/entrada/sessao'
-import { BotaoTema } from './BotaoTema'
 import { FaixaDemo } from './FaixaDemo'
 import estilos from './Layout.module.css'
+import { Logo } from './Logo'
 import { MenuConta } from './MenuConta'
 import { MenuLateral } from './MenuLateral'
 import { useMoldura } from './Moldura'
@@ -48,7 +49,10 @@ export function Layout() {
     if (!gavetaAberta) return
     document.getElementById(idMenu)?.querySelector<HTMLElement>('a')?.focus()
     const aoTeclar = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') fecharGaveta()
+      // Esc já usado (o painel da conta, no pé do menu, fecha antes): a gaveta fica aberta.
+      if (evento.key === 'Escape') {
+        if (!evento.defaultPrevented) fecharGaveta()
+      }
       // A busca mora na coluna inerte: a gaveta fecha junto, sem roubar o foco do campo da busca.
       else if (ehAtalhoBusca(evento)) setGavetaAberta(false)
     }
@@ -73,53 +77,64 @@ export function Layout() {
     navegar('/entrar', { replace: true })
   }
 
+  const conta = {
+    nome: sessao.nome,
+    papel: NOMES_PAPEIS[sessao.papel],
+    aoTrocarDePapel: trocarDePapel,
+    aoResetar: pedirReset,
+  }
+
   return (
-    <div className={estilos.app}>
-      {/* Gaveta aberta: o resto da tela fica inerte, e o Tab não sai do menu para trás do fundo
-          escuro (DMO-23). */}
-      <div className={estilos.faixa} inert={gavetaAberta}>
-        <FaixaDemo />
-      </div>
-      <div className={estilos.corpo}>
-        <MenuLateral
-          id={idMenu}
-          papel={sessao.papel}
-          recolhido={recolhido}
-          aoAlternarRecolhido={() => setRecolhido((valor) => !valor)}
-          gavetaAberta={gavetaAberta}
-          aoFecharGaveta={fecharGaveta}
-        />
-        {gavetaAberta && (
-          <div className={estilos.fundoGaveta} aria-hidden="true" onClick={fecharGaveta} />
-        )}
-        <div className={estilos.coluna} ref={coluna} inert={gavetaAberta}>
-          <header className={`${estilos.topo} nao-imprimir`}>
-            <button
-              ref={botaoMenu}
-              type="button"
-              className={estilos.abrirMenu}
-              aria-label="Abrir menu"
-              aria-expanded={gavetaAberta}
-              aria-controls={idMenu}
-              onClick={() => setGavetaAberta(true)}
-            >
-              <Menu size={24} aria-hidden="true" />
-            </button>
-            <BuscaGlobal papel={sessao.papel} />
-            <BotaoTema />
-            <MenuConta
-              nome={sessao.nome}
-              papel={NOMES_PAPEIS[sessao.papel]}
-              aoTrocarDePapel={trocarDePapel}
-              aoResetar={pedirReset}
-            />
-          </header>
-          <main className={estilos.conteudo}>
-            <Outlet />
-          </main>
-          <Rodape />
+    <BuscaGlobal papel={sessao.papel}>
+      <div className={estilos.app}>
+        {/* Gaveta aberta: o resto da tela fica inerte, e o Tab não sai do menu para trás do fundo
+            escuro (DMO-23). */}
+        <div className={estilos.faixa} inert={gavetaAberta}>
+          <FaixaDemo />
+        </div>
+        <div className={estilos.corpo}>
+          <MenuLateral
+            id={idMenu}
+            papel={sessao.papel}
+            nome={conta.nome}
+            nomePapel={conta.papel}
+            aoTrocarDePapel={conta.aoTrocarDePapel}
+            aoResetar={conta.aoResetar}
+            recolhido={recolhido}
+            aoAlternarRecolhido={() => setRecolhido((valor) => !valor)}
+            gavetaAberta={gavetaAberta}
+            aoFecharGaveta={fecharGaveta}
+          />
+          {gavetaAberta && (
+            <div className={estilos.fundoGaveta} aria-hidden="true" onClick={fecharGaveta} />
+          )}
+          <div className={estilos.coluna} ref={coluna} inert={gavetaAberta}>
+            {/* Só abaixo de 901px (RF-03): no desktop, o menu e o cabeçalho da página fazem esse papel. */}
+            <header className={`${estilos.barra} nao-imprimir`}>
+              <button
+                ref={botaoMenu}
+                type="button"
+                className={estilos.abrirMenu}
+                aria-label="Abrir menu"
+                aria-expanded={gavetaAberta}
+                aria-controls={idMenu}
+                onClick={() => setGavetaAberta(true)}
+              >
+                <Menu size={22} aria-hidden="true" />
+              </button>
+              <span className={estilos.logo}>
+                <Logo altura={28} />
+              </span>
+              <BotaoBuscaGlobal compacto />
+              <MenuConta {...conta} variante="avatar" />
+            </header>
+            <main className={estilos.conteudo}>
+              <Outlet />
+            </main>
+            <Rodape />
+          </div>
         </div>
       </div>
-    </div>
+    </BuscaGlobal>
   )
 }

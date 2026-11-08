@@ -22,9 +22,12 @@ test('PER-01 · entrar como analista vai ao início e o menu da conta mostra nom
   const sessao = await page.evaluate(() => sessionStorage.getItem('judisys:sessao'))
   expect(JSON.parse(sessao ?? '{}')).toMatchObject({ nome: 'Lia Campos', papel: 'analista' })
 
-  await page.getByRole('button', { name: 'Menu da conta' }).click()
-  await expect(page.getByText('Lia Campos', { exact: true }).last()).toBeVisible()
-  await expect(page.getByText('Analista', { exact: true })).toBeVisible()
+  // INI-01: a conta mora no pé do menu, que já mostra nome e papel; o painel repete os dois.
+  const conta = page.getByRole('button', { name: 'Menu da conta' })
+  await conta.click()
+  const painel = page.locator(`[id="${await conta.getAttribute('aria-controls')}"]`)
+  await expect(painel.getByText('Lia Campos', { exact: true })).toBeVisible()
+  await expect(painel.getByText('Analista', { exact: true })).toBeVisible()
   // Analista não vê Usuários no menu (RF-40: sem permissão, escondido).
   await expect(page.getByRole('link', { name: 'Usuários' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Logs' })).toBeVisible()
@@ -109,7 +112,7 @@ test('celular: o menu lateral abre como gaveta e fecha ao navegar', async ({ pag
   const abrirMenu = page.getByRole('button', { name: 'Abrir menu' })
   // Teclado: o foco entra na gaveta e, com Esc, volta ao botão que a abriu.
   await abrirMenu.click()
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeFocused()
+  await expect(page.getByRole('link', { name: 'Início' })).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(processos).toBeHidden()
   await expect(abrirMenu).toBeFocused()
