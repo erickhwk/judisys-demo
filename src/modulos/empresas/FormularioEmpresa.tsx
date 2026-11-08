@@ -20,6 +20,7 @@ import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
 import { Selo } from '../../ui/Selo'
 import { useSessao } from '../entrada/sessao'
+import { TOM_TIPO } from '../processos/rotulos'
 import estilos from './Empresas.module.css'
 import { useExclusaoEmpresa } from './ExclusaoEmpresa'
 import {
@@ -261,7 +262,7 @@ function ProcessosDaEmpresa({ empresaId }: { empresaId: string }) {
                 <span className={estilos.numero}>{formatarCnj(processo.numeroCnj)}</span>
               </span>
               <span className={estilos.detalhes}>
-                <Selo forma="pilula" tom={processo.tipo === 'rj' ? 'dourado' : 'azul'}>
+                <Selo forma="pilula" tom={TOM_TIPO[processo.tipo]}>
                   {processo.tipo === 'rj' ? 'Recuperação Judicial' : 'Falência'}
                 </Selo>
                 <Selo>{ROTULOS_FASE[processo.faseAtual]}</Selo>

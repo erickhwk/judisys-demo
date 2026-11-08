@@ -3,7 +3,7 @@ import { juntarClasses } from './classes'
 import estilos from './Selo.module.css'
 
 /**
- * Tons do selo. `azul` e `dourado` seguem o guia (Falência / Recuperação, MCAA / Ethos);
+ * Tons do selo. `azul` e `dourado` seguem o guia (MCAA / Ethos) e o canvas (RJ / falência);
  * `sucesso`, `alerta` e `perigo` marcam situações (cumprido, urgente, vencido).
  */
 export type TomSelo = 'neutro' | 'azul' | 'dourado' | 'sucesso' | 'alerta' | 'perigo'
