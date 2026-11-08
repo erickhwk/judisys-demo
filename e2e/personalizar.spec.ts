@@ -170,13 +170,23 @@ test('PRS-04 · recusa: sombra vermelha cortada na borda, aviso e volta ao solta
   expect(await posicoes(page)).toEqual(antes)
 })
 
-test('PRS-04 · um 1×1 todo fora do grid: aviso sem sombra e volta ao soltar', async ({ page }) => {
+test('PRS-04 · um 1×1 todo fora do grid: faixa na borda, aviso visível e volta ao soltar', async ({
+  page,
+}) => {
   await personalizar(page)
   const antes = await posicoes(page)
   await arrastar(page, 'proximos', -2, 0, false)
   const status = page.locator('[data-colunas="4"]').getByRole('status')
   await expect(status).toHaveText('Não cabe aqui: este quadro ocupa 1 coluna.')
-  await expect(page.locator('[data-recusa]')).toHaveCount(0)
+  const faixa = page.locator('[data-recusa="faixa"]')
+  await expect(faixa).toBeVisible()
+  const caixaFaixa = await faixa.boundingBox()
+  const caixaGrade = await page.locator('[data-colunas="4"]').boundingBox()
+  if (!caixaFaixa || !caixaGrade) throw new Error('sem caixa')
+  expect(caixaFaixa.x).toBeCloseTo(caixaGrade.x, 0)
+  await expect(page.locator('[data-recusa-aviso]')).toHaveText(
+    'Não cabe aqui: este quadro ocupa 1 coluna.',
+  )
   await page.mouse.up()
   expect(await posicoes(page)).toEqual(antes)
 })

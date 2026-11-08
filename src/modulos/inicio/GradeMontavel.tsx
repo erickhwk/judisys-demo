@@ -381,7 +381,7 @@ function GradeDesktop({
           />
         )}
 
-        {ativo && recusado && sombra && (
+        {ativo && sombra && (
           <>
             <div
               aria-hidden="true"
@@ -395,9 +395,36 @@ function GradeDesktop({
               De onde o quadro saiu
             </div>
             {/* A sombra é cortada na borda do grid (5.6, passo 3): fica só a parte de dentro. */}
-            <div aria-hidden="true" className={estilos.recusa} data-recusa="" style={sombra}>
-              {avisoDeRecusa(ativo.quadro)}
-            </div>
+            {sombra.fora === null ? (
+              <div
+                aria-hidden="true"
+                className={estilos.recusa}
+                data-recusa=""
+                style={sombra.estilo}
+              >
+                {avisoDeRecusa(ativo.quadro)}
+              </div>
+            ) : (
+              <>
+                <div
+                  aria-hidden="true"
+                  className={estilos.recusaFaixa}
+                  data-recusa="faixa"
+                  style={sombra.estilo}
+                />
+                <div
+                  aria-hidden="true"
+                  className={estilos.recusaAviso}
+                  data-recusa-aviso=""
+                  style={{
+                    top: sombra.estilo.top,
+                    [sombra.fora === 'esquerda' ? 'left' : 'right']: LARGURA_FAIXA + 8,
+                  }}
+                >
+                  {avisoDeRecusa(ativo.quadro)}
+                </div>
+              </>
+            )}
           </>
         )}
 
@@ -416,24 +443,32 @@ function posicaoDe(montagem: Montagem, quadro: IdQuadro): Pick<ItemMontagem, 'x'
 
 const medidaPx = (n: number, tamanho: number) => n * tamanho + (n - 1) * VAO
 
+/** Largura da faixa vermelha na borda do grid quando o quadro sai todo dele (5.6, passo 3). */
+const LARGURA_FAIXA = 6
+
+type SombraDaRecusa = { estilo: CSSProperties; fora: 'esquerda' | 'direita' | null }
+
 /**
  * Retângulo da sombra vermelha, em px dentro do grid, só com a parte que fica dentro dele (nas
- * colunas e nas linhas). `null` se nada dela cai no grid: o aviso continua no `role="status"`.
+ * colunas e nas linhas). Se nada dela cai no grid, vira uma faixa estreita na borda por onde o
+ * quadro saiu, e o aviso aparece ao lado dela (decidido com o usuário na INI-03).
  */
-function sombraCortada(ativo: Arrasto, unidade: number, linhas: number): CSSProperties | null {
+function sombraCortada(ativo: Arrasto, unidade: number, linhas: number): SombraDaRecusa {
   const { w, h } = CATALOGO[ativo.quadro]
   const larguraDoGrid = medidaPx(4, unidade)
   const esquerda = ativo.coluna * (unidade + VAO)
   const inicio = Math.max(0, esquerda)
   const fim = Math.min(larguraDoGrid, esquerda + medidaPx(w, unidade))
-  if (fim <= inicio) return null
   const linha = Math.min(ativo.linha, Math.max(0, linhas - h))
-  return {
-    left: inicio,
+  const vertical = {
     top: linha * (ALTURA_UNIDADE + VAO),
-    width: fim - inicio,
     height: medidaPx(Math.min(h, linhas), ALTURA_UNIDADE),
   }
+  if (fim > inicio)
+    return { estilo: { left: inicio, width: fim - inicio, ...vertical }, fora: null }
+  const fora = esquerda < 0 ? 'esquerda' : 'direita'
+  const left = fora === 'esquerda' ? 0 : larguraDoGrid - LARGURA_FAIXA
+  return { estilo: { left, width: LARGURA_FAIXA, ...vertical }, fora }
 }
 
 function avisoDeRecusa(quadro: IdQuadro): string {

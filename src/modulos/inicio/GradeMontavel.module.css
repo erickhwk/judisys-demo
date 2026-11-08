@@ -84,3 +84,28 @@
   line-height: 1.4;
   color: var(--cor-quadro-recusa);
 }
+
+/* Quadro todo fora do grid: faixa na borda por onde saiu e o aviso ao lado, dentro do grid. */
+.recusaFaixa {
+  position: absolute;
+  z-index: 6;
+  border-radius: 3px;
+  background: var(--cor-quadro-recusa);
+  pointer-events: none;
+}
+
+.recusaAviso {
+  position: absolute;
+  z-index: 6;
+  max-width: 240px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--cor-quadro-recusa);
+  border-radius: 8px;
+  background: var(--cor-perigo-claro);
+  pointer-events: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--cor-quadro-recusa);
+}
