@@ -2,20 +2,15 @@
 // quem, o quê, onde e quando (QDR-07). Cada uma leva ao registro como ele está agora, como na tela
 // de logs (LOG-03), e só para quem lê o módulo dele (RF-40). O quadro só entra no catálogo de quem
 // lê logs (S-05, `catalogoDoPapel`). Vem da atividade recente do antigo dashboard (DMO-18).
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
-import { useListar, useRepo, useTodos } from '../../../dados/contexto'
-import { COLECOES, type Repositorio } from '../../../dados/repositorio'
+import { useListar, useTodos } from '../../../dados/contexto'
+import { COLECOES } from '../../../dados/repositorio'
 import type { Log, Registro } from '../../../dados/schemas'
 import { type Modulo, pode } from '../../../regras/permissoes'
 import { juntarClasses } from '../../../ui/classes'
 import { useSessao } from '../../entrada/sessao'
-import {
-  chaveDoRegistro,
-  destinoDoRegistro,
-  type TabelaComDestino,
-  temDestino,
-} from '../../logs/consulta'
+import { chaveDoRegistro, destinoDoRegistro, temDestino } from '../../logs/consulta'
+import { useRegistrosDosLogs } from '../../logs/registrosDosLogs'
 import { LIMITE_ATIVIDADE_DO_QUADRO } from '../indicadores'
 import listas from './listaDoQuadro.module.css'
 import { Quadro } from './Quadro'
@@ -98,38 +93,6 @@ export function QuadroAtividade({ variante }: PropsDoQuadro) {
       </ol>
     </Quadro>
   )
-}
-
-/** Busca o registro de cada log mostrado, para o link; `null` quando ele não existe mais. */
-function useRegistrosDosLogs(logs: readonly Log[]) {
-  const repos: Record<TabelaComDestino, Pick<Repositorio<Registro>, 'buscar'>> = {
-    processos: useRepo('processos'),
-    marcosDeFase: useRepo('marcosDeFase'),
-    prazos: useRepo('prazos'),
-    credores: useRepo('credores'),
-    pedidosDeCredito: useRepo('pedidosDeCredito'),
-    agcs: useRepo('agcs'),
-    presencas: useRepo('presencas'),
-    votos: useRepo('votos'),
-    informes: useRepo('informes'),
-    empresas: useRepo('empresas'),
-    usuarios: useRepo('usuarios'),
-  }
-  const pedidos = logs.filter((log) => temDestino(log.colecao))
-  return useQuery({
-    queryKey: ['inicio', 'atividade', 'registros', pedidos.map(chaveDoRegistro)],
-    queryFn: async () => {
-      const encontrados = await Promise.all(
-        pedidos.map(async (log) => {
-          const repo = repos[log.colecao as TabelaComDestino]
-          return [chaveDoRegistro(log), (await repo.buscar(log.registroId)) ?? null] as const
-        }),
-      )
-      return new Map<string, Registro | null>(encontrados)
-    },
-    enabled: pedidos.length > 0,
-    placeholderData: keepPreviousData,
-  })
 }
 
 /** Sem link quando o papel não lê o módulo (RF-40), o registro sumiu ou não tem tela. */

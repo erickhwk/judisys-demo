@@ -12,6 +12,7 @@ import { useSessao } from '../../entrada/sessao'
 import { DIAS_DA_SEMANA, mesDe, semanasDoMes } from '../../prazos/regras'
 import { enderecoDoPrazo } from '../../prazos/TabelaPrazos'
 import { type DestaqueDoMes, destaqueDoMes, type MarcaDoDia, prazosDoMes } from '../indicadores'
+import { maiuscula } from '../resumo'
 import { Quadro } from './Quadro'
 import estilos from './QuadroCalendario.module.css'
 import type { PropsDoQuadro } from './registro'
@@ -43,13 +44,13 @@ export function QuadroCalendario({ variante }: PropsDoQuadro) {
   const marcas = prazosDoMes(prazos.data, agcs.data, hoje)
   const destaque = destaqueDoMes(prazos.data, agcs.data, hoje)
   const semanas = semanasDoMes(mesDe(hoje))
-  const nomeDoMes = maiuscula(formatarMesAno(hoje))
+  const mesEAno = maiuscula(formatarMesAno(hoje))
   const apelidos = new Map(processos.data.map((p) => [p.id, p.apelido]))
 
   return (
     <Quadro {...moldura}>
       <div className={estilos.calendario} data-semanas={semanas.length}>
-        <p className={estilos.mes}>{nomeDoMes}</p>
+        <p className={estilos.mes}>{mesEAno}</p>
         <p className="somente-leitor">{resumoDoMes(marcas, hoje)}</p>
         <div className={estilos.semana} aria-hidden="true">
           {DIAS_DA_SEMANA.map((dia) => (
@@ -86,7 +87,7 @@ export function QuadroCalendario({ variante }: PropsDoQuadro) {
         ) : (
           <p className={juntarClasses(estilos.pe, estilos.livre)}>
             {marcas.size === 0
-              ? `Nenhum prazo nem AGC em ${formatarMesAno(hoje).split(' ')[0]}.`
+              ? `Nenhum prazo nem AGC em ${nomeDoMes(hoje)}.`
               : 'Nenhum prazo nem AGC até o fim do mês.'}
           </p>
         )}
@@ -143,8 +144,9 @@ function diaCurto(data: DataIso): string {
   return `${Number(data.slice(8, 10))}/${data.slice(5, 7)}`
 }
 
-function maiuscula(texto: string): string {
-  return texto.charAt(0).toUpperCase() + texto.slice(1)
+/** `novembro`: só o nome do mês de `hoje`. */
+function nomeDoMes(hoje: DataIso): string {
+  return formatarMesAno(hoje).split(' ')[0] ?? ''
 }
 
 const NOMES_DA_MARCA: Readonly<Record<MarcaDoDia, [string, string]>> = {
@@ -156,7 +158,7 @@ const NOMES_DA_MARCA: Readonly<Record<MarcaDoDia, [string, string]>> = {
 
 /** Texto do mês para o leitor de tela: "Em novembro: prazo vencido no dia 5; …" (INV-05). */
 function resumoDoMes(marcas: ReadonlyMap<DataIso, MarcaDoDia>, hoje: DataIso): string {
-  const mes = formatarMesAno(hoje).split(' ')[0]
+  const mes = nomeDoMes(hoje)
   if (marcas.size === 0) return `Nenhum prazo nem AGC em ${mes}.`
   const partes = LEGENDA.flatMap(([marca]) => {
     const dias = [...marcas].filter(([, m]) => m === marca).map(([data]) => Number(data.slice(8)))

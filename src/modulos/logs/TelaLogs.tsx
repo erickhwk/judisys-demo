@@ -2,11 +2,9 @@
 // novo ao mais antigo (mesmo segundo: pela ordem do id, no repositório), com filtros por usuário,
 // módulo, processo e período na URL, as mudanças campo a campo e o link para o registro, ou
 // "Registro não existe mais" quando ele foi excluído.
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link, useSearchParams } from 'react-router'
-import type { Id } from '../../dados/armazenamento'
-import { useRepo, useTodos } from '../../dados/contexto'
-import { COLECOES, POR_PAGINA, type Repositorio } from '../../dados/repositorio'
+import { useTodos } from '../../dados/contexto'
+import { COLECOES, POR_PAGINA } from '../../dados/repositorio'
 import type { Log, Registro } from '../../dados/schemas'
 import { PREFIXO_CASCATA } from '../../dados/servicos/exclusoes'
 import { formatarDataHora } from '../../regras/datas'
@@ -28,10 +26,10 @@ import {
   type FiltrosLogs,
   filtrarLogs,
   MODULOS_COM_LOG,
-  type TabelaComDestino,
   temDestino,
 } from './consulta'
 import estilos from './logs.module.css'
+import { useRegistrosDosLogs } from './registrosDosLogs'
 
 const ORDEM = { campo: 'data', direcao: 'desc' } as const
 const PARAMETROS = ['usuario', 'modulo', 'processo', 'de', 'ate'] as const
@@ -55,47 +53,6 @@ function cascataPrimeiro(log: Log): Log {
       ...log.mudancas.filter((m) => !ehCascata(m.campo)),
     ],
   }
-}
-
-/**
- * O registro de cada log da página como está agora: `null` quando não existe mais (LOG-03).
- * Só as coleções com tela; as outras ficam fora do mapa.
- */
-function useRegistrosDosLogs(logs: readonly Log[]) {
-  const repos: Record<TabelaComDestino, Pick<Repositorio<Registro>, 'buscar'>> = {
-    processos: useRepo('processos'),
-    marcosDeFase: useRepo('marcosDeFase'),
-    prazos: useRepo('prazos'),
-    credores: useRepo('credores'),
-    pedidosDeCredito: useRepo('pedidosDeCredito'),
-    agcs: useRepo('agcs'),
-    presencas: useRepo('presencas'),
-    votos: useRepo('votos'),
-    informes: useRepo('informes'),
-    empresas: useRepo('empresas'),
-    usuarios: useRepo('usuarios'),
-  }
-  const pedidos = [
-    ...new Map(
-      logs.flatMap((log) =>
-        temDestino(log.colecao) ? [[chaveDoRegistro(log), [log.colecao, log.registroId]]] : [],
-      ) as [string, [TabelaComDestino, Id]][],
-    ),
-  ]
-  return useQuery({
-    queryKey: ['logs', 'registros', pedidos.map(([chave]) => chave)],
-    queryFn: async () => {
-      const encontrados = await Promise.all(
-        pedidos.map(
-          async ([chave, [tabela, id]]) =>
-            [chave, (await repos[tabela].buscar(id)) ?? null] as const,
-        ),
-      )
-      return new Map<string, Registro | null>(encontrados)
-    },
-    enabled: pedidos.length > 0,
-    placeholderData: keepPreviousData,
-  })
 }
 
 function LinkDoRegistro({
