@@ -85,7 +85,7 @@ export function fraseDoResumo(resumo: ResumoDoDia, hoje: DataIso): FraseDoResumo
     const sujeito = vencidos > 0 ? `${deHoje}` : `${deHoje} ${plural(deHoje, 'prazo', 'prazos')}`
     partes.push(`${sujeito} ${plural(deHoje, 'vence', 'vencem')} hoje`)
   }
-  if (agc) partes.push(`a AGC do ${agc.apelido} é ${quandoE(agc.data, hoje)}`)
+  if (agc) partes.push(`a AGC de ${agc.apelido} é ${quandoE(agc.data, hoje)}`)
   // O destaque abre a frase; o resto é o que vem depois dele.
   const frase = `${maiuscula(juntar(destaque ? [destaque, ...partes] : partes))}.`
   return { destaque, resto: frase.slice(destaque.length) }

@@ -21,12 +21,12 @@ describe('CabecalhoInicio', () => {
         hoje="2026-11-07"
         resumo={{
           destaque: '3 prazos vencidos',
-          resto: ', 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta.',
+          resto: ', 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
         }}
       />,
     )
     expect(html).toMatch(
-      /<p[^>]*data-resumo=""[^>]*><b[^>]*>3 prazos vencidos<\/b>, 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta\.<\/p>/,
+      /<p[^>]*data-resumo=""[^>]*><b[^>]*>3 prazos vencidos<\/b>, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta\.<\/p>/,
     )
   })
 

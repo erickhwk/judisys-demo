@@ -169,7 +169,7 @@ describe('cabeçalho do início com o seed', () => {
     const resumo = resumoDoDia(doDia.prazos, doDia.agcs, doDia.processos, fixo)
     const { destaque, resto } = fraseDoResumo(resumo, fixo)
     expect(destaque + resto).toBe(
-      '3 prazos vencidos, 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta.',
+      '3 prazos vencidos, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
     )
   })
 

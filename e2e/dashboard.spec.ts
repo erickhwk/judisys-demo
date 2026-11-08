@@ -14,7 +14,7 @@ test('CAB-01/CAB-03 · saudação, data por extenso e resumo do seed às 10h', a
   await expect(tituloDoInicio(page)).toHaveText('Bom dia, Otávio')
   await expect(page.getByText('Sábado, 7 de novembro', { exact: true })).toBeVisible()
   await expect(page.locator('[data-resumo]')).toHaveText(
-    '3 prazos vencidos, 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta.',
+    '3 prazos vencidos, 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
   )
 })
 

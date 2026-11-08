@@ -83,7 +83,7 @@ describe('resumoDoDia e a frase (RF-07)', () => {
     })
     expect(fraseDoResumo(resumo, HOJE)).toEqual({
       destaque: '3 prazos vencidos',
-      resto: ', 1 vence hoje e a AGC do Grupo Lontra Azul é na sexta.',
+      resto: ', 1 vence hoje e a AGC de Grupo Lontra Azul é na sexta.',
     })
   })
 
@@ -98,7 +98,7 @@ describe('resumoDoDia e a frase (RF-07)', () => {
       'Nenhuma pendência para hoje.',
     )
     expect(frase(resumoDoDia([], [agc('agc-7', '2026-11-14')], PROCESSOS, HOJE))).toBe(
-      'A AGC do Grupo Lontra Azul é no próximo sábado.',
+      'A AGC de Grupo Lontra Azul é no próximo sábado.',
     )
   })
 
@@ -113,10 +113,10 @@ describe('resumoDoDia e a frase (RF-07)', () => {
 
   it('CAB-07 · AGC amanhã ou hoje', () => {
     expect(frase({ vencidos: 2, hoje: 0, agc: { apelido: 'X', data: '2026-11-08' } })).toBe(
-      '2 prazos vencidos e a AGC do X é amanhã.',
+      '2 prazos vencidos e a AGC de X é amanhã.',
     )
     expect(frase({ vencidos: 0, hoje: 0, agc: { apelido: 'X', data: HOJE } })).toBe(
-      'A AGC do X é hoje.',
+      'A AGC de X é hoje.',
     )
     expect(resumoDoDia([], [agc('agc-hoje', HOJE)], PROCESSOS, HOJE).agc?.data).toBe(HOJE)
   })
@@ -141,7 +141,7 @@ describe('resumoDoDia e a frase (RF-07)', () => {
       data: '2026-11-10',
     })
     expect(frase({ vencidos: 0, hoje: 0, agc: { apelido: 'X', data: '2026-11-10' } })).toBe(
-      'A AGC do X é na terça.',
+      'A AGC de X é na terça.',
     )
   })
 })
