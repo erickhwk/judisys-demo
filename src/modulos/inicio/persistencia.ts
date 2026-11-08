@@ -4,7 +4,7 @@
 import { z } from 'zod'
 import { type DependenciasCarga, localStorageDoNavegador } from '../../dados/carga'
 import type { Papel } from '../../regras/permissoes'
-import { type ItemSalvo, type Montagem, normalizar, padraoDoPapel } from './montagem'
+import { type Montagem, normalizar, padraoDoPapel } from './montagem'
 
 export const PREFIXO_MONTAGEM = 'judisys:inicio:'
 const VERSAO = 1
@@ -50,17 +50,10 @@ export function lerMontagem(
 ): Montagem {
   const chave = chaveDaMontagem(usuarioId)
   const daAba = memoria.get(chave)
-  if (daAba) return normalizarOuPadrao(daAba, papel)
+  if (daAba) return normalizar(daAba, papel)
   const salva = lerGravada(fonte(), chave)
   // O padrão também passa pelo filtro do papel (S-05): vale se o RF-39 mudar.
-  return normalizarOuPadrao(salva ? salva.itens : padraoDoPapel(papel), papel)
-}
-
-/** Montagem com quadros que o `normalizar` descartou todos vira o padrão do papel (MNT-08). */
-function normalizarOuPadrao(itens: readonly ItemSalvo[], papel: Papel): Montagem {
-  const normalizada = normalizar(itens, papel)
-  if (normalizada.length > 0 || itens.length === 0) return normalizada
-  return normalizar(padraoDoPapel(papel), papel)
+  return normalizar(salva ? salva.itens : padraoDoPapel(papel), papel)
 }
 
 function lerGravada(storage: Storage | null, chave: string) {

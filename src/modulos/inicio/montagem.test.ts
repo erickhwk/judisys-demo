@@ -16,6 +16,7 @@ import {
   normalizar,
   ordemDeLeitura,
   PADROES,
+  padraoDoPapel,
   primeiroLugarLivre,
 } from './montagem'
 
@@ -233,7 +234,13 @@ describe('normalizar', () => {
     expect(MEDIDA_DESKTOP('carteira')).toEqual({ w: 4, h: 1 })
   })
 
-  it('montagem vazia continua vazia', () => {
+  it('MNT-08 · montagem vazia de propósito continua vazia', () => {
     expect(normalizar([], 'aj')).toEqual([])
+  })
+
+  it('MNT-08 · todos os itens descartados (inexistentes ou repetidos) viram o padrão do papel', () => {
+    expect(normalizar([{ quadro: 'velho', x: 0, y: 0 }], 'advogado')).toEqual(
+      ordemDeLeitura(padraoDoPapel('advogado')),
+    )
   })
 })

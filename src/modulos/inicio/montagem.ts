@@ -225,8 +225,18 @@ export interface ItemSalvo {
  * de leitura, quem não cabia (sobreposto ou fora das 4 colunas) vai para o primeiro lugar livre.
  * Assim um item deslocado não desaloja outro que estava certo. Montagem inválida no formato é da
  * persistência: aqui ela já chega como lista de itens.
+ *
+ * Se todos os itens foram descartados, vale o padrão do papel; a montagem vazia de propósito
+ * (PRS-11) continua vazia (MNT-08).
  */
 export function normalizar(montagemSalva: readonly ItemSalvo[], papel: Papel): Montagem {
+  const normalizada = encaixar(montagemSalva, papel)
+  if (normalizada.length > 0 || montagemSalva.length === 0) return normalizada
+  // O padrão passa pelo mesmo filtro, mas sem nova volta ao padrão: não há recursão.
+  return encaixar(padraoDoPapel(papel), papel)
+}
+
+function encaixar(montagemSalva: readonly ItemSalvo[], papel: Papel): Montagem {
   const resultado: Montagem = []
   const deslocados: IdQuadro[] = []
   const vistos = new Set<IdQuadro>()
