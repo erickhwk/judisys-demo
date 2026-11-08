@@ -18,7 +18,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 **Divisão de arquivos do lote 1** (evita conflito):
 
 - **INI-01:** `tokens.css`, `Layout`, `MenuLateral` (inclusive o rótulo "Início"), `MenuConta`, `BotaoTema` e `CabecalhoPagina`, além dos e2e que clicam no link "Dashboard" do menu.
-- **INI-02:** `src/modulos/inicio/montagem.ts` e `persistencia.ts`, e `src/dados/boot.tsx`.
+- **INI-02:** `src/modulos/inicio/montagem.ts` e `persistencia.ts`, `src/dados/boot.tsx`, `scripts/indicadores.ts` e o script no `package.json`. O script importa o `indicadores.ts` de onde ele estiver; quem mergear por último entre a INI-02 e a INI-04 acerta o caminho.
 - **INI-04:** a mudança de `src/modulos/dashboard/` para `src/modulos/inicio/`, sem os arquivos da INI-02. Inclui `e2e/apoio.ts` e os e2e que esperam o título "Dashboard".
 - **INI-05:** só `src/ui/graficos/`.
 
@@ -30,6 +30,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - Vale a parte fixa da `tasks-demo.md` (pt-BR, rotas por módulo, autonomia, pegadinhas e guarda de cores). O SDD prevalece sobre o PRD.
   - Nesta feature, o `src/ui/MenuLateral.tsx` é da INI-01 e o `src/modulos/inicio/montagem.ts` é da INI-02. As outras tarefas não editam esses arquivos sem virar dúvida.
   - Referência visual: os artboards do canvas da SDD §11. Os valores de cor do canvas são aproximações; na implementação valem os tokens.
+  - Número do seed usado em ficha, caso ou teste sai do `pnpm indicadores` (INI-02). Cálculo novo em `indicadores.ts` entra também na saída do script.
   - Capturas: as do `contexto` da demo, nas larguras 1280 (menu aberto), 1440, 834 e 390, nos dois temas (SDD §10).
 
 ---
@@ -59,14 +60,15 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 ## INI-02 · Montagem: modelo, regras de encaixe e persistência
 - **Tipo:** Feature
 - **Depende de:** —
-- **SDD:** §4 (S-02, S-03, S-05), §5.2, §5.4, §5.5, §7.6
-- **Descrição:** funções puras da montagem (o catálogo com os tamanhos, os padrões por papel, `cabe`, `primeiroLugarLivre`, `ordemDeLeitura`, `empacotar` e `normalizar`) e a persistência no `localStorage` por usuário, apagada pelo "Resetar demo". Sem tela: é a base da INI-03.
+- **SDD:** §4 (S-02, S-03, S-05), §5.2, §5.4, §5.5, §7.6, §10 (`pnpm indicadores`)
+- **Descrição:** funções puras da montagem (o catálogo com os tamanhos, os padrões por papel, `cabe`, `primeiroLugarLivre`, `ordemDeLeitura`, `empacotar` e `normalizar`) e a persistência no `localStorage` por usuário, apagada pelo "Resetar demo". Sem tela: é a base da INI-03. Inclui o script `pnpm indicadores`, fonte única dos números do seed para fichas, casos e testes.
 - **Critérios de aceite:**
   - [ ] `src/modulos/inicio/montagem.ts` com os tipos da §5.2, o `CATALOGO` (12 quadros, tamanhos do PRD §6.4, `modulos` por quadro) e os `PADROES` dos três papéis do RF-17.
   - [ ] As funções da §5.4, puras e com teste.
   - [ ] `persistencia.ts` com chave `judisys:inicio:<usuarioId>`, valor versionado e lido com zod, e `apagarMontagens()` por prefixo.
   - [ ] `resetarDemo` do `boot.tsx` chama `apagarMontagens()` depois de o reset dar certo.
   - [ ] Sem `localStorage`, a montagem fica em memória, sem erro.
+  - [ ] `pnpm indicadores` (`scripts/indicadores.ts`, com tsx): carrega o seed com as datas do relógio fixo (2026-11-07 10:00, o mesmo dos e2e) e imprime os números das funções reais de `indicadores.ts`, por bloco e com rótulo.
 - **Testes:**
   - [ ] `cabe`: fora do grid à direita, `x` negativo, sobreposição e o próprio item ignorado
   - [ ] `primeiroLugarLivre`: buraco no meio, primeira linha cheia, sem lugar (vai para a base)
@@ -78,6 +80,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] MNT-05 · itens sobrepostos ou fora do grid reposicionados
   - [ ] MNT-06 · sem `localStorage`, gravar e ler em memória
   - [ ] MNT-07 · mudança de versão do seed não apaga a montagem
+  - [ ] `pnpm indicadores` imprime os números do topo e o passivo por classe iguais aos do teste do dashboard (DSH-01)
 
 ## INI-03 · Grade montável: prova de conceito, Personalizar e moldura do quadro
 - **Tipo:** Feature

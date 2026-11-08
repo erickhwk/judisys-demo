@@ -325,6 +325,7 @@ O mesmo do PRD §9, mais:
 ## 10. Notas de testabilidade
 
 - **Funções puras:** `montagem.ts`, `resumo.ts`, `persistencia.ts` (com um `Storage` falso) e os cálculos novos de `indicadores.ts` têm teste unitário com casos tirados das tabelas acima.
+- **Números do seed:** `pnpm indicadores` (`scripts/indicadores.ts`) roda as funções de `indicadores.ts` sobre o seed com o relógio fixo e imprime os resultados. É a fonte única dos números dos casos QDR e das fichas: nada de cálculo avulso fora do código do app.
 - **Grade:** em jsdom não há layout. Os testes de componente da grade injetam a largura (prop `larguraForcada`, só para teste) em vez de medir.
 - **Recusa:** a regra (`cabe`, coluna pretendida) tem teste unitário. O e2e do arrasto usa `page.mouse` com passos (`steps: 10`) e espera a tela parar de carregar antes de começar (pegadinha do hover registrada no handoff).
 - **Capturas:** `comparacao-visual` em 1280 (menu aberto), 1440, 834 e 390, nos dois temas, para o início e para uma página de lista (a casca), mais o modo Personalizar com a recusa.

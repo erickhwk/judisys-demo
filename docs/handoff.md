@@ -9,7 +9,7 @@ Data: 2026-11-08. Responda sempre em pt-BR.
 - As worktrees e os PRs usam a branch **`ini-redesign`** como base, nunca a `main`.
 - A divisão de arquivos e os args do lote estão no topo de `docs/tasks-inicio.md`.
 
-Antes de começar, falta uma decisão do usuário: o script `pnpm indicadores` (item 3 do `/retro`) entra na INI-02 ou vira um AJ? Ele roda o `indicadores.ts` sobre o seed com o relógio fixo, para que os números das fichas, dos casos do SDD e dos testes saiam de uma fonte só.
+A INI-02 inclui o script `pnpm indicadores`, a fonte única dos números do seed (decidido em 2026-11-08).
 
 ## Onde estamos
 
