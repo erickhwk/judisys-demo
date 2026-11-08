@@ -106,7 +106,8 @@ function assinar(avisar: () => void): () => void {
 
 /** Muda a cada `apagarMontagens`: na `key` da tela, faz ela reler a montagem depois do reset. */
 export function useGeracaoDasMontagens(): number {
-  return useSyncExternalStore(assinar, () => geracao)
+  const ler = () => geracao
+  return useSyncExternalStore(assinar, ler, ler)
 }
 
 /** Apaga as montagens de todos os usuários (RF-25). O `resetarDemo` do boot chama. Não lança. */
