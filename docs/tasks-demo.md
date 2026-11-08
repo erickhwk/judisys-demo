@@ -33,6 +33,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
   - Autonomia: o agente decide o que for técnico ou de baixo impacto e registra no rascunho do PR em "Decidido pelo agente"; vira dúvida só regra de negócio do produto real, escopo novo e o que for difícil de desfazer.
   - Pegadinhas: `biome migrate` desliga o linter (teste-guarda em `src/biome.test.ts`); Markdown fica fora do Biome. O relógio vem de `src/regras/relogio.ts`. Componentes de `src/ui/` antes de criar um novo; CSV com `gerarCsv`/`nomeArquivoCsv` (`src/regras/csv.ts`) e `baixarArquivo` (`src/ui/baixarArquivo.ts`). Capturas: `capturar.sh` com `--login-clique "Entrar como Advogado" --relogio 2026-11-07T10:00:00 --rolagem-interna --tela nome='#/rota'`, preview na porta 432{n}, derrubado no fim (`pkill -f 'preview --port 432{n}'`).
   - Guia visual (só leitura, fora do repo): `~/code/mcaa-app/docs/design/judisys/` (`DESIGN.md`, `dashboard.html`, `telas/`).
+  - Marca da Draft e cores aprovadas pelo usuário (só leitura, fora do repo): `~/code/draft-site/assets/` (logos da Draft em SVG). Laranja da Draft `#FF5A36`; dourado do Judisys `#C8993F` (= `--cor-dourado-500`). Cores chapadas, sem degradê, inclusive na marca (AJ-11); toda cor vem de `src/estilos/tokens.css`, conferido pelo `src/estilos/cores.test.ts` (AJ-17).
 
 ---
 
