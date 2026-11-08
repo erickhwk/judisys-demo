@@ -31,8 +31,10 @@ test('QDR-02 · próxima AGC do seed, e o Abrir leva à AGC', async ({ page }) =
   const agc = quadro(page, 'Próxima AGC')
   await expect(agc).toContainText('Grupo Lontra Azul')
   await expect(agc).toContainText('sexta · em 6 dias')
-  await expect(agc).toContainText('1ª convocação13/11')
-  await expect(agc).toContainText('2ª convocação20/11')
+  await expect(agc.getByRole('term').first()).toContainText('1ª convocação')
+  await expect(agc.getByRole('definition').first()).toHaveText('13/11')
+  await expect(agc.getByRole('term').nth(1)).toContainText('2ª convocação')
+  await expect(agc.getByRole('definition').nth(1)).toHaveText('20/11')
 
   await agc.getByRole('link', { name: 'Abrir' }).click()
   await expect(page.getByRole('heading', { name: 'AGC de 13/11/2026', level: 1 })).toBeVisible()

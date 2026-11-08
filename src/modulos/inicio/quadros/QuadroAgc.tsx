@@ -66,11 +66,21 @@ export function QuadroAgc({ variante }: PropsDoQuadro) {
         </div>
         <dl className={estilos.convocacoes}>
           <div className={estilos.convocacao}>
-            <dt>1ª convocação</dt>
+            <dt>
+              1ª <span className={estilos.longo}>convocação</span>
+              <span className={estilos.curto} aria-hidden="true">
+                conv.
+              </span>
+            </dt>
             <dd>{diaEMes(agc.dataPrimeira)}</dd>
           </div>
           <div className={estilos.convocacao}>
-            <dt>2ª convocação</dt>
+            <dt>
+              2ª <span className={estilos.longo}>convocação</span>
+              <span className={estilos.curto} aria-hidden="true">
+                conv.
+              </span>
+            </dt>
             <dd>{diaEMes(agc.dataSegunda)}</dd>
           </div>
         </dl>

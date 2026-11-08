@@ -86,8 +86,10 @@ describe('Q-02 · próxima AGC', () => {
   it('QDR-02 · Grupo Lontra Azul, 13/11, "em 6 dias", 2ª convocação 20/11', async () => {
     const html = await renderizar(<QuadroAgc variante="desktop" />)
     expect(texto(html)).toContain(
-      'nov 13 Grupo Lontra Azul sexta · em 6 dias 1ª convocação 13/11 2ª convocação 20/11',
+      'nov 13 Grupo Lontra Azul sexta · em 6 dias 1ª convocação conv. 13/11 2ª convocação conv. 20/11',
     )
+    // "conv." é a forma curta do quadro estreito; o leitor de tela ouve só "convocação".
+    expect(html).toContain('aria-hidden="true">conv.</span>')
     expect(html).toMatch(/href="\/processos\/prc-001\/agc\/[\w-]+"[^>]*>Abrir</)
   })
 
