@@ -9,6 +9,7 @@ import {
   type IdQuadro,
   type ItemMontagem,
   type Montagem,
+  ordemDeLeitura,
 } from './montagem'
 
 /** Vão entre as unidades, na horizontal e na vertical (5.3). */
@@ -86,7 +87,7 @@ export function soltar(
   const outros = antes.filter((item) => item.quadro !== quadro)
   const movido: ItemMontagem = { quadro, x, y: Math.min(y, base(outros)) }
   const postos: Montagem = [movido]
-  for (const item of [...outros].sort((a, b) => a.y - b.y || a.x - b.x)) {
+  for (const item of ordemDeLeitura(outros)) {
     const posto = { ...item }
     for (;;) {
       const embaixo = postos.filter((outro) => sobrepoe(posto, outro))

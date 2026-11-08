@@ -10,6 +10,7 @@ import type { Papel } from '../../regras/permissoes'
 import { agora, hoje as hojeDoRelogio } from '../../regras/relogio'
 import { Botao } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
+import { Vazio } from '../../ui/Vazio'
 import { type Sessao, useSessao } from '../entrada/sessao'
 import { colunasDaLargura } from './arrasto'
 import { CabecalhoInicio } from './CabecalhoInicio'
@@ -176,13 +177,16 @@ function Cabecalho({ sessao, hoje, acoes }: { sessao: Sessao; hoje: DataIso; aco
 function SemQuadros({ aoRestaurar }: { aoRestaurar?: () => void }) {
   return (
     <div className={estilos.semQuadros}>
-      <p className={estilos.semQuadrosTitulo}>Nenhum quadro no início</p>
-      <p className={estilos.semQuadrosTexto}>
-        {aoRestaurar
-          ? 'Restaure o padrão do seu papel ou adicione quadros pelo catálogo do Personalizar.'
-          : 'Para montar o início, abra o Personalizar numa tela larga.'}
-      </p>
-      {aoRestaurar && <Botao onClick={aoRestaurar}>Restaurar padrão</Botao>}
+      <Vazio
+        icone={<LayoutDashboard size={24} />}
+        titulo="Nenhum quadro no início"
+        descricao={
+          aoRestaurar
+            ? 'Restaure o padrão do seu papel ou adicione quadros pelo catálogo do Personalizar.'
+            : 'Para montar o início, abra o Personalizar numa tela larga.'
+        }
+        acao={aoRestaurar && <Botao onClick={aoRestaurar}>Restaurar padrão</Botao>}
+      />
     </div>
   )
 }

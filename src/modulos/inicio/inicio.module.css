@@ -26,28 +26,6 @@
 /* Montagem vazia de propósito (RF-23) */
 
 .semQuadros {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 40px 24px;
   border: 1px dashed var(--cor-quadro-guia);
   border-radius: 12px;
-  text-align: center;
-}
-
-.semQuadrosTitulo {
-  margin: 0;
-  font-family: var(--fonte-titulo);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--cor-texto);
-}
-
-.semQuadrosTexto {
-  max-width: 440px;
-  margin: 0 0 8px;
-  font-size: var(--tamanho-texto-pequeno);
-  line-height: 1.5;
-  color: var(--cor-texto-muted);
 }
