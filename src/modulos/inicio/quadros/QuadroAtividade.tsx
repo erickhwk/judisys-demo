@@ -53,9 +53,11 @@ export function QuadroAtividade({ variante }: PropsDoQuadro) {
       <ol className={listas.lista}>
         {recentes.map((log) => {
           const quem = nomes.get(log.usuarioId) ?? 'Usuário excluído'
-          const onde = log.processoId
-            ? (apelidos.get(log.processoId) ?? 'Processo excluído')
-            : undefined
+          const apelido = log.processoId ? apelidos.get(log.processoId) : undefined
+          // O log do próprio processo já diz "o processo": sem apelido (excluído), fica só a ação.
+          const onde =
+            apelido ??
+            (log.processoId && log.colecao !== 'processos' ? 'Processo excluído' : undefined)
           const destino = destinoDaAtividade(log, registros.data, podeLer)
           const conteudo = (
             <>

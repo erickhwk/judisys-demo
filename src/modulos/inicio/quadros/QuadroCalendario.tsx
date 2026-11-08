@@ -16,6 +16,7 @@ import { maiuscula } from '../resumo'
 import { Quadro } from './Quadro'
 import estilos from './QuadroCalendario.module.css'
 import type { PropsDoQuadro } from './registro'
+import { diaCurto } from './textos'
 
 const LEGENDA: readonly [MarcaDoDia, string][] = [
   ['vencido', 'vencido'],
@@ -137,11 +138,6 @@ function Destaque({
       {conteudo}
     </p>
   )
-}
-
-/** `7/11`: o dia sem o zero à esquerda, como no canvas. */
-function diaCurto(data: DataIso): string {
-  return `${Number(data.slice(8, 10))}/${data.slice(5, 7)}`
 }
 
 /** `novembro`: só o nome do mês de `hoje`. */

@@ -190,17 +190,25 @@ const PESO_DA_MARCA: Readonly<Record<MarcaDoDia, number>> = {
   prazo: 1,
 }
 
+/** Uma convocação de AGC no calendário: a data e qual das duas é. */
+export interface ConvocacaoDoDia {
+  data: DataIso
+  convocacao: 1 | 2
+}
+
 /**
  * Datas de AGC que o calendário marca: a convocação instalada, se houve (mesmo de AGC encerrada: ela
  * aconteceu naquele dia); senão, as convocações de hoje em diante da AGC não encerrada (a 1ª que
  * passou sem instalar não acontece mais), como na `proximasAgcs`.
  */
-export function datasDeAgc(agc: Agc, hoje: DataIso): DataIso[] {
-  if (agc.convocacaoInstalada) {
-    return [agc.convocacaoInstalada === 1 ? agc.dataPrimeira : agc.dataSegunda]
-  }
+export function datasDeAgc(agc: Agc, hoje: DataIso): ConvocacaoDoDia[] {
+  const primeira = { data: agc.dataPrimeira, convocacao: 1 } as const
+  const segunda = { data: agc.dataSegunda, convocacao: 2 } as const
+  if (agc.convocacaoInstalada) return [agc.convocacaoInstalada === 1 ? primeira : segunda]
   if (agc.status === 'encerrada') return []
-  return [agc.dataPrimeira, agc.dataSegunda].filter((data) => data >= hoje)
+  // As duas no mesmo dia (o schema permite): um evento só, o da 1ª.
+  const datas = agc.dataSegunda === agc.dataPrimeira ? [primeira] : [primeira, segunda]
+  return datas.filter((c) => c.data >= hoje)
 }
 
 /**
@@ -224,7 +232,7 @@ export function prazosDoMes(
     const v = prazo.vencimento
     marcar(v, v < hoje ? 'vencido' : v === hoje ? 'hoje' : 'prazo')
   }
-  for (const agc of agcs) for (const data of datasDeAgc(agc, hoje)) marcar(data, 'agc')
+  for (const agc of agcs) for (const { data } of datasDeAgc(agc, hoje)) marcar(data, 'agc')
   return new Map([...marcas].sort(([a], [b]) => a.localeCompare(b)))
 }
 
@@ -248,13 +256,7 @@ export function destaqueDoMes(
     .filter((p) => noPeriodo(p, 'abertos', hoje) && noMes(p.vencimento))
     .sort(compararPrazos)
   const convocacoes = agcs
-    .flatMap((agc) =>
-      datasDeAgc(agc, hoje).map((data) => ({
-        agc,
-        data,
-        convocacao: (data === agc.dataPrimeira ? 1 : 2) as 1 | 2,
-      })),
-    )
+    .flatMap((agc) => datasDeAgc(agc, hoje).map((c) => ({ ...c, agc })))
     .filter((c) => noMes(c.data))
     .sort((a, b) => a.data.localeCompare(b.data) || a.agc.id.localeCompare(b.agc.id))
   const [prazo] = abertos

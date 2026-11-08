@@ -113,6 +113,11 @@
   background: var(--cor-dourado-claro);
 }
 
+/* Hoje com AGC: o anel dourado fica, mas o número segue o da AGC (texto invertido no azul cheio). */
+.dia[data-hoje][data-marca="agc"] {
+  color: var(--cor-texto-invertido);
+}
+
 .legenda {
   display: flex;
   flex-wrap: wrap;

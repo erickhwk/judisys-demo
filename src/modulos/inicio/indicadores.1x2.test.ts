@@ -90,12 +90,16 @@ describe('proximosDoQuadro (Q-04, C-05)', () => {
 })
 
 describe('datasDeAgc (Q-05)', () => {
+  const datas = (a: Tipos['agcs']) =>
+    datasDeAgc(a, HOJE).map((c) => `${Number(c.data.slice(8))} (${c.convocacao}ª)`)
+
   it('agendada: as convocações de hoje em diante', () => {
-    expect(datasDeAgc(agc('a', '2026-11-13', '2026-11-20'), HOJE)).toEqual([
-      '2026-11-13',
-      '2026-11-20',
-    ])
-    expect(datasDeAgc(agc('b', '2026-11-05', '2026-11-12'), HOJE)).toEqual(['2026-11-12'])
+    expect(datas(agc('a', '2026-11-13', '2026-11-20'))).toEqual(['13 (1ª)', '20 (2ª)'])
+    expect(datas(agc('b', '2026-11-05', '2026-11-12'))).toEqual(['12 (2ª)'])
+  })
+
+  it('as duas convocações no mesmo dia contam como um evento só, o da 1ª', () => {
+    expect(datas(agc('mesmo-dia', '2026-11-13', '2026-11-13'))).toEqual(['13 (1ª)'])
   })
 
   it('instalada (ou já encerrada): só a data da convocação instalada', () => {
@@ -103,13 +107,13 @@ describe('datasDeAgc (Q-05)', () => {
       status: 'encerrada',
       convocacaoInstalada: 2,
     })
-    expect(datasDeAgc(instalada, HOJE)).toEqual(['2026-11-12'])
+    expect(datas(instalada)).toEqual(['12 (2ª)'])
+    const noMesmoDia = agc('e', '2026-11-12', '2026-11-12', { convocacaoInstalada: 2 })
+    expect(datas(noMesmoDia)).toEqual(['12 (2ª)'])
   })
 
   it('encerrada sem instalação: nenhuma', () => {
-    expect(datasDeAgc(agc('d', '2026-11-13', '2026-11-20', { status: 'encerrada' }), HOJE)).toEqual(
-      [],
-    )
+    expect(datas(agc('d', '2026-11-13', '2026-11-20', { status: 'encerrada' }))).toEqual([])
   })
 })
 
@@ -190,6 +194,13 @@ describe('destaqueDoMes (pé do calendário)', () => {
   it('a 2ª convocação conta como AGC daquele dia', () => {
     const agcs = [agc('agc', '2026-11-01', '2026-11-08')]
     expect(destaqueDoMes([], agcs, HOJE)).toMatchObject({ tipo: 'agc', convocacao: 2 })
+  })
+
+  it('AGC instalada na 2ª com as duas datas iguais: "2ª convocação" e nenhum outro evento', () => {
+    const agcs = [agc('agc', '2026-11-13', '2026-11-13', { convocacaoInstalada: 2 })]
+    expect(destaqueDoMes([], agcs, HOJE)).toMatchObject({ convocacao: 2, outros: 0 })
+    const naoInstalada = [agc('agc', '2026-11-13', '2026-11-13')]
+    expect(destaqueDoMes([], naoInstalada, HOJE)).toMatchObject({ convocacao: 1, outros: 0 })
   })
 
   it('resto do mês livre (só vencidos, ou eventos no mês que vem): null', () => {

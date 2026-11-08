@@ -9,6 +9,11 @@ export function diaEMes(data: DataIso | Carimbo): string {
   return `${data.slice(8, 10)}/${data.slice(5, 7)}`
 }
 
+/** `7/11`: o dia sem o zero à esquerda, como no pé do calendário do canvas (Q-05). */
+export function diaCurto(data: DataIso): string {
+  return `${Number(data.slice(8, 10))}/${data.slice(5, 7)}`
+}
+
 /** Distância de hoje: "há 90 dias", "ontem", "hoje", "amanhã", "em 5 dias" (Q-04, QDR-05). */
 export function dataRelativa(data: DataIso, hoje: DataIso): string {
   const dias = diasEntre(hoje, data)

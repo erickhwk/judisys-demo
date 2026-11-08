@@ -155,6 +155,23 @@ describe('Q-06 · Atividade recente', () => {
       '/empresas/emp-006',
     ])
   })
+  it('processo excluído: o log dele fica "excluiu o processo", sem "Processo excluído"', async () => {
+    const [maisNovo] = [...tabelas.logs].sort((a, b) => b.data.localeCompare(a.data))
+    if (!maisNovo) throw new Error('seed sem logs')
+    const dados = new ArmazenamentoMemoria()
+    const exclusao = {
+      ...maisNovo,
+      id: 'log-exclusao',
+      data: '2026-11-07T09:00:00',
+      acao: 'excluiu',
+      colecao: 'processos',
+      registroId: 'prc-apagado',
+      processoId: 'prc-apagado',
+    } as const
+    await gravarTabelas(dados, { ...tabelas, logs: [...tabelas.logs, exclusao] })
+    const [primeira] = itens(await renderizar(QuadroAtividade, 'desktop', dados))
+    expect(primeira).toMatch(/excluiu o processo$/)
+  })
 })
 
 describe('Q-07 · Últimos informes', () => {

@@ -8,6 +8,7 @@ import { hoje as hojeDoRelogio } from '../../../regras/relogio'
 import { juntarClasses } from '../../../ui/classes'
 import { useSessao } from '../../entrada/sessao'
 import { enderecoDoPrazo } from '../../prazos/TabelaPrazos'
+import { plural } from '../../processos/rotulos'
 import { proximosDoQuadro } from '../indicadores'
 import listas from './listaDoQuadro.module.css'
 import { Quadro } from './Quadro'
@@ -83,5 +84,4 @@ export function QuadroProximos({ variante }: PropsDoQuadro) {
   )
 }
 
-const rodape = (restantes: number) =>
-  `+ ${restantes} ${restantes === 1 ? 'prazo' : 'prazos'} na agenda`
+const rodape = (restantes: number) => `+ ${plural(restantes, 'prazo', 'prazos')} na agenda`
