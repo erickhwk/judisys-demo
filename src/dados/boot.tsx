@@ -10,6 +10,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { apagarMontagens } from '../modulos/inicio/persistencia'
 import { TelaCarregando, TelaErroCarga } from '../ui/TelaDeBoot'
 import type { Armazenamento } from './armazenamento'
 import { carregar, type ResultadoCarga, resetar, TITULO_ERRO_CARGA } from './carga'
@@ -88,7 +89,7 @@ function DemoCarregada({ carga, children }: { carga: ResultadoCarga; children: R
   const [avisoVersao, setAvisoVersao] = useState(carga.avisoVersao)
 
   const resetarDemo = useCallback(async () => {
-    await resetar(carga)
+    await resetarDadosDaDemo(carga)
     setAvisoVersao(false)
   }, [carga])
 
@@ -103,4 +104,16 @@ function DemoCarregada({ carga, children }: { carga: ResultadoCarga; children: R
     [carga, avisoVersao, resetarDemo],
   )
   return <Demo.Provider value={valor}>{children}</Demo.Provider>
+}
+
+/**
+ * Reset manual (RF-02) com o que vive fora do IndexedDB: depois de o seed ser regravado, apaga as
+ * montagens do início (RF-25, SDD-INI §5.5). Se o reset falha, as montagens ficam.
+ */
+export async function resetarDadosDaDemo(
+  carga: ResultadoCarga,
+  passos: { resetar: typeof resetar; apagarMontagens: () => void } = { resetar, apagarMontagens },
+): Promise<void> {
+  await passos.resetar(carga)
+  passos.apagarMontagens()
 }

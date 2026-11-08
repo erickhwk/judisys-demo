@@ -80,6 +80,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] MNT-05 · itens sobrepostos ou fora do grid reposicionados
   - [ ] MNT-06 · sem `localStorage`, gravar e ler em memória
   - [ ] MNT-07 · mudança de versão do seed não apaga a montagem
+  - [ ] MNT-08 · montagem com todos os quadros descartados vira o padrão do papel; vazia de propósito continua vazia
   - [ ] `pnpm indicadores` imprime os números do topo e o passivo por classe iguais aos do teste do dashboard (DSH-01)
 
 ## INI-03 · Grade montável: prova de conceito, Personalizar e moldura do quadro
