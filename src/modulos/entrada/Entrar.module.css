@@ -267,138 +267,314 @@
   background: var(--cor-previa-item);
 }
 
+.grupoMenu {
+  width: 44px;
+  height: 4px;
+  margin: 10px 0 0 10px;
+  border-radius: 2px;
+  background: var(--cor-previa-item);
+  opacity: 0.6;
+}
+
+/* A conta no pé do menu: avatar e nome. */
+.contaMenu {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.contaMenu span:first-child {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cor-dourado-200);
+}
+
+.contaMenu span:last-child {
+  width: 60px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--cor-previa-item);
+}
+
+/* O início em miniatura: saudação, Carteira por fase e a grade de quadros (AJ-23). */
 .janelaConteudo {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 20px 24px;
+  gap: 12px;
+  padding: 18px 22px;
   color: var(--cor-previa-texto);
+}
+
+.saudacao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .janelaTitulo {
   font-family: var(--fonte-titulo);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
+  line-height: 1.1;
 }
 
-.janelaCards {
+.resumo {
   display: flex;
-  gap: 10px;
+  gap: 4px;
 }
 
-.miniCard,
-.miniLista {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--cor-previa-borda);
-  border-radius: 10px;
-  background: var(--cor-previa-cartao);
-}
-
-.miniCard {
-  flex: 1;
-}
-
-.miniRotulo {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--cor-previa-rotulo);
-}
-
-.miniNumero {
-  width: 46px;
-  height: 12px;
-  border-radius: 4px;
-  background: var(--cor-previa-texto);
-}
-
-.miniBarra {
-  display: flex;
-  gap: 2px;
+.resumo span {
   height: 5px;
-  overflow: hidden;
   border-radius: 3px;
 }
 
-.miniBarra span:first-child {
-  flex: 8;
-  background: var(--cor-azul-800);
+.resumo span:first-child {
+  width: 64px;
+  background: var(--cor-perigo);
 }
 
-.miniBarra span:last-child {
-  flex: 2;
-  background: var(--cor-dourado-500);
-}
-
-.miniLista {
-  width: 64%;
-  gap: 6px;
-}
-
-.miniListaTitulo {
-  margin-bottom: 4px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.miniLinha {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  background: var(--cor-previa-fundo);
-}
-
-.miniIcone {
-  width: 26px;
-  height: 26px;
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 7px;
-  background: var(--cor-previa-icone);
-  color: var(--cor-dourado-700);
-}
-
-.miniTexto {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  white-space: nowrap;
+.resumo span:last-child {
+  width: 190px;
+  background: var(--cor-previa-traco);
 }
 
 .miniTraco {
-  width: 70%;
   height: 5px;
   border-radius: 3px;
   background: var(--cor-previa-traco);
 }
 
-.miniSelo {
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--cor-azul-claro);
-  color: var(--cor-azul-800);
+.miniQuadro {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 1px solid var(--cor-previa-borda);
+  border-radius: 9px;
+  background: var(--cor-previa-cartao);
+}
+
+.miniTitulo {
   font-size: 9.5px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.carteira {
+  gap: 6px;
+}
+
+.fases {
+  display: grid;
+  grid-template-columns: repeat(var(--fases), 1fr);
+  gap: 3px;
+}
+
+.rj {
+  --fases: 10;
+}
+
+.falencia {
+  --fases: 7;
+}
+
+.fases span {
+  height: 14px;
+  border-radius: 3px;
+  background: var(--cor-previa-fundo);
+}
+
+/* RJ azul e falência dourada, como a Carteira por fase do início (AJ-20). */
+.rj .faseOcupada {
+  background: var(--cor-azul-claro);
+}
+
+.falencia .faseOcupada {
+  background: var(--cor-dourado-claro);
+}
+
+.miniGrade {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 116px;
+  gap: 10px;
+}
+
+.largo {
+  grid-column: span 2;
+}
+
+.passivo {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.trilho {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--cor-previa-fundo);
+}
+
+.trilho span {
+  display: block;
+  height: 100%;
+  background: var(--cor-grafico-3);
+}
+
+.trilho .barraMaior {
+  background: var(--cor-grafico-1);
+}
+
+.numero {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fonte-titulo);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.vencidos {
+  width: 46px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--cor-perigo);
+}
+
+.segmentos {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+  margin-top: auto;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.segmentos span:nth-child(1) {
+  flex: 3;
+  background: var(--cor-perigo);
+}
+
+.segmentos span:nth-child(2) {
+  flex: 1;
+  background: var(--cor-grafico-2);
+}
+
+.segmentos span:nth-child(3) {
+  flex: 1;
+  background: var(--cor-grafico-1);
+}
+
+.segmentos span:nth-child(4) {
+  flex: 6;
+  background: var(--cor-grafico-3);
+}
+
+.segmentos span:nth-child(5) {
+  flex: 8;
+  background: var(--cor-grafico-4);
+}
+
+.agc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agc .miniTraco {
+  flex: 1;
+}
+
+.dia {
+  width: 34px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--cor-previa-borda);
+  border-radius: 6px;
+  font-family: var(--fonte-titulo);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.dia span {
+  align-self: stretch;
+  background: var(--cor-previa-destaque);
+  color: var(--cor-dourado-200);
+  font-size: 7px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.linha {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+.linha polyline {
+  fill: none;
+  stroke: var(--cor-grafico-1);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.prazo,
+.atividade {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prazo .miniTraco,
+.atividade .miniTraco {
+  flex: 1;
+}
+
+.prazo span:first-child {
+  width: 22px;
+  height: 5px;
+  flex: none;
+  border-radius: 3px;
+}
+
+.atrasado {
+  background: var(--cor-perigo);
+}
+
+.hoje {
+  background: var(--cor-dourado-600);
+}
+
+.atividade span:first-child {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--cor-azul-claro);
 }
 
 .flutuante {
   position: absolute;
-  left: -28px;
-  top: 250px;
+  /* Sobre o menu, saindo da janela pela esquerda: visível em 1280x800, cobrindo só os traços dos
+     rótulos do Passivo, sem texto. */
+  left: -48px;
+  top: 212px;
   display: flex;
   align-items: center;
   gap: 12px;

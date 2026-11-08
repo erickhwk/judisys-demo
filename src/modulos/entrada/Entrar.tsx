@@ -1,6 +1,6 @@
 // Login da demo (RF-05; DESIGN.md §Login): metade com os três cartões "Entrar como…", um por papel,
 // com o primeiro usuário daquele papel no seed; metade com o painel escuro decorativo.
-import { ArrowRight, Bell, FileText } from 'lucide-react'
+import { ArrowRight, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useTodos } from '../../dados/contexto'
 import type { Usuario } from '../../dados/schemas'
@@ -101,9 +101,17 @@ export function Entrar() {
   )
 }
 
-const LINHAS_PREVIA = ['Quadro Geral de Credores', 'Ata da AGC', 'Relatório mensal de atividades']
+/** Fases de cada linha da Carteira por fase na prévia: `true` é fase com processo. */
+const CARTEIRA_PREVIA = {
+  rj: [true, true, true, false, true, false, false, false, true, true],
+  falencia: [true, true, false, true, false, false, true],
+} as const
+/** Larguras das barras do Passivo sob administração, em % da maior. */
+const PASSIVO_PREVIA = [100, 25, 23, 20]
+/** Prazos cumpridos por mês: os pontos da linha, de 0 (fundo) a 40 (topo). */
+const LINHA_PREVIA = '0,26 22,30 44,30 66,24 88,14 110,30 132,34 154,28 176,16 198,22 220,10 240,16'
 
-/** Metade escura com a prévia do sistema (decorativa, sem dados). */
+/** Metade escura com a prévia do sistema (decorativa, sem dados): o início em miniatura (AJ-23). */
 function PainelDecorativo() {
   return (
     <aside className={estilos.painel}>
@@ -119,43 +127,114 @@ function PainelDecorativo() {
         <div className={estilos.janela}>
           <div className={estilos.janelaMenu}>
             <Logo variante="marca" fundo="escuro" altura={24} alt="" />
+            <span className={estilos.grupoMenu} />
             <span className={estilos.itemAtivo}>
               <span />
             </span>
-            {[50, 56, 44, 64].map((largura) => (
+            {[56, 50, 44, 46].map((largura) => (
               <span key={largura} className={estilos.itemMenu}>
                 <span style={{ width: largura }} />
               </span>
             ))}
+            <span className={estilos.grupoMenu} />
+            {[48, 34].map((largura) => (
+              <span key={largura} className={estilos.itemMenu}>
+                <span style={{ width: largura }} />
+              </span>
+            ))}
+            <span className={estilos.contaMenu}>
+              <span />
+              <span />
+            </span>
           </div>
           <div className={estilos.janelaConteudo}>
-            <span className={estilos.janelaTitulo}>Início</span>
-            <div className={estilos.janelaCards}>
-              {['Processos', 'Credores', 'Prazos'].map((rotulo) => (
-                <div key={rotulo} className={estilos.miniCard}>
-                  <span className={estilos.miniRotulo}>{rotulo}</span>
-                  <span className={estilos.miniNumero} />
-                  <span className={estilos.miniBarra}>
-                    <span />
-                    <span />
-                  </span>
+            <div className={estilos.saudacao}>
+              <span className={estilos.miniTraco} style={{ width: 70 }} />
+              <span className={estilos.janelaTitulo}>Bom dia, Helena</span>
+              <span className={estilos.resumo}>
+                <span />
+                <span />
+              </span>
+            </div>
+            <div className={`${estilos.miniQuadro} ${estilos.carteira}`}>
+              <span className={estilos.miniTitulo}>Carteira por fase</span>
+              {(['rj', 'falencia'] as const).map((tipo) => (
+                <div key={tipo} className={`${estilos.fases} ${estilos[tipo]}`}>
+                  {CARTEIRA_PREVIA[tipo].map((ocupada, i) => (
+                    <span
+                      // biome-ignore lint/suspicious/noArrayIndexKey: lista fixa e decorativa
+                      key={i}
+                      className={ocupada ? estilos.faseOcupada : undefined}
+                    />
+                  ))}
                 </div>
               ))}
             </div>
-            <div className={estilos.miniLista}>
-              <span className={estilos.miniListaTitulo}>Últimos informes</span>
-              {LINHAS_PREVIA.map((titulo) => (
-                <div key={titulo} className={estilos.miniLinha}>
-                  <span className={estilos.miniIcone}>
-                    <FileText size={14} />
+            <div className={estilos.miniGrade}>
+              <div className={`${estilos.miniQuadro} ${estilos.largo}`}>
+                <span className={estilos.miniTitulo}>Passivo sob administração</span>
+                {PASSIVO_PREVIA.map((largura, i) => (
+                  <span key={largura} className={estilos.passivo}>
+                    <span className={estilos.miniTraco} />
+                    <span className={estilos.trilho}>
+                      <span
+                        className={i === 0 ? estilos.barraMaior : undefined}
+                        style={{ width: `${largura}%` }}
+                      />
+                    </span>
                   </span>
-                  <span className={estilos.miniTexto}>
-                    <span>{titulo}</span>
+                ))}
+              </div>
+              <div className={estilos.miniQuadro}>
+                <span className={estilos.miniTitulo}>Prazos em aberto</span>
+                <span className={estilos.numero}>
+                  19
+                  <span className={estilos.vencidos} />
+                </span>
+                <span className={estilos.segmentos}>
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </div>
+              <div className={estilos.miniQuadro}>
+                <span className={estilos.miniTitulo}>Próxima AGC</span>
+                <span className={estilos.agc}>
+                  <span className={estilos.dia}>
+                    <span>NOV</span>
+                    13
+                  </span>
+                  <span className={estilos.miniTraco} />
+                </span>
+              </div>
+              <div className={`${estilos.miniQuadro} ${estilos.largo}`}>
+                <span className={estilos.miniTitulo}>Prazos cumpridos</span>
+                <svg className={estilos.linha} viewBox="0 0 240 40" preserveAspectRatio="none">
+                  <title>Prazos cumpridos por mês</title>
+                  <polyline points={LINHA_PREVIA} />
+                </svg>
+              </div>
+              <div className={estilos.miniQuadro}>
+                <span className={estilos.miniTitulo}>Próximos prazos</span>
+                {[estilos.atrasado, estilos.atrasado, estilos.hoje].map((tom, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: lista fixa e decorativa
+                  <span key={i} className={estilos.prazo}>
+                    <span className={tom} />
                     <span className={estilos.miniTraco} />
                   </span>
-                  <span className={estilos.miniSelo}>RJ</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className={estilos.miniQuadro}>
+                <span className={estilos.miniTitulo}>Atividade recente</span>
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className={estilos.atividade}>
+                    <span />
+                    <span className={estilos.miniTraco} />
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
