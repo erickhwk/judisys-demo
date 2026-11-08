@@ -100,8 +100,8 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 - **Testes:**
   - [ ] GRD-01 · padrão do advogado em 1440px
   - [ ] GRD-02 · padrão de cada papel
-  - [ ] GRD-03 · 4 colunas a partir de 976px
-  - [ ] GRD-04 · 2 colunas em 975px, empacotado
+  - [ ] GRD-03 · 4 colunas a partir de 880px (inclui 1280px com o menu aberto)
+  - [ ] GRD-04 · 2 colunas em 879px, empacotado
   - [ ] GRD-05 · ordem do advogado em 2 colunas
   - [ ] GRD-06 · uma coluna no celular
   - [ ] GRD-07 · link do cabeçalho do quadro leva à origem
