@@ -66,6 +66,15 @@ test('CAS-04 · a busca global abre pelo cabeçalho da página e pelo ⌘K', asy
   await expect(busca(page).locator('[data-grupo="processos"]').getByRole('option')).toHaveCount(1)
 })
 
+test('CAS-04 · no início, a busca fica no cabeçalho do início (uma só)', async ({ page }) => {
+  await entrarComo(page, 'advogado')
+  const cabecalho = page.locator('main header').first()
+  await expect(cabecalho.getByRole('heading', { level: 1 })).toContainText('Otávio')
+  await expect(page.getByRole('button', { name: 'Buscar', exact: true })).toHaveCount(1)
+  await cabecalho.getByRole('button', { name: 'Buscar', exact: true }).click()
+  await expect(busca(page).getByRole('combobox')).toBeFocused()
+})
+
 test('CAS-05 · em 834px, a barra do topo tem o menu, a logo, a lupa e o avatar', async ({
   page,
 }) => {

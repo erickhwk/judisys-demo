@@ -3,6 +3,7 @@
 // frase-resumo do dia, com os vencidos em vermelho. À direita, as ações (busca e Personalizar).
 import type { ReactNode } from 'react'
 import type { DataIso } from '../../regras/datas'
+import { BotaoBuscaGlobal } from '../busca/BuscaGlobal'
 import estilos from './CabecalhoInicio.module.css'
 import { dataPorExtenso, type FraseDoResumo, primeiroNome, saudacao } from './resumo'
 
@@ -14,7 +15,7 @@ export interface PropsCabecalhoInicio {
   hoje: DataIso
   /** Sem resumo (dados ainda carregando ou com erro), a linha não aparece. */
   resumo?: FraseDoResumo
-  /** O lugar da busca e do botão Personalizar (INI-03). */
+  /** Ações à esquerda da busca, como o botão Personalizar (INI-03). */
   acoes?: ReactNode
 }
 
@@ -31,7 +32,10 @@ export function CabecalhoInicio({ nome, hora, hoje, resumo, acoes }: PropsCabeca
           </p>
         )}
       </div>
-      {acoes && <div className={estilos.acoes}>{acoes}</div>}
+      <div className={estilos.acoes}>
+        {acoes}
+        <BotaoBuscaGlobal className={estilos.busca} />
+      </div>
     </header>
   )
 }
