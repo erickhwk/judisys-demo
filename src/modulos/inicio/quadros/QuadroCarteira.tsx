@@ -50,7 +50,8 @@ export function QuadroCarteira({ variante }: PropsDoQuadro) {
   const { sessao } = useSessao()
   const podeAbrir = sessao ? pode(sessao.papel, 'ler', 'processos') : false
   const carteira = processos.data ? carteiraPorFase(processos.data) : null
-  const semProcessos = carteira?.every((c) => c.fases.every((f) => f.quantidade === 0))
+  // Vazio só sem nenhum processo: uma carteira só de convoladas ou desistências mostra as trilhas zeradas.
+  const semProcessos = processos.data?.length === 0
 
   return (
     <Quadro

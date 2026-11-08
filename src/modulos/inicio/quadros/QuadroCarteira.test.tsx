@@ -92,6 +92,20 @@ describe('Quadro Carteira por fase', () => {
     expect(html).not.toContain(ERRO_CARTEIRA)
   })
 
+  it('QDR-15 · só com convoladas e desistências, as trilhas zeradas, e não o estado vazio', async () => {
+    const tabelas = prepararSeed(gerarSeed(), '2026-11-07').tabelas
+    const processos = tabelas.processos.filter((p) =>
+      ['convolada-falencia', 'desistencia'].includes(p.faseAtual),
+    )
+    expect(processos.length).toBeGreaterThan(0)
+    const armazenamento = new ArmazenamentoMemoria()
+    await gravarTabelas(armazenamento, { ...tabelas, processos })
+    const html = await tela('desktop', armazenamento)
+    expect(html).not.toContain(VAZIO_CARTEIRA)
+    expect(html).toContain('0 ativas')
+    expect(linksDeFase(html)).toEqual([])
+  })
+
   it('resumo do tipo no singular e sem encerradas', () => {
     expect(resumoDoTipo({ ativos: 1, encerrados: 0 })).toBe('1 ativa')
     expect(resumoDoTipo({ ativos: 0, encerrados: 2 })).toBe('0 ativas · 2 encerradas')

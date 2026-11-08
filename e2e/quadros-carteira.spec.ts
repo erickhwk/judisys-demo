@@ -56,6 +56,11 @@ test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ p
     const janela = 'janela' in extremo ? extremo.janela : extremo.conteiner + casca
     await page.setViewportSize({ width: janela, height: 900 })
     await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
+    if ('conteiner' in extremo) {
+      // A casca medida em 1440px vale nesta janela: o contêiner é mesmo o extremo pedido.
+      const largura = (await grade.boundingBox())?.width ?? 0
+      expect(Math.abs(largura - extremo.conteiner), extremo.nome).toBeLessThanOrEqual(1)
+    }
     await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
     // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
     const estouros = await carteira(page).evaluate((quadro) => {
