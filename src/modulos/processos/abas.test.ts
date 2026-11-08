@@ -8,15 +8,9 @@ describe('rotaDoProcesso', () => {
     expect(rotaDoProcesso('prc-002', 'agc')).toBe('/processos/prc-002/agc')
   })
 
-  it('serve para todas as abas', () => {
-    expect(ABAS.map((aba) => rotaDoProcesso('prc-001', aba))).toEqual([
-      '/processos/prc-001/visao-geral',
-      '/processos/prc-001/empresas',
-      '/processos/prc-001/credores',
-      '/processos/prc-001/prazos',
-      '/processos/prc-001/agc',
-      '/processos/prc-001/informes',
-      '/processos/prc-001/historico',
-    ])
+  it('serve para todas as abas, sem depender da ordem delas', () => {
+    for (const aba of ABAS) {
+      expect(rotaDoProcesso('prc-001', aba)).toBe(`/processos/prc-001/${aba}`)
+    }
   })
 })
