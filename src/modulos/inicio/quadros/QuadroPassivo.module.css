@@ -8,23 +8,17 @@
   margin-top: 8px;
 }
 
-/* Na célula de altura fixa, as linhas ficam mais juntas que o padrão do gráfico (10px). */
-.corpo:not([data-variante="celular"]) [data-grafico="barras-horizontais"] {
-  gap: 7px;
-}
-
-/* O nome ganha a largura do canvas (190px em 272px de unidade) e encolhe com o quadro. */
-.corpo:not([data-variante="celular"]) [data-grafico="barras-horizontais"] > div {
-  grid-template-columns: minmax(0, 36%) minmax(0, 1fr) auto;
+/* Na célula de altura fixa, as linhas ficam mais juntas que o padrão do gráfico (10px), e o nome
+   ganha a largura do canvas (190px em 272px de unidade) e encolhe com o quadro. */
+.corpo:not([data-variante="celular"]) {
+  --barras-vao: 7px;
+  --barras-largura-nome: 36%;
 }
 
 .corpo[data-variante="celular"] {
+  --barras-vao: 12px;
   gap: 12px;
   margin-top: 12px;
-}
-
-.corpo[data-variante="celular"] [data-grafico="barras-horizontais"] {
-  gap: 12px;
 }
 
 .nota {

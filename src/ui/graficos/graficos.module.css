@@ -168,14 +168,15 @@
 .barras {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* Quem usa ajusta o vão e a largura do nome por estas variáveis, sem mexer na grade da linha. */
+  gap: var(--barras-vao, 10px);
   width: 100%;
   min-width: 0;
 }
 
 .linhaBarra {
   display: grid;
-  grid-template-columns: minmax(0, 9em) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, var(--barras-largura-nome, 9em)) minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
 }
