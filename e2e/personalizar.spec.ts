@@ -170,6 +170,60 @@ test('PRS-04 · recusa: sombra vermelha cortada na borda, aviso e volta ao solta
   expect(await posicoes(page)).toEqual(antes)
 })
 
+test('PRS-04 · um 1×1 todo fora do grid: aviso sem sombra e volta ao soltar', async ({ page }) => {
+  await personalizar(page)
+  const antes = await posicoes(page)
+  await arrastar(page, 'proximos', -2, 0, false)
+  const status = page.locator('[data-colunas="4"]').getByRole('status')
+  await expect(status).toHaveText('Não cabe aqui: este quadro ocupa 1 coluna.')
+  await expect(page.locator('[data-recusa]')).toHaveCount(0)
+  await page.mouse.up()
+  expect(await posicoes(page)).toEqual(antes)
+})
+
+test('arrastar: a célula de origem mantém a altura enquanto a prévia encolhe o grid', async ({
+  page,
+}) => {
+  await montar(page, [
+    { quadro: 'proximos', x: 0, y: 0 },
+    { quadro: 'calendario', x: 0, y: 2 },
+  ])
+  await personalizar(page)
+  await arrastar(page, 'calendario', 1, 0, false)
+  await expect(page.locator('[data-celula="proximos"]')).toHaveAttribute('data-y', '0')
+  // offsetHeight, e não a caixa: o arrastado está inclinado.
+  const altura = await page
+    .locator('[data-celula="calendario"]')
+    .evaluate((celula) => (celula as HTMLElement).offsetHeight)
+  expect(altura).toBe(2 * 176 + 16)
+  await page.mouse.up()
+  expect(await posicoes(page)).toContainEqual({ quadro: 'calendario', x: 1, y: 0 })
+})
+
+test('arrastar e rolar a página: o quadro continua sob o ponteiro', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 700 })
+  await personalizar(page)
+  await arrastar(page, 'prazos', 0, 1, false)
+  const alca = page.locator('[data-celula="prazos"] [data-alca]')
+  const centro = async () => {
+    const caixa = await alca.boundingBox()
+    if (!caixa) throw new Error('sem a alça')
+    return { x: caixa.x + caixa.width / 2, y: caixa.y + caixa.height / 2 }
+  }
+  const antes = await centro()
+  await page.mouse.wheel(0, 300)
+  // A rolagem é da coluna de conteúdo (Layout), e chega depois do wheel.
+  await expect
+    .poll(() => page.locator('main').evaluate((main) => main.parentElement?.scrollTop ?? 0))
+    .toBe(300)
+  await expect.poll(async () => Math.round((await centro()).y)).toBe(Math.round(antes.y))
+  expect((await centro()).x).toBeCloseTo(antes.x, 0)
+  await page.mouse.up()
+  // Rolou 300px para baixo com o ponteiro parado: o quadro cai mais abaixo que a linha 1.
+  const prazos = (await posicoes(page)).find((i) => i.quadro === 'prazos')
+  expect(prazos?.y).toBeGreaterThan(1)
+})
+
 test('PRS-05/PRS-07 · × tira o quadro e o devolve ao catálogo; o catálogo põe no primeiro lugar livre', async ({
   page,
 }) => {
@@ -245,6 +299,8 @@ test('PRS-11 · tirar todos mostra o aviso; Concluir grava a montagem vazia', as
   const aviso = page.getByText('Nenhum quadro no início')
   await expect(aviso).toBeVisible()
   await expect(page.getByRole('button', { name: 'Restaurar padrão' })).toHaveCount(2)
+  // O × focado sumiu com a grade: o foco vai para o Restaurar padrão do aviso, não para o body.
+  await expect(page.locator(':focus')).toHaveText('Restaurar padrão')
   await botao(page, 'Concluir').click()
   expect(await gravada(page)).toEqual([])
 

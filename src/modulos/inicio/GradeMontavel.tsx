@@ -9,6 +9,7 @@
 // ficaria por baixo empurrado para baixo; soltar aceita a prévia.
 import {
   type CSSProperties,
+  memo,
   type PointerEvent,
   type ReactNode,
   useCallback,
@@ -91,10 +92,17 @@ export function GradeMontavel({ montagem, cols, largura, editando, aoMudar }: Pr
   )
 }
 
-function QuadroNaGrade({ id, variante }: { id: IdQuadro; variante: Variante }) {
+// Memorizado: arrastar redesenha a grade a cada movimento, mas não o corpo dos quadros.
+const QuadroNaGrade = memo(function QuadroNaGrade({
+  id,
+  variante,
+}: {
+  id: IdQuadro
+  variante: Variante
+}) {
   const Componente = QUADROS[id]
   return <Componente variante={variante} />
-}
+})
 
 function linhasDaGrade(cols: number, linhas: number): CSSProperties {
   return {
@@ -141,11 +149,16 @@ interface Arrasto {
   quadro: IdQuadro
   /** O rascunho quando o ponteiro desceu na alça: volta a ele na recusa (5.6, passo 1). */
   antes: Montagem
+  /** Só este ponteiro move e solta o quadro (outro dedo não larga). */
+  ponteiro: number
   inicioX: number
   inicioY: number
   /** Ponteiro dentro do quadro, a partir do canto de cima à esquerda. */
   deslocamentoX: number
   deslocamentoY: number
+  /** Canto de cima à esquerda da célula de origem, dentro do grid: rolar não descola o quadro. */
+  origemX: number
+  origemY: number
   /** Passou do limiar: daqui em diante, mostra sombra e prévia. */
   ativo: boolean
   dx: number
@@ -186,11 +199,13 @@ function GradeDesktop({
     [ativo, recusado],
   )
   const exibida = ativo ? (previa ?? ativo.antes) : montagem
-  const linhas = base(exibida) + (editando ? 1 : 0)
+  // No arrasto, o grid não encolhe: a célula de origem do arrastado continua dentro das linhas.
+  const linhas = Math.max(base(exibida), ativo ? base(ativo.antes) : 0) + (editando ? 1 : 0)
   const unidade = larguraDaUnidade(largura, 4)
   const unidadeRef = useRef(unidade)
   unidadeRef.current = unidade
   const arrastando = arrasto !== null
+  const sombra = ativo && recusado ? sombraCortada(ativo, unidade, linhas) : null
 
   // Sai da edição no meio do arrasto (Cancelar não dá, mas o contêiner pode encolher): esquece.
   useEffect(() => {
@@ -199,31 +214,42 @@ function GradeDesktop({
 
   useEffect(() => {
     if (!arrastando) return
-    const mover = (evento: globalThis.PointerEvent) => {
+    // Último ponteiro visto: rolar a página no meio do arrasto recalcula a célula sem mover o mouse.
+    let ultimo: { x: number; y: number } | null = null
+    const acompanhar = (clienteX: number, clienteY: number) => {
       const atual = arrastoRef.current
       const grade = gradeRef.current
       if (!atual || !grade) return
-      const dx = evento.clientX - atual.inicioX
-      const dy = evento.clientY - atual.inicioY
-      if (!atual.ativo && Math.hypot(dx, dy) < LIMIAR_ARRASTO) return
-      evento.preventDefault()
       const caixa = grade.getBoundingClientRect()
       atualizar({
         ...atual,
         ativo: true,
-        dx,
-        dy,
-        coluna: colunaPretendida(
-          evento.clientX,
-          atual.deslocamentoX,
-          caixa.left,
-          unidadeRef.current,
-        ),
-        linha: linhaPretendida(evento.clientY, atual.deslocamentoY, caixa.top),
+        dx: clienteX - atual.deslocamentoX - caixa.left - atual.origemX,
+        dy: clienteY - atual.deslocamentoY - caixa.top - atual.origemY,
+        coluna: colunaPretendida(clienteX, atual.deslocamentoX, caixa.left, unidadeRef.current),
+        linha: linhaPretendida(clienteY, atual.deslocamentoY, caixa.top),
       })
     }
-    const largar = () => {
+    const mover = (evento: globalThis.PointerEvent) => {
       const atual = arrastoRef.current
+      if (!atual || evento.pointerId !== atual.ponteiro) return
+      // O botão foi solto sem o pointerup chegar (fora da janela, por exemplo): desiste.
+      if (evento.buttons === 0) {
+        desistir()
+        return
+      }
+      const andou = Math.hypot(evento.clientX - atual.inicioX, evento.clientY - atual.inicioY)
+      if (!atual.ativo && andou < LIMIAR_ARRASTO) return
+      evento.preventDefault()
+      ultimo = { x: evento.clientX, y: evento.clientY }
+      acompanhar(evento.clientX, evento.clientY)
+    }
+    const rolar = () => {
+      if (ultimo && arrastoRef.current?.ativo) acompanhar(ultimo.x, ultimo.y)
+    }
+    const largar = (evento: globalThis.PointerEvent) => {
+      const atual = arrastoRef.current
+      if (atual && evento.pointerId !== atual.ponteiro) return
       atualizar(null)
       if (!atual?.ativo || saiDoGrid(atual.quadro, atual.coluna)) return
       aoMudarRef.current?.(soltar(atual.antes, atual.quadro, atual.coluna, atual.linha))
@@ -236,11 +262,14 @@ function GradeDesktop({
     window.addEventListener('pointerup', largar)
     window.addEventListener('pointercancel', desistir)
     window.addEventListener('keydown', tecla)
+    // Captura: a rolagem é da coluna de conteúdo, e o evento de rolagem não sobe.
+    window.addEventListener('scroll', rolar, true)
     return () => {
       window.removeEventListener('pointermove', mover)
       window.removeEventListener('pointerup', largar)
       window.removeEventListener('pointercancel', desistir)
       window.removeEventListener('keydown', tecla)
+      window.removeEventListener('scroll', rolar, true)
     }
     // O efeito só liga e desliga os ouvintes; o arrasto corrente vem do ref.
   }, [arrastando, atualizar])
@@ -257,34 +286,42 @@ function GradeDesktop({
     if (botoes && botoes.length > 0) botoes[Math.min(indice, botoes.length - 1)]?.focus()
   })
 
-  const edicao: EdicaoDaGrade = {
-    editando,
-    tirar: (quadro) => {
-      focarTirar.current = ordem.findIndex((item) => item.quadro === quadro)
-      aoMudar?.(montagem.filter((item) => item.quadro !== quadro))
-    },
-    pegar: (quadro, evento: PointerEvent<HTMLElement>) => {
-      if (!editando || evento.button !== 0) return
-      const celula = evento.currentTarget.closest('[data-celula]')
-      if (!celula) return
-      evento.preventDefault()
-      const caixa = celula.getBoundingClientRect()
-      const item = montagem.find((i) => i.quadro === quadro)
-      atualizar({
-        quadro,
-        antes: montagem,
-        inicioX: evento.clientX,
-        inicioY: evento.clientY,
-        deslocamentoX: evento.clientX - caixa.left,
-        deslocamentoY: evento.clientY - caixa.top,
-        ativo: false,
-        dx: 0,
-        dy: 0,
-        coluna: item?.x ?? 0,
-        linha: item?.y ?? 0,
-      })
-    },
-  }
+  // Estável durante o arrasto (a montagem só muda ao soltar): os quadros não se redesenham.
+  const edicao = useMemo<EdicaoDaGrade>(
+    () => ({
+      editando,
+      tirar: (quadro) => {
+        focarTirar.current = ordemDeLeitura(montagem).findIndex((item) => item.quadro === quadro)
+        aoMudarRef.current?.(montagem.filter((item) => item.quadro !== quadro))
+      },
+      pegar: (quadro, evento: PointerEvent<HTMLElement>) => {
+        const grade = gradeRef.current
+        const celula = evento.currentTarget.closest('[data-celula]')
+        if (!editando || evento.button !== 0 || !grade || !celula) return
+        evento.preventDefault()
+        const caixa = celula.getBoundingClientRect()
+        const caixaGrade = grade.getBoundingClientRect()
+        const item = montagem.find((i) => i.quadro === quadro)
+        atualizar({
+          quadro,
+          antes: montagem,
+          ponteiro: evento.pointerId,
+          inicioX: evento.clientX,
+          inicioY: evento.clientY,
+          deslocamentoX: evento.clientX - caixa.left,
+          deslocamentoY: evento.clientY - caixa.top,
+          origemX: caixa.left - caixaGrade.left,
+          origemY: caixa.top - caixaGrade.top,
+          ativo: false,
+          dx: 0,
+          dy: 0,
+          coluna: item?.x ?? 0,
+          linha: item?.y ?? 0,
+        })
+      },
+    }),
+    [editando, montagem, atualizar],
+  )
 
   return (
     <ContextoEdicao.Provider value={edicao}>
@@ -344,7 +381,7 @@ function GradeDesktop({
           />
         )}
 
-        {ativo && recusado && (
+        {ativo && recusado && sombra && (
           <>
             <div
               aria-hidden="true"
@@ -358,12 +395,7 @@ function GradeDesktop({
               De onde o quadro saiu
             </div>
             {/* A sombra é cortada na borda do grid (5.6, passo 3): fica só a parte de dentro. */}
-            <div
-              aria-hidden="true"
-              className={estilos.recusa}
-              data-recusa=""
-              style={sombraCortada(ativo, unidade)}
-            >
+            <div aria-hidden="true" className={estilos.recusa} data-recusa="" style={sombra}>
               {avisoDeRecusa(ativo.quadro)}
             </div>
           </>
@@ -384,18 +416,23 @@ function posicaoDe(montagem: Montagem, quadro: IdQuadro): Pick<ItemMontagem, 'x'
 
 const medidaPx = (n: number, tamanho: number) => n * tamanho + (n - 1) * VAO
 
-/** Retângulo da sombra vermelha, em px dentro do grid, só com a parte que fica dentro dele. */
-function sombraCortada(ativo: Arrasto, unidade: number): CSSProperties {
+/**
+ * Retângulo da sombra vermelha, em px dentro do grid, só com a parte que fica dentro dele (nas
+ * colunas e nas linhas). `null` se nada dela cai no grid: o aviso continua no `role="status"`.
+ */
+function sombraCortada(ativo: Arrasto, unidade: number, linhas: number): CSSProperties | null {
   const { w, h } = CATALOGO[ativo.quadro]
   const larguraDoGrid = medidaPx(4, unidade)
   const esquerda = ativo.coluna * (unidade + VAO)
   const inicio = Math.max(0, esquerda)
   const fim = Math.min(larguraDoGrid, esquerda + medidaPx(w, unidade))
+  if (fim <= inicio) return null
+  const linha = Math.min(ativo.linha, Math.max(0, linhas - h))
   return {
     left: inicio,
-    top: Math.min(ativo.linha, base(ativo.antes)) * (ALTURA_UNIDADE + VAO),
-    width: Math.max(0, fim - inicio),
-    height: medidaPx(h, ALTURA_UNIDADE),
+    top: linha * (ALTURA_UNIDADE + VAO),
+    width: fim - inicio,
+    height: medidaPx(Math.min(h, linhas), ALTURA_UNIDADE),
   }
 }
 

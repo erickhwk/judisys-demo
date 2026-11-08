@@ -116,17 +116,17 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
         />
       )}
 
-      {aviso && (
-        <p className={estilos.aviso} role="status">
-          {aviso}
-        </p>
-      )}
+      {/* A região existe desde o início: o leitor de tela só anuncia o texto que entra nela. */}
+      <p className={aviso ? estilos.aviso : 'somente-leitor'} role="status">
+        {aviso}
+      </p>
 
       <div ref={ref} className={estilos.conteiner}>
         {largura !== null &&
           cols !== null &&
           (exibida.length === 0 ? (
             <SemQuadros
+              focar={editando}
               // Fora do modo, restaurar abre o Personalizar com o padrão: só o Concluir grava.
               aoRestaurar={
                 editando || podePersonalizar
@@ -174,7 +174,12 @@ function Cabecalho({ sessao, hoje, acoes }: { sessao: Sessao; hoje: DataIso; aco
 }
 
 /** Montagem vazia, de propósito (PRS-11, RF-23): o aviso com o Restaurar padrão. */
-function SemQuadros({ aoRestaurar }: { aoRestaurar?: () => void }) {
+function SemQuadros({ aoRestaurar, focar }: { aoRestaurar?: () => void; focar: boolean }) {
+  const restaurarRef = useRef<HTMLButtonElement>(null)
+  // Tirar o último quadro desmonta a grade com o × focado: o foco vem para o Restaurar padrão.
+  useEffect(() => {
+    if (focar) restaurarRef.current?.focus()
+  }, [focar])
   return (
     <div className={estilos.semQuadros}>
       <Vazio
@@ -185,7 +190,13 @@ function SemQuadros({ aoRestaurar }: { aoRestaurar?: () => void }) {
             ? 'Restaure o padrão do seu papel ou adicione quadros pelo catálogo do Personalizar.'
             : 'Para montar o início, abra o Personalizar numa tela larga.'
         }
-        acao={aoRestaurar && <Botao onClick={aoRestaurar}>Restaurar padrão</Botao>}
+        acao={
+          aoRestaurar && (
+            <Botao ref={restaurarRef} onClick={aoRestaurar}>
+              Restaurar padrão
+            </Botao>
+          )
+        }
       />
     </div>
   )
