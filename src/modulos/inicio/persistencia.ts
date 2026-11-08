@@ -1,6 +1,7 @@
 // Montagem do início guardada por usuário (SDD-INI §5.5, RF-24 a RF-26, C-03): no localStorage,
 // numa chave por usuário, apagada pelo "Resetar demo". Sem localStorage (CAR-12 da demo), a
 // montagem vive só na memória desta aba: vale até recarregar, sem erro na tela.
+import { useSyncExternalStore } from 'react'
 import { z } from 'zod'
 import { type DependenciasCarga, localStorageDoNavegador } from '../../dados/carga'
 import type { Papel } from '../../regras/permissoes'
@@ -93,9 +94,26 @@ export function gravarMontagem(
   memoria.set(chave, itens)
 }
 
+// Quantas vezes as montagens foram apagadas nesta aba. O reset leva ao início que já está aberto, e
+// a tela, que lê a montagem ao montar, não veria o padrão (MNT-02): ela remonta quando o número muda.
+let geracao = 0
+const ouvintes = new Set<() => void>()
+
+function assinar(avisar: () => void): () => void {
+  ouvintes.add(avisar)
+  return () => ouvintes.delete(avisar)
+}
+
+/** Muda a cada `apagarMontagens`: na `key` da tela, faz ela reler a montagem depois do reset. */
+export function useGeracaoDasMontagens(): number {
+  return useSyncExternalStore(assinar, () => geracao)
+}
+
 /** Apaga as montagens de todos os usuários (RF-25). O `resetarDemo` do boot chama. Não lança. */
 export function apagarMontagens(fonte: FonteStorage = localStorageDoNavegador): void {
   memoria.clear()
+  geracao++
+  for (const avisar of ouvintes) avisar()
   try {
     const storage = fonte()
     if (!storage) return
