@@ -6,11 +6,17 @@ import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
+  carteiraPorFase,
+  cumpridosPorMes,
   destaqueDoMes,
-  funilPorFase,
+  informesPorMes,
   numerosDoTopo,
   passivoPorClasse,
+  passivoPorProcesso,
+  pedidosPorStatus,
   prazosDoMes,
+  prazosPorUrgencia,
+  proximaAgc,
   proximasAgcs,
   proximosDoQuadro,
   proximosPrazos,
@@ -47,6 +53,7 @@ function dinheiro(centavos: number): string {
 export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[] {
   const topo = numerosDoTopo(tabelas, hoje)
   const classes = passivoPorClasse(tabelas.processos, tabelas.credores)
+  const porProcesso = passivoPorProcesso(tabelas.processos, tabelas.credores)
   const resumo = resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje)
   const processo = (id: string) => tabelas.processos.find((p) => p.id === id)?.apelido ?? id
   const proximos = proximosDoQuadro(tabelas.prazos, hoje)
@@ -82,12 +89,36 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         { rotulo: 'Total', valor: dinheiro(classes.reduce((soma, c) => soma + c.valor, 0)) },
       ],
     },
-    ...(['rj', 'falencia'] as const).map((tipo) => ({
-      titulo: `Funil por fase, ${tipo === 'rj' ? 'RJ' : 'falência'} (funilPorFase)`,
-      linhas: funilPorFase(tabelas.processos, tipo).map((e) => ({
-        rotulo: e.rotulo,
-        valor: e.quantidade,
+    // INI-08 · quadros 2×1 (Q-08 a Q-10)
+    {
+      titulo: 'Passivo por processo ativo (passivoPorProcesso)',
+      linhas: [
+        ...porProcesso.maiores.map((p) => ({ rotulo: p.apelido, valor: dinheiro(p.valor) })),
+        { rotulo: 'Ativos sem relação do AJ', valor: porProcesso.semRelacao },
+        { rotulo: 'Total', valor: dinheiro(porProcesso.total) },
+      ],
+    },
+    {
+      titulo: 'Informes por mês, 12 meses até o de hoje (informesPorMes)',
+      linhas: informesPorMes(tabelas.informes, hoje).map((m) => ({
+        rotulo: m.mes,
+        valor: m.quantidade,
       })),
+    },
+    {
+      titulo: 'Prazos cumpridos por mês de vencimento, 12 meses fechados (cumpridosPorMes)',
+      linhas: cumpridosPorMes(tabelas.prazos, hoje).map((m) => ({
+        rotulo: m.mes,
+        valor: m.quantidade,
+      })),
+    },
+    ...carteiraPorFase(tabelas.processos).map((c) => ({
+      titulo: `Carteira por fase, ${c.tipo === 'rj' ? 'RJ' : 'falência'} (carteiraPorFase)`,
+      linhas: [
+        { rotulo: 'Ativos', valor: c.ativos },
+        { rotulo: 'Encerrados', valor: c.encerrados },
+        ...c.fases.map((f) => ({ rotulo: f.rotulo, valor: f.quantidade })),
+      ],
     })),
     {
       titulo: 'Próximos prazos em aberto (proximosPrazos)',
@@ -128,12 +159,61 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         valor: `${a.convocacao}ª convocação`,
       })),
     },
+    ...blocosDosQuadros1x1(tabelas, hoje, processo),
     {
       titulo: 'Últimos informes (ultimosInformes)',
       linhas: ultimosInformes(tabelas.informes).map((i) => ({
         rotulo: `${i.data} · ${processo(i.processoId)}`,
         valor: i.titulo,
       })),
+    },
+  ]
+}
+
+/** INI-06 · Q-01 a Q-03: prazos por urgência, próxima AGC e pedidos de crédito. */
+function blocosDosQuadros1x1(
+  tabelas: TabelasSeed,
+  hoje: DataIso,
+  processo: (id: string) => string,
+): Bloco[] {
+  const urgencia = prazosPorUrgencia(tabelas.prazos, hoje)
+  const agc = proximaAgc(tabelas.agcs, hoje)
+  const pedidos = pedidosPorStatus(tabelas.pedidosDeCredito)
+  return [
+    {
+      titulo: 'Prazos em aberto por urgência (prazosPorUrgencia)',
+      linhas: [
+        { rotulo: 'Em aberto', valor: urgencia.abertos },
+        { rotulo: 'Vencidos', valor: urgencia.vencidos },
+        { rotulo: 'Hoje', valor: urgencia.hoje },
+        { rotulo: 'De D+1 a D+7', valor: urgencia.ate7Dias },
+        { rotulo: 'De D+8 a D+30', valor: urgencia.ate30Dias },
+        { rotulo: 'Depois', valor: urgencia.depois },
+      ],
+    },
+    {
+      titulo: 'Próxima AGC agendada (proximaAgc)',
+      linhas: agc
+        ? [
+            { rotulo: 'Processo', valor: processo(agc.processoId) },
+            { rotulo: '1ª convocação', valor: agc.dataPrimeira },
+            { rotulo: '2ª convocação', valor: agc.dataSegunda },
+          ]
+        : [],
+    },
+    {
+      titulo: 'Pedidos de crédito por status (pedidosPorStatus)',
+      linhas: [
+        { rotulo: 'Pendentes', valor: pedidos.pendentes },
+        { rotulo: 'Acolhidos', valor: pedidos.acolhidos },
+        { rotulo: 'Rejeitados', valor: pedidos.rejeitados },
+        {
+          rotulo: 'Processo com mais pendentes',
+          valor: pedidos.maisPendentes
+            ? `${processo(pedidos.maisPendentes.processoId)} (${pedidos.maisPendentes.pendentes})`
+            : '(nenhum)',
+        },
+      ],
     },
   ]
 }

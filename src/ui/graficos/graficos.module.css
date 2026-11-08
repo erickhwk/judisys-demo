@@ -168,14 +168,15 @@
 .barras {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* Quem usa ajusta o vão e a largura do nome por estas variáveis, sem mexer na grade da linha. */
+  gap: var(--barras-vao, 10px);
   width: 100%;
   min-width: 0;
 }
 
 .linhaBarra {
   display: grid;
-  grid-template-columns: minmax(0, 9em) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, var(--barras-largura-nome, 9em)) minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
 }
@@ -224,7 +225,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 12px;
+  font-size: var(--legenda-fonte, 12px);
   color: var(--cor-texto-forte);
 }
 
@@ -234,10 +235,17 @@
   gap: 7px;
 }
 
+/* Duas colunas (Q-11): a da esquerda pode ganhar mais largura com --legenda-coluna-1 (em fr). */
+.legendaEmDuasColunas {
+  display: grid;
+  grid-template-columns: minmax(0, var(--legenda-coluna-1, 1fr)) minmax(0, 1fr);
+  gap: 6px var(--legenda-vao-colunas, 20px);
+}
+
 .itemLegenda {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--legenda-vao-item, 6px);
   min-width: 0;
 }
 
@@ -260,4 +268,20 @@
   color: var(--cor-texto);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.detalheLegenda {
+  margin-left: auto;
+  padding-left: 4px;
+  color: var(--cor-texto-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Com o detalhe, o valor vem logo depois dele, numa largura fixa para os valores se alinharem. */
+.detalheLegenda + .valorLegenda {
+  min-width: 2.2em;
+  padding-left: 3px;
+  margin-left: 0;
+  text-align: right;
 }

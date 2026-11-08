@@ -117,8 +117,9 @@ test('PRS-01 · Personalizar: faixa, catálogo com tamanhos, guias, alça e ×, 
   await expect(page.locator('[data-guia]')).toHaveCount(20)
   await expect(page.locator('[data-alca]')).toHaveCount(8)
   await expect(page.getByRole('button', { name: /^Tirar .* do início$/ })).toHaveCount(8)
-  // Links do corpo dos quadros ficam no DOM, mas dentro do `inert` da moldura (RF-18).
+  // Os links do corpo ficam no DOM, desligados pelo `inert` da moldura (RF-18).
   await expect(page.locator('[data-colunas] a:not([inert] a)')).toHaveCount(0)
+  await expect(page.locator('[data-colunas] [inert] a')).not.toHaveCount(0)
   await expect(botao(page, 'Personalizar')).toHaveCount(0)
 })
 

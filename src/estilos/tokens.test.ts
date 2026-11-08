@@ -117,6 +117,8 @@ describe.each([
 /** [elemento gráfico, fundo]: ícones e marcas não textuais pedem 3:1 (WCAG 1.4.11). */
 const PARES_GRAFICOS: readonly (readonly [string, string])[] = [
   ['--cor-menu-icone-ativo', '--cor-menu-ativo'],
+  // 5ª série dos gráficos (INI-08): a ME/EPP do Q-11 precisa aparecer sobre a superfície
+  ['--cor-grafico-5', '--cor-superficie'],
 ]
 
 describe.each([

@@ -101,6 +101,8 @@
   --cor-grafico-2: #c8993f;
   --cor-grafico-3: #6d84b3;
   --cor-grafico-4: #c3cbdb;
+  /* 5ª série (Q-11, ME/EPP): bronze que não some sobre a superfície, como o trilho sumia (INI-08) */
+  --cor-grafico-5: #946a2c;
 
   /* Personalizar o início (S-09): guias da grade e o quadro que não cabe onde foi solto */
   --cor-quadro-guia: #c3cbdb;
@@ -231,6 +233,7 @@
     --cor-grafico-1: #dbe4f7;
     --cor-grafico-3: #7f97c6;
     --cor-grafico-4: #3a5486;
+    --cor-grafico-5: #d9b98a;
     --cor-quadro-guia: #3a5486;
     --cor-quadro-sombra: #7f97c6;
 

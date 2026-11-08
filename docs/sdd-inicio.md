@@ -245,7 +245,7 @@ Todos puros, com `hoje` por parâmetro:
 
 | ID | Tipo | Dado | Quando | Então |
 |---|---|---|---|---|
-| QDR-01 | F | seed | Q-01 | 19 em aberto, 3 vencidos, 1 hoje; barra com 3, 1, 1, 4 e 10. |
+| QDR-01 | F | seed | Q-01 | 19 em aberto, 3 vencidos, 1 hoje; barra com 3, 1, 1, 6 e 8 (faixas do §5.7; corrigido com o usuário na INI-06). |
 | QDR-02 | F | seed | Q-02 | Grupo Lontra Azul, 13/11, "em 6 dias", 2ª convocação 20/11. |
 | QDR-03 | B | sem AGC agendada | Q-02 | "Nenhuma AGC agendada" e o link para a agenda (RF-15). |
 | QDR-04 | F | seed | Q-03 | Rosca 8, 25, 17 e "8 pendentes" no centro; nota do processo com mais pendentes. |
@@ -256,7 +256,7 @@ Todos puros, com `hoje` por parâmetro:
 | QDR-09 | F | seed | Q-08 | Total igual ao `numerosDoTopo`; quatro barras; "4 processos sem relação do AJ". |
 | QDR-10 | F | seed | Q-09 | 12 colunas com 1, 5, 3, 1, 3, 0, 3, 5, 5, 8, 8, 1 (dez/25 a nov/26); no celular, as 6 últimas. |
 | QDR-11 | F | seed | Q-10 | 12 pontos (nov/25 a out/26): 3, 2, 2, 3, 5, 2, 1, 2, 5, 4, 6, 5; recorde em set. |
-| QDR-12 | F | seed | Q-11 | Cinco classes somando R$ 389,5 mi, com os percentuais 56, 20, 12, 7 e 4. |
+| QDR-12 | F | seed | Q-11 | Cinco classes somando R$ 389,5 mi, com os percentuais 56, 20, 13, 7 e 4 (maiores restos, somando 100, como a `Barra100`; corrigido com o usuário na INI-08). |
 | QDR-13 | F | seed | Q-12 | RJ: Pedido 1, Deferido 1, Edital 1, Plano 1, Fiscalização 1, Encerrada 1, as demais 0 apagadas; Falência: Decretada 1, Arrecadação 1, Realização 1, Encerrada 1. |
 | QDR-14 | F | Q-12 | clicar numa fase | `/processos?tipo=…&fase=…` (F-08). |
 | QDR-15 | B | qualquer quadro sem dados | abrir | Estado vazio próprio (RF-15). |

@@ -1,0 +1,16 @@
+/* O número com a fonte e o peso do destaque da moldura; a frase apagada ao lado. */
+
+.resumo {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--cor-texto-muted);
+}
+
+.numero {
+  font-family: var(--fonte-titulo);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto);
+}

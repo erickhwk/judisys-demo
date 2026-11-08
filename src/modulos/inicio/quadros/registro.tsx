@@ -12,11 +12,18 @@
 import type { ComponentType } from 'react'
 import type { IdQuadro } from '../montagem'
 import type { Variante } from './Quadro'
+import { QuadroAgc } from './QuadroAgc'
 import { QuadroAtividade } from './QuadroAtividade'
 import { QuadroCalendario } from './QuadroCalendario'
+import { QuadroCarteira } from './QuadroCarteira'
+import { QuadroClasses } from './QuadroClasses'
+import { QuadroCumpridos } from './QuadroCumpridos'
 import { QuadroInformes } from './QuadroInformes'
-import { provisorio } from './QuadroProvisorio'
+import { QuadroPassivo } from './QuadroPassivo'
+import { QuadroPedidos } from './QuadroPedidos'
+import { QuadroPrazos } from './QuadroPrazos'
 import { QuadroProximos } from './QuadroProximos'
+import { QuadroPublicados } from './QuadroPublicados'
 
 export interface PropsDoQuadro {
   /** Desenho da largura atual: 4 colunas, 2 colunas ou a lista do celular (RF-14). */
@@ -25,9 +32,9 @@ export interface PropsDoQuadro {
 
 export const QUADROS: Readonly<Record<IdQuadro, ComponentType<PropsDoQuadro>>> = {
   // INI-06 · quadros 1×1
-  prazos: provisorio('prazos'),
-  agc: provisorio('agc'),
-  pedidos: provisorio('pedidos'),
+  prazos: QuadroPrazos,
+  agc: QuadroAgc,
+  pedidos: QuadroPedidos,
 
   // INI-07 · quadros 1×2
   proximos: QuadroProximos,
@@ -36,11 +43,11 @@ export const QUADROS: Readonly<Record<IdQuadro, ComponentType<PropsDoQuadro>>> =
   informes: QuadroInformes,
 
   // INI-08 · quadros 2×1
-  passivo: provisorio('passivo'),
-  publicados: provisorio('publicados'),
-  cumpridos: provisorio('cumpridos'),
-  classes: provisorio('classes'),
+  passivo: QuadroPassivo,
+  publicados: QuadroPublicados,
+  cumpridos: QuadroCumpridos,
+  classes: QuadroClasses,
 
   // INI-09 · carteira por fase (4×1)
-  carteira: provisorio('carteira'),
+  carteira: QuadroCarteira,
 }
