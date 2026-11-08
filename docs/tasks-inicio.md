@@ -234,7 +234,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 ## INI-10 · Fechamento: limpeza, ponta a ponta, capturas e PR para a main
 - **Tipo:** Chore
 - **Depende de:** INI-06, INI-07, INI-08, INI-09
-- **SDD:** §6, §7.6, §10, §12
+- **SDD:** §4 (S-12), §6, §7.6, §10, §12
 - **Descrição:** remover o que sobrou do dashboard antigo (inclusive o `GraficoPassivo` e o recharts), trocar cores provisórias pelos tokens de gráfico, rodar os e2e de ponta a ponta do início e da persistência, fazer as capturas finais e a medição do RNF-03, e abrir o PR `ini-redesign` → `main`.
 - **Critérios de aceite:**
   - [ ] Nenhum resto do dashboard antigo: sem `GraficoPassivo`, sem `funilPorFase` não usado, recharts fora do `package.json`.
@@ -243,6 +243,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] Capturas finais: início em 1280 (menu aberto), 1440, 834 e 390, nos dois temas; o Personalizar com a recusa; uma lista com a casca nova.
   - [ ] `--cor-grafico-4` com contraste de pelo menos 3:1 sobre a superfície nos dois temas, com o par no `tokens.test.ts` (decidido com o usuário no lote 3; hoje 1,6:1 no claro e 2,1:1 no escuro).
   - [ ] Decidir com o usuário se os quadros 1×1, 1×2 e a Carteira adotam no celular o `ResumoNoCorpo` dos quadros 2×1 (lote 3).
+  - [ ] Personalizar só com ícone e tooltip (S-12): `BotaoIcone` com `aria-label` e `title` "Personalizar"; em 1280px com o menu aberto, o botão e a busca ficam na linha da saudação, sem o cabeçalho mudar de altura no modo de edição.
   - [ ] Handoff atualizado e PR `ini-redesign` → `main` aberto, com a seção "Revisão automática".
 - **Testes:**
   - [ ] MNT-01 · montagem por usuário (e2e, trocando de papel)

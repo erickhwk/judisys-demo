@@ -61,7 +61,7 @@ describe('grade em 4 colunas', () => {
   it('GRD-03 · contêiner de 880px tem 4 colunas e o Personalizar', async () => {
     const html = await tela(880)
     expect(colunas(html)).toBe('4')
-    expect(html).toContain('>Personalizar</button>')
+    expect(html).toContain('aria-label="Personalizar"')
   })
 
   it('GRD-08 · montagem com buraco: o buraco continua', async () => {
