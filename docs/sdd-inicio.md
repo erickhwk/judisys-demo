@@ -48,9 +48,15 @@ Conferidos em 2026-11-07.
 
 ## 3. Questões abertas
 
-Nenhuma bloqueia a implementação.
+Nenhuma em aberto.
 
-**Q-01. Recusa por cima do react-grid-layout.** A biblioteca limita o `x` em vez de recusar (F-09). A recusa (RF-19) vem da posição do ponteiro (seção 5.6). A primeira tarefa de grid é uma prova de conceito: se a recusa não ficar estável, a alternativa é um grid próprio (CSS grid com arrastar por `pointer events`), avaliada na mesma tarefa.
+**Q-01. Recusa por cima do react-grid-layout.** *Resolvida na INI-03 (2026-11-08): grid próprio, ver S-11.* A biblioteca limita o `x` em vez de recusar (F-09). A recusa (RF-19) vem da posição do ponteiro (seção 5.6). A primeira tarefa de grid é uma prova de conceito: se a recusa não ficar estável, a alternativa é um grid próprio (CSS grid com arrastar por `pointer events`), avaliada na mesma tarefa.
+
+A prova de conceito montou o `react-grid-layout` 2.3.0 com `noCompactor` e a recusa da seção 5.6 por cima, e rodou o arrasto com `page.mouse` (10 passos) no padrão do advogado em 1440px:
+
+- **Recusa (PRS-04):** funcionou, mas só remontando o grid (`key` novo) no `onDragStop`. A biblioteca guarda o layout limitado no estado interno e não relê a prop `layout` se ela não mudou.
+- **Arrastar para lugar livre (PRS-02):** falhou. Com `noCompactor`, cada quadro por onde o ponteiro passa é empurrado para baixo e não volta. Levar Prazos de (0, 0) para (0, 4) deixou Informes publicados, Passivo e Carteira empurrados para a linha 5, **um sobre o outro** (quebra o INV-01).
+- **Empurrar (PRS-03):** funcionou no caso simples.
 
 ---
 
@@ -68,6 +74,7 @@ Nenhuma bloqueia a implementação.
 | S-08 | A busca global sai do topo do Layout e entra no `CabecalhoPagina`, à direita das ações da página. No tablet e no celular, ela vira o botão de lupa da barra do topo, que abre a mesma busca. |
 | S-09 | Tokens novos em `tokens.css`, nos dois temas: `--cor-menu-fundo` (deixa de ser sempre escuro), `--cor-menu-ativo`, `--cor-menu-icone-ativo`, `--cor-grafico-1` a `--cor-grafico-4`, `--cor-quadro-guia` e `--cor-quadro-recusa`. Os tokens "sempre escuros" do menu saem. A faixa da demo e o painel da entrada continuam sempre escuros. |
 | S-10 | O `react-grid-layout` só é importado pelo módulo do início. Como o início é a primeira tela depois da entrada, o modo de edição (catálogo e handlers) pode ficar num `lazy` se a medição do RNF-03 pedir. |
+| S-11 | **Grid próprio no lugar do `react-grid-layout` (Q-01, INI-03).** CSS grid com a posição explícita de cada quadro (`grid-column` e `grid-row`), então os buracos ficam sem compactador (S-04). O arrasto usa `pointer events` na alça. A cada movimento, a prévia é calculada **a partir do rascunho de antes do arrasto**: o quadro vai para a célula do ponteiro, e quem ficaria por baixo desce em cascata (`soltar` em `arrasto.ts`). Assim, o caminho do ponteiro não deixa quadros empurrados. A recusa e a coluna pretendida seguem a seção 5.6. A largura do contêiner vem de um `ResizeObserver` próprio (`useLargura`), no lugar do `useContainerWidth`. Sem a biblioteca, o bundle não cresce, e o `lazy` do S-10 não é preciso. Onde este SDD cita a biblioteca (F-09, S-04, S-10, seções 5.1, 5.3 e 5.6), vale este grid. Motivo: na prova de conceito, a biblioteca com `noCompactor` acumulou os empurrões do caminho e chegou a sobrepor quadros (Q-01). |
 
 ---
 
