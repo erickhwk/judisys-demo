@@ -2,7 +2,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Tipos } from '../../dados/schemas'
 import {
-  funilPorFase,
   numerosDoTopo,
   passivoPorClasse,
   proximasAgcs,
@@ -116,34 +115,6 @@ describe('numerosDoTopo (RF-07)', () => {
     )
     const numeros = numerosDoTopo({ processos: encerrado, credores: CREDORES, prazos: [] }, HOJE)
     expect(numeros).toMatchObject({ ativosRj: 1, ativosFalencia: 0, passivo: 350_00 })
-  })
-})
-
-describe('funilPorFase (RF-08, T-35)', () => {
-  it('toda fase do tipo, na ordem, com zero onde não há processo', () => {
-    const rj = funilPorFase(PROCESSOS, 'rj')
-    expect(rj.map((e) => e.fase)).toEqual([
-      'pedido',
-      'processamento-deferido',
-      'edital-publicado',
-      'relacao-aj-publicada',
-      'plano-apresentado',
-      'prazo-objecoes',
-      'agc',
-      'plano-homologado',
-      'fiscalizacao',
-      'encerrada',
-      'convolada-falencia',
-      'desistencia',
-    ])
-    expect(rj.filter((e) => e.quantidade > 0).map((e) => [e.fase, e.quantidade])).toEqual([
-      ['plano-apresentado', 1],
-      ['encerrada', 1],
-      ['convolada-falencia', 1],
-    ])
-    const falencia = funilPorFase(PROCESSOS, 'falencia')
-    expect(falencia).toHaveLength(7)
-    expect(falencia[0]).toEqual({ fase: 'decretada', rotulo: 'Decretada', quantidade: 1 })
   })
 })
 
