@@ -211,7 +211,8 @@ async function baixarDoSite(arquivo: string): Promise<unknown> {
   return resposta.json()
 }
 
-function localStorageDoNavegador(): Storage | null {
+/** `localStorage` do navegador, ou `null` se ele não deixa usar (CAR-12). */
+export function localStorageDoNavegador(): Storage | null {
   try {
     return globalThis.localStorage ?? null
   } catch {

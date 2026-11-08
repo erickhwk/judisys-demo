@@ -2,6 +2,7 @@
 // numa chave por usuário, apagada pelo "Resetar demo". Sem localStorage (CAR-12 da demo), a
 // montagem vive só na memória desta aba: vale até recarregar, sem erro na tela.
 import { z } from 'zod'
+import { type DependenciasCarga, localStorageDoNavegador } from '../../dados/carga'
 import type { Papel } from '../../regras/permissoes'
 import { type Montagem, normalizar, padraoDoPapel } from './montagem'
 
@@ -24,16 +25,8 @@ const schemaGravado = z.object({
   ),
 })
 
-/** `localStorage` do navegador, ou `null` se ele não deixa usar. */
-export type FonteStorage = () => Storage | null
-
-function localStorageDoNavegador(): Storage | null {
-  try {
-    return globalThis.localStorage ?? null
-  } catch {
-    return null
-  }
-}
+/** `localStorage` do navegador, ou `null` se ele não deixa usar (o mesmo da carga). */
+export type FonteStorage = DependenciasCarga['localStorage']
 
 // Concluir desta aba, por chave: vale por cima do localStorage até recarregar (MNT-06). Também
 // cobre o localStorage que existe mas recusa gravar (cota, modo privado).
