@@ -80,13 +80,13 @@ function ConteudoAba({ processo }: { processo: Processo }) {
   }
 
   // O campo tem estado próprio e a URL recebe a busca depois de uma pausa (AJ-07).
-  const [textoBusca, setTextoBusca] = useBuscaAdiada(busca, (texto) =>
+  const [textoBusca, setTextoBusca, limparTextoBusca] = useBuscaAdiada(busca, (texto) =>
     mudar({ busca: texto, pagina: '' }),
   )
 
   function limpar() {
     // Zera o campo também quando o texto ainda não chegou à URL (busca vazia, gravação pendente).
-    setTextoBusca('')
+    limparTextoBusca()
     mudar({ busca: '', classe: '', pagina: '' })
   }
 
