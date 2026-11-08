@@ -10,6 +10,7 @@ import {
   CREDOR_IMPUGNACAO,
   entrarComo,
   lerTabela,
+  tituloDoInicio,
   trocarPara,
 } from './apoio'
 
@@ -30,13 +31,13 @@ const botao = (page: Page, nome: string | RegExp) =>
   page.getByRole('button', { name: nome, exact: typeof nome === 'string' })
 
 /**
- * Passa pelo dashboard antes de abrir a rota. Entre rotas da SPA o goto só troca o hash, e a tela
+ * Passa pelo início antes de abrir a rota. Entre rotas da SPA o goto só troca o hash, e a tela
  * anterior continua no DOM até a nova renderizar: sem a parada, uma asserção de "tem 0" (ou uma
  * linha de tabela) passaria olhando a tela velha.
  */
 async function irPara(page: Page, rota: string): Promise<void> {
   await page.goto('./#/')
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
   await page.goto(rota)
 }
 

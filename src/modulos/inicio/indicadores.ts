@@ -1,7 +1,7 @@
-// Números e listas do dashboard (RF-07 a RF-10, SDD §7.7). Funções puras: "hoje" vem por
-// parâmetro (T-19); a tela só busca as coleções e desenha.
+// Números e listas do início (antes dashboard: RF-07 a RF-10 da demo, SDD §7.7; e o SDD do início
+// §5.7). Funções puras: "hoje" vem por parâmetro (T-19); a tela só busca as coleções e desenha.
 import type { Tipos } from '../../dados/schemas'
-import type { DataIso } from '../../regras/datas'
+import { type DataIso, somarDias } from '../../regras/datas'
 import {
   ehFaseFinal,
   type Fase,
@@ -153,4 +153,48 @@ export function ultimosInformes(informes: readonly Informe[]): Informe[] {
   return [...informes]
     .sort((a, b) => b.data.localeCompare(a.data) || b.criadoEm.localeCompare(a.criadoEm))
     .slice(0, LIMITE_INFORMES)
+}
+
+// ---------------------------------------------------------------------------------------------
+// Resumo do dia do cabeçalho do início (RF-07 do PRD do início, SDD §5.7, CAB-03 a CAB-07)
+
+/** Até quantos dias à frente a AGC entra no resumo (de hoje a D+7, inclusive). */
+export const DIAS_AGC_NO_RESUMO = 7
+
+export interface ResumoDoDia {
+  /** Prazos em aberto com vencimento antes de hoje. */
+  vencidos: number
+  /** Prazos em aberto que vencem hoje. */
+  hoje: number
+  /** A primeira AGC agendada com a 1ª convocação de hoje a D+7, ou `null`. */
+  agc: { apelido: string; data: DataIso } | null
+}
+
+/**
+ * Números da frase-resumo: vencidos e de hoje pelos mesmos períodos da agenda (PRZ-08), para onde
+ * o resumo leva; a AGC pela regra da `proximaAgc` do SDD (agendada, `dataPrimeira >= hoje`),
+ * limitada aos próximos 7 dias. AGC de processo que não existe mais fica de fora.
+ */
+export function resumoDoDia(
+  prazos: readonly Prazo[],
+  agcs: readonly Agc[],
+  processos: readonly Pick<Processo, 'id' | 'apelido'>[],
+  hoje: DataIso,
+): ResumoDoDia {
+  const apelidos = new Map(processos.map((p) => [p.id, p.apelido]))
+  const limite = somarDias(hoje, DIAS_AGC_NO_RESUMO)
+  const [agc] = agcs
+    .filter(
+      (a) =>
+        a.status === 'agendada' &&
+        a.dataPrimeira >= hoje &&
+        a.dataPrimeira <= limite &&
+        apelidos.has(a.processoId),
+    )
+    .sort((a, b) => a.dataPrimeira.localeCompare(b.dataPrimeira) || a.id.localeCompare(b.id))
+  return {
+    vencidos: prazos.filter((p) => noPeriodo(p, 'vencidos', hoje)).length,
+    hoje: prazos.filter((p) => noPeriodo(p, 'hoje', hoje)).length,
+    agc: agc ? { apelido: apelidos.get(agc.processoId) ?? '', data: agc.dataPrimeira } : null,
+  }
 }

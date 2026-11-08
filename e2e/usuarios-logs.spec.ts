@@ -2,7 +2,7 @@
 // LOG-04). Usa o seed; cada teste começa com o armazenamento limpo (contexto novo do Playwright).
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, entrarComo, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -103,7 +103,7 @@ test('RF-39 · AJ cria, edita e exclui usuário; T-23 recusa o responsável por 
   await expect(page.getByText('Beatriz Nunes')).toHaveCount(0)
 })
 
-test('PER-07 · analista vê a tela de logs, a aba Histórico e o dashboard', async ({ page }) => {
+test('PER-07 · analista vê a tela de logs, a aba Histórico e o início', async ({ page }) => {
   await entrarComo(page, 'analista')
   await page.goto('./#/logs')
   await expect(page.getByRole('heading', { name: 'Logs', level: 1 })).toBeVisible()
@@ -115,7 +115,7 @@ test('PER-07 · analista vê a tela de logs, a aba Histórico e o dashboard', as
   ).toBeVisible()
 
   await page.goto('./#/')
-  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  await expect(tituloDoInicio(page)).toBeVisible()
 
   // Usuários fica fora para o analista (RF-39).
   await page.goto('./#/usuarios')
