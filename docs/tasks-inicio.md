@@ -80,6 +80,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] MNT-05 · itens sobrepostos ou fora do grid reposicionados
   - [ ] MNT-06 · sem `localStorage`, gravar e ler em memória
   - [ ] MNT-07 · mudança de versão do seed não apaga a montagem
+  - [ ] MNT-08 · montagem com todos os quadros descartados vira o padrão do papel; vazia de propósito continua vazia
   - [ ] `pnpm indicadores` imprime os números do topo e o passivo por classe iguais aos do teste do dashboard (DSH-01)
 
 ## INI-03 · Grade montável: prova de conceito, Personalizar e moldura do quadro
@@ -204,6 +205,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - [ ] Quatro quadros conforme as fichas, nas três variantes e nos dois temas.
   - [ ] Informes publicados com 6 meses no celular; prazos cumpridos com o subtítulo "por mês de vencimento" (C-01).
   - [ ] Capturas nos extremos de largura.
+  - [ ] Token `--cor-grafico-5` nos dois temas (com par no `tokens.test.ts`) para a 5ª série do Passivo por classe, que hoje usa a cor do trilho e some no tema claro (decidido no lote 1, INI-05).
 - **Testes:**
   - [ ] QDR-09 · passivo do seed igual ao total do topo
   - [ ] QDR-10 · informes por mês do seed, 12 e 6 meses
