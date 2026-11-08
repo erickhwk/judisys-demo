@@ -2,7 +2,7 @@
 // legenda; o valor de cada classe também fica na tabela logo abaixo (leitor de tela e celular).
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
-import estilos from './dashboard.module.css'
+import estilos from './inicio.module.css'
 import type { PassivoDaClasse } from './indicadores'
 
 const ALTURA_BARRA = 36

@@ -39,7 +39,7 @@ import {
 import { rotuloSituacao, TOM_SITUACAO } from '../prazos/regras'
 import { ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
 import { ROTULOS_TIPO } from '../processos/rotulos'
-import estilos from './dashboard.module.css'
+import estilos from './inicio.module.css'
 import { GraficoPassivo } from './GraficoPassivo'
 import {
   type EtapaDoFunil,
@@ -58,7 +58,7 @@ const LOGS_RECENTES = {
   porPagina: LIMITE_ATIVIDADE,
 } as const
 
-export function Dashboard() {
+export function Inicio() {
   const hoje = hojeDoRelogio()
   const { sessao } = useSessao()
   const podeLer = (modulo: Modulo) => (sessao ? pode(sessao.papel, 'ler', modulo) : false)

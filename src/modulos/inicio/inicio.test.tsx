@@ -9,7 +9,7 @@ import { type DataIso, formatarData, somarDias } from '../../regras/datas'
 import { type Papel, pode } from '../../regras/permissoes'
 import { hoje as hojeDoRelogio } from '../../regras/relogio'
 import { renderizarComDados } from '../../ui/renderizarParaTeste'
-import { Dashboard } from './Dashboard'
+import { Inicio } from './Inicio'
 import { ehAtivo } from './indicadores'
 import { registro } from './rotas'
 
@@ -30,7 +30,7 @@ beforeEach(async () => {
 })
 
 const tela = (papel: Papel = 'advogado') =>
-  renderizarComDados(<Dashboard />, { armazenamento, papel })
+  renderizarComDados(<Inicio />, { armazenamento, papel })
 
 function stat(html: string, nome: string): string {
   const achado = new RegExp(`data-stat="${nome}"[^>]*>([^<]*)<`).exec(html)
