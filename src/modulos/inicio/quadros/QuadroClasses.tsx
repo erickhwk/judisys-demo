@@ -38,7 +38,7 @@ export function QuadroClasses({ variante }: PropsDoQuadro) {
   return (
     <Quadro {...moldura} destaque={celular ? undefined : formatarMoedaCurta(total)}>
       <div className={estilos.corpo}>
-        <div className={estilos.conteudo} data-variante={variante}>
+        <div className={estilos.conteudo} data-desenho={variante}>
           {celular && <ResumoNoCorpo numero={formatarMoedaCurta(total)} texto="nas RJ ativas" />}
           {/* Sem tom próprio: a barra e a legenda pegam as cinco séries pela posição. */}
           <Barra100

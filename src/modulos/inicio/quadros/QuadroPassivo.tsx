@@ -32,7 +32,7 @@ export function QuadroPassivo({ variante }: PropsDoQuadro) {
   const celular = variante === 'celular'
   return (
     <Quadro {...moldura} destaque={celular ? undefined : total}>
-      <div className={estilos.corpo} data-variante={variante}>
+      <div className={estilos.corpo} data-desenho={variante}>
         {celular && <ResumoNoCorpo numero={total} texto="na relação do AJ dos processos ativos" />}
         <BarrasHorizontais
           descricao="Relação do AJ dos maiores processos ativos"

@@ -10,12 +10,12 @@
 
 /* Na célula de altura fixa, as linhas ficam mais juntas que o padrão do gráfico (10px), e o nome
    ganha a largura do canvas (190px em 272px de unidade) e encolhe com o quadro. */
-.corpo:not([data-variante="celular"]) {
+.corpo:not([data-desenho="celular"]) {
   --barras-vao: 7px;
   --barras-largura-nome: 36%;
 }
 
-.corpo[data-variante="celular"] {
+.corpo[data-desenho="celular"] {
   --barras-vao: 12px;
   gap: 12px;
   margin-top: 12px;
@@ -31,6 +31,6 @@
   text-overflow: ellipsis;
 }
 
-.corpo[data-variante="celular"] .nota {
+.corpo[data-desenho="celular"] .nota {
   white-space: normal;
 }
