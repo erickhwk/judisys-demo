@@ -148,6 +148,98 @@ export function proximasAgcs(agcs: readonly Agc[], hoje: DataIso): ProximaAgc[] 
     .slice(0, LIMITE_AGCS)
 }
 
+// ---------------------------------------------------------------------------------------------
+// INI-06 · quadros 1×1: prazos em aberto (Q-01), próxima AGC (Q-02) e pedidos de crédito (Q-03)
+
+/** Prazos em aberto por urgência (Q-01). As faixas não se cruzam e somam `abertos`. */
+export interface PrazosPorUrgencia {
+  abertos: number
+  /** Vencimento antes de hoje (o período "vencidos" da agenda). */
+  vencidos: number
+  hoje: number
+  /** De D+1 a D+7. */
+  ate7Dias: number
+  /** De D+8 a D+30. */
+  ate30Dias: number
+  /** Depois de D+30. */
+  depois: number
+}
+
+export function prazosPorUrgencia(prazos: readonly Prazo[], hoje: DataIso): PrazosPorUrgencia {
+  const contagem: PrazosPorUrgencia = {
+    abertos: 0,
+    vencidos: 0,
+    hoje: 0,
+    ate7Dias: 0,
+    ate30Dias: 0,
+    depois: 0,
+  }
+  const em7 = somarDias(hoje, 7)
+  const em30 = somarDias(hoje, 30)
+  for (const prazo of prazos) {
+    if (!noPeriodo(prazo, 'abertos', hoje)) continue
+    const v = prazo.vencimento
+    contagem.abertos++
+    if (v < hoje) contagem.vencidos++
+    else if (v === hoje) contagem.hoje++
+    else if (v <= em7) contagem.ate7Dias++
+    else if (v <= em30) contagem.ate30Dias++
+    else contagem.depois++
+  }
+  return contagem
+}
+
+/**
+ * A primeira AGC `agendada` com a 1ª convocação de hoje em diante (SDD §5.7, Q-02): pela data e,
+ * no mesmo dia, pelo id. AGC instalada ou encerrada não é "próxima"; a de 1ª convocação já passada
+ * também não, como no `resumoDoDia`.
+ */
+export function proximaAgc(agcs: readonly Agc[], hoje: DataIso): Agc | null {
+  const [primeira] = agcs
+    .filter((a) => a.status === 'agendada' && a.dataPrimeira >= hoje)
+    .sort((a, b) => a.dataPrimeira.localeCompare(b.dataPrimeira) || a.id.localeCompare(b.id))
+  return primeira ?? null
+}
+
+type PedidoDeCredito = Tipos['pedidosDeCredito']
+
+export interface PedidosPorStatus {
+  pendentes: number
+  acolhidos: number
+  rejeitados: number
+  /** O processo com mais pedidos pendentes (no empate, o de menor id), ou `null` sem pendentes. */
+  maisPendentes: { processoId: string; pendentes: number } | null
+}
+
+export function pedidosPorStatus(pedidos: readonly PedidoDeCredito[]): PedidosPorStatus {
+  const pendentesPorProcesso = new Map<string, number>()
+  let acolhidos = 0
+  let rejeitados = 0
+  for (const pedido of pedidos) {
+    if (pedido.status === 'acolhido') acolhidos++
+    else if (pedido.status === 'rejeitado') rejeitados++
+    else {
+      pendentesPorProcesso.set(
+        pedido.processoId,
+        (pendentesPorProcesso.get(pedido.processoId) ?? 0) + 1,
+      )
+    }
+  }
+  let maisPendentes: PedidosPorStatus['maisPendentes'] = null
+  let pendentes = 0
+  for (const [processoId, quantidade] of pendentesPorProcesso) {
+    pendentes += quantidade
+    if (
+      !maisPendentes ||
+      quantidade > maisPendentes.pendentes ||
+      (quantidade === maisPendentes.pendentes && processoId < maisPendentes.processoId)
+    ) {
+      maisPendentes = { processoId, pendentes: quantidade }
+    }
+  }
+  return { pendentes, acolhidos, rejeitados, maisPendentes }
+}
+
 /** Informes mais recentes: pela data e, no mesmo dia, pelo cadastro mais novo. */
 export function ultimosInformes(informes: readonly Informe[]): Informe[] {
   return [...informes]
