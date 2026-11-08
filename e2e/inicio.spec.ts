@@ -56,18 +56,43 @@ test.describe('larguras', () => {
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
   })
 
-  test('GRD-09 · tela muito larga: grid de 1240px à esquerda, unidade de 298px', async ({
+  test('GRD-09 · tela muito larga: grid de 2200px à esquerda, unidade de 538px', async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1920, height: 1000 })
+    await page.setViewportSize({ width: 3440, height: 1000 })
     await entrarComo(page, 'advogado')
     const caixa = await grade(page).boundingBox()
-    expect(caixa?.width).toBe(1240)
+    expect(caixa?.width).toBe(2200)
     const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
-    expect(prazos?.width).toBe(298)
+    expect(prazos?.width).toBe(538)
     // Alinhado à esquerda, com o cabeçalho.
     const titulo = await tituloDoInicio(page).boundingBox()
     expect(prazos?.x).toBe(titulo?.x)
+    // As ações do cabeçalho param na borda direita da grade, e não na da janela (AJ-21).
+    const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
+    expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(
+      (caixa?.x ?? 0) + (caixa?.width ?? 0),
+      0,
+    )
+  })
+
+  test('AJ-21 · monitor de 2560px com o menu aberto: a grade preenche a coluna', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 2560, height: 1000 })
+    await entrarComo(page, 'advogado')
+    await expect(page.getByRole('button', { name: 'Recolher menu' })).toBeVisible()
+    const caixa = await grade(page).boundingBox()
+    const resto = await page.evaluate(() => {
+      const grade = document.querySelector('[data-colunas]')
+      const coluna = grade?.closest('main')
+      return (
+        (coluna?.getBoundingClientRect().right ?? 0) - (grade?.getBoundingClientRect().right ?? 0)
+      )
+    })
+    expect(caixa?.width).toBeLessThan(2200)
+    // Só a margem do conteúdo à direita, sem vazio.
+    expect(resto).toBeLessThanOrEqual(60)
   })
 
   test('GRD-04/PRS-12 · tablet (834px): 2 colunas, sem Personalizar', async ({ page }) => {

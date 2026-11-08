@@ -12,7 +12,7 @@ import { Botao, BotaoIcone } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
 import { Vazio } from '../../ui/Vazio'
 import { type Sessao, useSessao } from '../entrada/sessao'
-import { colunasDaLargura } from './arrasto'
+import { colunasDaLargura, LARGURA_MAXIMA } from './arrasto'
 import { CabecalhoInicio } from './CabecalhoInicio'
 import { CatalogoEdicao } from './CatalogoEdicao'
 import { GradeMontavel } from './GradeMontavel'
@@ -88,7 +88,8 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
   const podePersonalizar = cols === COLUNAS_DESKTOP
 
   return (
-    <div className={estilos.tela}>
+    // O teto vem da mesma constante da unidade do arrasto: as sombras batem com as células (AJ-21).
+    <div className={estilos.tela} style={{ maxWidth: LARGURA_MAXIMA }}>
       <Cabecalho
         sessao={sessao}
         hoje={hoje}
@@ -121,7 +122,7 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
         {aviso}
       </p>
 
-      <div ref={ref} className={estilos.conteiner}>
+      <div ref={ref}>
         {largura !== null &&
           cols !== null &&
           (exibida.length === 0 ? (
