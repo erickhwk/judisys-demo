@@ -8,6 +8,7 @@ import { hoje } from '../../../regras/relogio'
 import { Barra100, type SegmentoDaBarra } from '../../../ui/graficos/Barra100'
 import { Legenda } from '../../../ui/graficos/Legenda'
 import { useSessao } from '../../entrada/sessao'
+import { plural } from '../../processos/rotulos'
 import { prazosPorUrgencia } from '../indicadores'
 import { Quadro } from './Quadro'
 import estilos from './QuadroPrazos.module.css'
@@ -15,8 +16,6 @@ import type { PropsDoQuadro } from './registro'
 
 const TITULO = 'Prazos em aberto'
 const LINK = { para: '/agenda', rotulo: 'Agenda', modulo: 'prazos' } as const
-
-const plural = (n: number, singular: string, varios: string) => (n === 1 ? singular : varios)
 
 export function QuadroPrazos({ variante }: PropsDoQuadro) {
   const prazos = useTodos('prazos')
@@ -51,7 +50,7 @@ export function QuadroPrazos({ variante }: PropsDoQuadro) {
               <span className={estilos.urgentes}>
                 {u.vencidos > 0 && (
                   <Contagem
-                    texto={`${u.vencidos} ${plural(u.vencidos, 'vencido', 'vencidos')}`}
+                    texto={plural(u.vencidos, 'vencido', 'vencidos')}
                     periodo="vencidos"
                     classe={estilos.vencidos}
                     link={leAgenda}

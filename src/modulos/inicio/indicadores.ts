@@ -275,15 +275,11 @@ export function resumoDoDia(
 ): ResumoDoDia {
   const apelidos = new Map(processos.map((p) => [p.id, p.apelido]))
   const limite = somarDias(hoje, DIAS_AGC_NO_RESUMO)
-  const [agc] = agcs
-    .filter(
-      (a) =>
-        a.status === 'agendada' &&
-        a.dataPrimeira >= hoje &&
-        a.dataPrimeira <= limite &&
-        apelidos.has(a.processoId),
-    )
-    .sort((a, b) => a.dataPrimeira.localeCompare(b.dataPrimeira) || a.id.localeCompare(b.id))
+  const proxima = proximaAgc(
+    agcs.filter((a) => apelidos.has(a.processoId)),
+    hoje,
+  )
+  const agc = proxima && proxima.dataPrimeira <= limite ? proxima : null
   return {
     vencidos: prazos.filter((p) => noPeriodo(p, 'vencidos', hoje)).length,
     hoje: prazos.filter((p) => noPeriodo(p, 'hoje', hoje)).length,
