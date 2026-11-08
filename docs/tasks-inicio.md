@@ -234,7 +234,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
 ## INI-10 · Fechamento: limpeza, ponta a ponta, capturas e PR para a main
 - **Tipo:** Chore
 - **Depende de:** INI-06, INI-07, INI-08, INI-09
-- **SDD:** §4 (S-12), §6, §7.6, §10, §12
+- **SDD:** §4 (S-12, S-13), §6, §7.6, §10, §12
 - **Descrição:** remover o que sobrou do dashboard antigo (inclusive o `GraficoPassivo` e o recharts), trocar cores provisórias pelos tokens de gráfico, rodar os e2e de ponta a ponta do início e da persistência, fazer as capturas finais e a medição do RNF-03, e abrir o PR `ini-redesign` → `main`.
 - **Critérios de aceite:**
   - [ ] Nenhum resto do dashboard antigo: sem `GraficoPassivo`, sem `funilPorFase` não usado, recharts fora do `package.json`.

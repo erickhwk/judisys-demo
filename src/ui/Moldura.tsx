@@ -54,9 +54,10 @@ export function MolduraProvider({ children }: { children: ReactNode }) {
     setFalhou(false)
     try {
       await resetar()
+      // O reset já valeu: a tela remonta mesmo se o refetch abaixo falhar.
+      setResets((n) => n + 1)
       // Depois do reset, tudo o que estava em cache é do banco antigo (T-22, CAR-04).
       await queryClient.invalidateQueries()
-      setResets((n) => n + 1)
       setAberto(false)
       navegar('/')
     } catch (erro) {
