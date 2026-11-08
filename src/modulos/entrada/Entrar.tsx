@@ -106,9 +106,22 @@ const CARTEIRA_PREVIA = {
   rj: [true, true, true, false, true, false, false, false, true, true],
   falencia: [true, true, false, true, false, false, true],
 } as const
-/** Larguras das barras do Passivo sob administração, em % da maior. */
-const PASSIVO_PREVIA = [100, 25, 23, 20]
-/** Prazos cumpridos por mês: os pontos da linha, de 0 (fundo) a 40 (topo). */
+/** Itens do menu da prévia, por grupo: a largura do traço de cada um. */
+const MENU_PREVIA = {
+  principal: { processos: 56, empresas: 50, informes: 44, agenda: 46 },
+  administracao: { usuarios: 48, logs: 34 },
+}
+/** Barras do Passivo sob administração: a largura de cada uma, em % da maior. */
+const PASSIVO_PREVIA = { lontra: 100, beijaFlor: 25, sapoCururu: 23, queroQuero: 20 }
+/** Segmentos da barra de Prazos em aberto: proporção e cor (vencidos, hoje, 7 dias, 30, depois). */
+const SEGMENTOS_PREVIA = [
+  { cor: 'var(--cor-perigo)', flex: 3 },
+  { cor: 'var(--cor-grafico-2)', flex: 1 },
+  { cor: 'var(--cor-grafico-1)', flex: 1 },
+  { cor: 'var(--cor-grafico-3)', flex: 6 },
+  { cor: 'var(--cor-grafico-4)', flex: 8 },
+]
+/** Prazos cumpridos por mês: os pontos da linha, em y de 0 (topo) a 40 (fundo), como no SVG. */
 const LINHA_PREVIA = '0,26 22,30 44,30 66,24 88,14 110,30 132,34 154,28 176,16 198,22 220,10 240,16'
 
 /** Metade escura com a prévia do sistema (decorativa, sem dados): o início em miniatura (AJ-23). */
@@ -131,14 +144,14 @@ function PainelDecorativo() {
             <span className={estilos.itemAtivo}>
               <span />
             </span>
-            {[56, 50, 44, 46].map((largura) => (
-              <span key={largura} className={estilos.itemMenu}>
+            {Object.entries(MENU_PREVIA.principal).map(([item, largura]) => (
+              <span key={item} className={estilos.itemMenu}>
                 <span style={{ width: largura }} />
               </span>
             ))}
             <span className={estilos.grupoMenu} />
-            {[48, 34].map((largura) => (
-              <span key={largura} className={estilos.itemMenu}>
+            {Object.entries(MENU_PREVIA.administracao).map(([item, largura]) => (
+              <span key={item} className={estilos.itemMenu}>
                 <span style={{ width: largura }} />
               </span>
             ))}
@@ -173,8 +186,8 @@ function PainelDecorativo() {
             <div className={estilos.miniGrade}>
               <div className={`${estilos.miniQuadro} ${estilos.largo}`}>
                 <span className={estilos.miniTitulo}>Passivo sob administração</span>
-                {PASSIVO_PREVIA.map((largura, i) => (
-                  <span key={largura} className={estilos.passivo}>
+                {Object.entries(PASSIVO_PREVIA).map(([processo, largura], i) => (
+                  <span key={processo} className={estilos.passivo}>
                     <span className={estilos.miniTraco} />
                     <span className={estilos.trilho}>
                       <span
@@ -192,11 +205,9 @@ function PainelDecorativo() {
                   <span className={estilos.vencidos} />
                 </span>
                 <span className={estilos.segmentos}>
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
+                  {SEGMENTOS_PREVIA.map(({ cor, flex }) => (
+                    <span key={cor} style={{ flex, background: cor }} />
+                  ))}
                 </span>
               </div>
               <div className={estilos.miniQuadro}>
@@ -211,8 +222,12 @@ function PainelDecorativo() {
               </div>
               <div className={`${estilos.miniQuadro} ${estilos.largo}`}>
                 <span className={estilos.miniTitulo}>Prazos cumpridos</span>
-                <svg className={estilos.linha} viewBox="0 0 240 40" preserveAspectRatio="none">
-                  <title>Prazos cumpridos por mês</title>
+                <svg
+                  className={estilos.linha}
+                  viewBox="0 0 240 40"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
                   <polyline points={LINHA_PREVIA} />
                 </svg>
               </div>

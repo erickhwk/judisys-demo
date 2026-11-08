@@ -461,31 +461,6 @@
   border-radius: 3px;
 }
 
-.segmentos span:nth-child(1) {
-  flex: 3;
-  background: var(--cor-perigo);
-}
-
-.segmentos span:nth-child(2) {
-  flex: 1;
-  background: var(--cor-grafico-2);
-}
-
-.segmentos span:nth-child(3) {
-  flex: 1;
-  background: var(--cor-grafico-1);
-}
-
-.segmentos span:nth-child(4) {
-  flex: 6;
-  background: var(--cor-grafico-3);
-}
-
-.segmentos span:nth-child(5) {
-  flex: 8;
-  background: var(--cor-grafico-4);
-}
-
 .agc {
   display: flex;
   align-items: center;
