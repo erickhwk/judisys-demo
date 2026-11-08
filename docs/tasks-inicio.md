@@ -31,7 +31,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`). Referência visu
   - Nesta feature, o `src/ui/MenuLateral.tsx` é da INI-01 e o `src/modulos/inicio/montagem.ts` é da INI-02. As outras tarefas não editam esses arquivos sem virar dúvida.
   - Referência visual: os artboards do canvas da SDD §11. Os valores de cor do canvas são aproximações; na implementação valem os tokens.
   - Número do seed usado em ficha, caso ou teste sai do `pnpm indicadores` (INI-02). Cálculo novo em `indicadores.ts` entra também na saída do script.
-  - Capturas: as do `contexto` da demo, nas larguras 1280 (menu aberto), 1440, 834 e 390, nos dois temas (SDD §10).
+  - Capturas (SDD §10: 1280 com o menu aberto, 1440, 834 e 390, nos dois temas): `capturar.sh --url http://localhost:432{n}/ --login-clique "Entrar como Advogado" --relogio 2026-11-07T10:00:00 --rolagem-interna --viewports 1280x800,1440x900,834x1112,390x844 --tema claro,escuro --tema-chave tema --tela <nome>='#/<rota>'`, com o preview na porta 432{n}, derrubado no fim.
 
 ---
 

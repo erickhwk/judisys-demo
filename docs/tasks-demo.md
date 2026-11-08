@@ -24,7 +24,7 @@ Repositório: `erickhwk/judisys-demo` (pasta `~/code/judisys`), exceto a DMO-25 
 
 - `teste`:
   - `setup`: `pnpm install --frozen-lockfile`
-  - `run`: `pnpm lint && pnpm typecheck && pnpm test && PORTA_E2E=431{n} pnpm e2e`. O e2e local gera o seed e o build sozinho (AJ-06).
+  - `run`: `pnpm lint && pnpm typecheck && pnpm test && PORTA_E2E=431{n} pnpm e2e --workers=2`. O e2e local gera o seed e o build sozinho (AJ-06). Com `--workers=2`, quatro agentes em paralelo não sobrecarregam a máquina (lote 1 do INI: com os workers padrão, a carga chegou a 10–12 e o e2e falhou por tempo).
   - `rapido`: `pnpm lint && pnpm typecheck && pnpm vitest run {arquivos}`
 - `contexto`, a parte fixa (copiar e somar a divisão de arquivos do lote):
   - pt-BR em commits, comentários e PR; o SDD prevalece sobre o PRD.
