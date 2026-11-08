@@ -8,6 +8,7 @@ import { excluirEmpresa } from '../../dados/servicos/exclusoes'
 import { Botao } from '../../ui/Botao'
 import { Confirmacao } from '../../ui/Confirmacao'
 import { Dialogo } from '../../ui/Dialogo'
+import { rotaDoProcesso } from '../processos/abas'
 import estilos from './Empresas.module.css'
 import type { Empresa } from './empresas'
 
@@ -78,7 +79,7 @@ export function useExclusaoEmpresa(aoExcluir?: () => void): {
           <ul className={estilos.vinculos} aria-label="Processos da empresa">
             {recusa.processos.map((processo) => (
               <li key={processo.id}>
-                <Link to={`/processos/${processo.id}/visao-geral`}>{processo.rotulo}</Link>
+                <Link to={rotaDoProcesso(processo.id, 'visao-geral')}>{processo.rotulo}</Link>
               </li>
             ))}
           </ul>

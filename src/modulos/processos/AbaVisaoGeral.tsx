@@ -10,6 +10,7 @@ import { hoje } from '../../regras/relogio'
 import { juntarClasses } from '../../ui/classes'
 import { Selo, type TomSelo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
+import { rotaDoProcesso } from './abas'
 import { formatarPercentual } from './formulario'
 import { linhaDoTempo } from './linhaDoTempo'
 import estilos from './processos.module.css'
@@ -90,7 +91,7 @@ export function AbaVisaoGeral({ processoId }: { processoId: string }) {
             <h2 id="titulo-prazos" className={estilos.tituloCartao}>
               Próximos prazos
             </h2>
-            <Link to={`/processos/${processoId}/prazos`}>Ver todos</Link>
+            <Link to={rotaDoProcesso(processoId, 'prazos')}>Ver todos</Link>
           </div>
           {prazos.isSuccess && proximos.length === 0 ? (
             <Vazio titulo="Nenhum prazo aberto" />
@@ -152,7 +153,7 @@ export function AbaVisaoGeral({ processoId }: { processoId: string }) {
             <div>
               <dt>Empresas</dt>
               <dd>
-                <Link to={`/processos/${processoId}/empresas`}>
+                <Link to={rotaDoProcesso(processoId, 'empresas')}>
                   {plural(vinculos.data?.length ?? 0, 'empresa', 'empresas')}
                 </Link>
               </dd>

@@ -15,6 +15,7 @@ import { Selo } from '../../ui/Selo'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
 import { useCredoresDoProcesso, useProcesso } from '../credores/consultas'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import {
   type Agc,
   convocacaoSugerida,
@@ -67,7 +68,7 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
     () => linhasDaMesa(credores.data ?? [], votantes, conjuntoPresentes),
     [credores.data, votantes, conjuntoPresentes],
   )
-  const aba = `/processos/${processo.id}/agc`
+  const aba = rotaDoProcesso(processo.id, 'agc')
   const situacao = SITUACOES_AGC[agc.status]
 
   return (
@@ -75,7 +76,7 @@ function ConteudoAgc({ processo, agc }: { processo: Processo; agc: Agc }) {
       <CabecalhoPagina
         trilha={[
           { rotulo: 'Processos', para: '/processos' },
-          { rotulo: processo.apelido, para: `/processos/${processo.id}/visao-geral` },
+          { rotulo: processo.apelido, para: rotaDoProcesso(processo.id, 'visao-geral') },
           { rotulo: 'AGC', para: aba },
         ]}
         titulo={`AGC de ${formatarData(agc.dataPrimeira)}`}

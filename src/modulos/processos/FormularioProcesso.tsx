@@ -18,6 +18,7 @@ import { CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from './abas'
 import {
   type EntradaFormulario,
   paraDadosProcesso,
@@ -80,7 +81,7 @@ export function NovoProcesso() {
           empresaIds: valores.empresaIds,
           dataInicio: valores.dataInicio,
         })
-        navegar(`/processos/${processo.id}/visao-geral`)
+        navegar(rotaDoProcesso(processo.id, 'visao-geral'))
       }}
     />
   )
@@ -107,10 +108,10 @@ export function EditarProcesso() {
         atual,
         vinculos.data.map((v) => v.empresaId),
       )}
-      voltarPara={`/processos/${atual.id}/visao-geral`}
+      voltarPara={rotaDoProcesso(atual.id, 'visao-geral')}
       salvar={async (valores) => {
         await editar(atual.id, paraDadosProcesso(valores, atual), valores.empresaIds)
-        navegar(`/processos/${atual.id}/visao-geral`)
+        navegar(rotaDoProcesso(atual.id, 'visao-geral'))
       }}
     />
   )

@@ -18,6 +18,7 @@ import { CabecalhoPagina } from '../../ui/CabecalhoPagina'
 import { Campo, CampoMarcacao, CampoSelecao, CampoTexto } from '../../ui/Campo'
 import { Erro } from '../../ui/Erro'
 import { Formulario, SecaoFormulario } from '../../ui/Formulario'
+import { rotaDoProcesso } from '../processos/abas'
 import {
   CAMPOS_FORMULARIO,
   CATEGORIAS,
@@ -43,7 +44,7 @@ export function NovoInforme() {
       <CabecalhoPagina
         trilha={[{ rotulo: 'Informes', para: '/informes' }, { rotulo: 'Novo informe' }]}
         titulo="Novo informe"
-        acoes={<Voltar para={processoId ? `/processos/${processoId}/informes` : '/informes'} />}
+        acoes={<Voltar para={processoId ? rotaDoProcesso(processoId, 'informes') : '/informes'} />}
       />
       <CamposInforme processoId={processoId} />
     </div>
@@ -176,7 +177,7 @@ function Campos({
   })
 
   const voltar =
-    aoCancelar ?? (() => navegar(processoId ? `/processos/${processoId}/informes` : '/informes'))
+    aoCancelar ?? (() => navegar(processoId ? rotaDoProcesso(processoId, 'informes') : '/informes'))
 
   return (
     <Formulario

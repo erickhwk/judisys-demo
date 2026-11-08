@@ -13,6 +13,7 @@ import { hoje } from '../../regras/relogio'
 import { Botao, BotaoLink } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
 import { NaoEncontrada } from '../../ui/TelasDeAviso'
+import { rotaDoProcesso } from '../processos/abas'
 import { useCredoresDoProcesso, useProcesso } from './consultas'
 import estilos from './credores.module.css'
 import { QuadroResumo } from './QuadroResumo'
@@ -54,7 +55,7 @@ export function ConteudoQgc({ processo, credores }: { processo: Processo; credor
   return (
     <main className={impressao.paginaImpressao}>
       <div className={`${impressao.barraImpressao} nao-imprimir`}>
-        <BotaoLink para={`/processos/${processo.id}/credores`} icone={<ArrowLeft size={18} />}>
+        <BotaoLink para={rotaDoProcesso(processo.id, 'credores')} icone={<ArrowLeft size={18} />}>
           Voltar ao processo
         </BotaoLink>
         <Botao variante="primario" icone={<Printer size={18} />} onClick={() => window.print()}>

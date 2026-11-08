@@ -10,6 +10,7 @@ import { BotaoIcone } from '../../ui/Botao'
 import { juntarClasses } from '../../ui/classes'
 import { Selo } from '../../ui/Selo'
 import { AcoesLinha, type ColunaTabela, Tabela } from '../../ui/Tabela'
+import { rotaDoProcesso } from '../processos/abas'
 import estilos from './prazos.module.css'
 import { rotuloSituacao, TOM_SITUACAO } from './regras'
 import type { AcoesPrazo } from './useAcoesPrazo'
@@ -19,7 +20,7 @@ type Processo = Tipos['processos']
 
 /** Endereço do prazo na aba Prazos do processo (PRZ-09: o calendário leva ao prazo). */
 export function enderecoDoPrazo(prazo: Pick<Prazo, 'id' | 'processoId'>): string {
-  return `/processos/${prazo.processoId}/prazos?prazo=${encodeURIComponent(prazo.id)}`
+  return `${rotaDoProcesso(prazo.processoId, 'prazos')}?prazo=${encodeURIComponent(prazo.id)}`
 }
 
 /** `id` do elemento do prazo na aba, para rolar até ele. */

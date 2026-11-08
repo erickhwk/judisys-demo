@@ -17,6 +17,7 @@ import { Erro } from '../../ui/Erro'
 import { Selo } from '../../ui/Selo'
 import { VisualizadorPdf } from '../../ui/VisualizadorPdf'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import { useUrlDoAnexo } from './anexos'
 import { CamposInforme, Voltar } from './FormularioInforme'
 import { ehPdf, formatarTamanho, type Informe } from './informes'
@@ -65,7 +66,7 @@ export function TelaInforme() {
         trilha={[
           { rotulo: 'Informes', para: '/informes' },
           ...(apelido
-            ? [{ rotulo: apelido, para: `/processos/${informe.processoId}/visao-geral` }]
+            ? [{ rotulo: apelido, para: rotaDoProcesso(informe.processoId, 'visao-geral') }]
             : []),
           { rotulo: editando ? 'Editar' : 'Informe' },
         ]}
@@ -80,7 +81,7 @@ export function TelaInforme() {
         acoes={
           !editando && (
             <>
-              <Voltar para={`/processos/${informe.processoId}/informes`} />
+              <Voltar para={rotaDoProcesso(informe.processoId, 'informes')} />
               {podeEditar && (
                 <Botao
                   variante="primario"
@@ -123,7 +124,7 @@ function Detalhes({ informe, apelido }: { informe: Informe; apelido?: string }) 
           <div>
             <dt>Processo</dt>
             <dd>
-              <Link to={`/processos/${informe.processoId}/informes`}>{apelido ?? '—'}</Link>
+              <Link to={rotaDoProcesso(informe.processoId, 'informes')}>{apelido ?? '—'}</Link>
             </dd>
           </div>
           <div>

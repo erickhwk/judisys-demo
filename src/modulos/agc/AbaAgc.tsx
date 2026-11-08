@@ -12,6 +12,7 @@ import { Selo } from '../../ui/Selo'
 import { Tabela } from '../../ui/Tabela'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import { plural } from '../processos/rotulos'
 import { type Agc, emSimulacao, SITUACOES_AGC } from './agc'
 import estilos from './agc.module.css'
@@ -29,7 +30,7 @@ export function AbaAgc({ processoId }: { processoId: string }) {
 
   if (consulta.isError) return <Erro mensagem="Não foi possível carregar as AGCs." />
   const agcs = consulta.data ?? []
-  const caminho = (agc: Agc) => `/processos/${processoId}/agc/${agc.id}`
+  const caminho = (agc: Agc) => `${rotaDoProcesso(processoId, 'agc')}/${agc.id}`
 
   return (
     <section className={estilos.aba} aria-labelledby={idTitulo}>

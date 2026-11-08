@@ -5,6 +5,7 @@
 import { useTodos } from '../../../dados/contexto'
 import { Legenda } from '../../../ui/graficos/Legenda'
 import { Rosca, type SegmentoDaRosca } from '../../../ui/graficos/Rosca'
+import { rotaDoProcesso } from '../../processos/abas'
 import { pedidosPorStatus } from '../indicadores'
 import { type LinkDoQuadro, Quadro } from './Quadro'
 import estilos from './QuadroPedidos.module.css'
@@ -41,7 +42,7 @@ export function QuadroPedidos({ variante }: PropsDoQuadro) {
   ]
   const mais = s.maisPendentes
   const link: LinkDoQuadro = mais
-    ? { para: `/processos/${mais.processoId}/credores`, rotulo: 'Ver', modulo: 'credores' }
+    ? { para: rotaDoProcesso(mais.processoId, 'credores'), rotulo: 'Ver', modulo: 'credores' }
     : LINK_PROCESSOS
 
   return (

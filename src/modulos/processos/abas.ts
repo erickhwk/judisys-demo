@@ -29,5 +29,10 @@ export const DEFINICOES_ABAS: Record<Aba, DefinicaoAba> = definicoes
 /** As abas na ordem da tela. */
 export const ABAS = Object.keys(DEFINICOES_ABAS) as Aba[]
 
+/** O caminho de uma aba da tela do processo: `/processos/<id>/<aba>` (AJ-19). */
+export function rotaDoProcesso(id: string, aba: Aba): string {
+  return `/processos/${id}/${aba}`
+}
+
 /** O conteúdo de uma aba recebe só o `processoId`. */
 export type ConteudoAba = (props: { processoId: string }) => JSX.Element | null

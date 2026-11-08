@@ -31,6 +31,7 @@ import { useBuscaAdiada } from '../../ui/useBuscaAdiada'
 import { useExportarCsv } from '../../ui/useExportarCsv'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from './abas'
 import { useExcluirProcesso } from './ExcluirProcesso'
 import { exportarProcessos } from './exportacao'
 import { listarProcessos } from './listagem'
@@ -126,7 +127,7 @@ export function ListaProcessos() {
       titulo: 'Apelido',
       largura: '26%',
       destaque: true,
-      celula: (p) => <Link to={`/processos/${p.id}/visao-geral`}>{p.apelido}</Link>,
+      celula: (p) => <Link to={rotaDoProcesso(p.id, 'visao-geral')}>{p.apelido}</Link>,
     },
     {
       chave: 'numero',

@@ -15,7 +15,7 @@ import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
 import { useSessao } from '../entrada/sessao'
 import { AvancarFase } from './AvancarFase'
-import { ABAS, type Aba, type ConteudoAba, DEFINICOES_ABAS } from './abas'
+import { ABAS, type Aba, type ConteudoAba, DEFINICOES_ABAS, rotaDoProcesso } from './abas'
 import { DesfazerMarco } from './DesfazerMarco'
 import { useExcluirProcesso } from './ExcluirProcesso'
 import { NavegacaoAbas } from './NavegacaoAbas'
@@ -114,7 +114,7 @@ export function TelaDoProcesso({ aba, Conteudo }: { aba: Aba; Conteudo: Conteudo
           itens={visiveis.map((chave) => ({
             chave,
             rotulo: DEFINICOES_ABAS[chave].rotulo,
-            para: `/processos/${atual.id}/${chave}`,
+            para: rotaDoProcesso(atual.id, chave),
             ativa: chave === aba,
           }))}
         />

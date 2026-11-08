@@ -11,6 +11,7 @@ import { juntarClasses } from '../../../ui/classes'
 import { useSessao } from '../../entrada/sessao'
 import { DIAS_DA_SEMANA, mesDe, semanasDoMes } from '../../prazos/regras'
 import { enderecoDoPrazo } from '../../prazos/TabelaPrazos'
+import { rotaDoProcesso } from '../../processos/abas'
 import { type DestaqueDoMes, destaqueDoMes, type MarcaDoDia, prazosDoMes } from '../indicadores'
 import { maiuscula } from '../resumo'
 import { Quadro } from './Quadro'
@@ -113,7 +114,7 @@ function Destaque({
   const podeAbrir = sessao ? pode(sessao.papel, 'ler', ehPrazo ? 'prazos' : 'agc') : false
   const para = ehPrazo
     ? enderecoDoPrazo(destaque.prazo)
-    : `/processos/${destaque.agc.processoId}/agc/${destaque.agc.id}`
+    : `${rotaDoProcesso(destaque.agc.processoId, 'agc')}/${destaque.agc.id}`
   const quando = destaque.data === hoje ? 'Hoje' : 'Próximo'
   const apelido = apelidos.get(registro.processoId) ?? 'Processo excluído'
   const conteudo = (

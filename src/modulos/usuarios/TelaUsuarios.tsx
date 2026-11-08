@@ -20,6 +20,7 @@ import { Vazio } from '../../ui/Vazio'
 import { mensagemDeErro } from '../credores/erros'
 import { NOMES_PAPEIS } from '../entrada/papeis'
 import { useSessao } from '../entrada/sessao'
+import { rotaDoProcesso } from '../processos/abas'
 import { DialogoUsuario } from './DialogoUsuario'
 import { TabelaPermissoes } from './TabelaPermissoes'
 import estilos from './usuarios.module.css'
@@ -192,7 +193,7 @@ export function TelaUsuarios() {
           <ul className={estilos.vinculos} aria-label="Processos do usuário">
             {recusa.vinculos.map((processo) => (
               <li key={processo.id}>
-                <Link to={`/processos/${processo.id}/visao-geral`}>{processo.rotulo}</Link>
+                <Link to={rotaDoProcesso(processo.id, 'visao-geral')}>{processo.rotulo}</Link>
               </li>
             ))}
           </ul>
