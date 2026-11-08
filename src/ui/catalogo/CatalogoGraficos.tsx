@@ -2,6 +2,7 @@
 // início (272 e 560px) e solto na largura da página, com os casos de borda (série toda zero).
 // O botão de tema no topo do catálogo troca os dois temas. Dados fictícios, no formato das fichas.
 import type { ReactNode } from 'react'
+import { formatarMoedaCurta } from '../../regras/moeda'
 import { Barra100 } from '../graficos/Barra100'
 import { BarrasHorizontais } from '../graficos/BarrasHorizontais'
 import { Colunas } from '../graficos/Colunas'
@@ -28,26 +29,28 @@ const colunas = MESES.map((rotulo, i) => {
 })
 const pontos = MESES.map((rotulo, i) => ({ rotulo, valor: CUMPRIDOS[i] ?? 0 }))
 const recorde = CUMPRIDOS.indexOf(Math.max(...CUMPRIDOS))
+const marcaRecorde = {
+  indice: recorde,
+  rotulo: `${MESES[recorde]}: recorde (${CUMPRIDOS[recorde]})`,
+}
 
-/** Valores em milhões de reais, já como número para o gráfico. */
+/** Valores em centavos, como os quadros recebem do repositório; `formatarMoedaCurta` exibe. */
+const MILHAO = 100_000_000
 const CLASSES = [
-  { rotulo: 'Trabalhista', valor: 219.3 },
-  { rotulo: 'Garantia real', valor: 78.3 },
-  { rotulo: 'Quirografário', valor: 48.3 },
-  { rotulo: 'ME e EPP', valor: 28 },
-  { rotulo: 'Fiscal', valor: 15.6 },
+  { rotulo: 'Trabalhista', valor: 219.3 * MILHAO },
+  { rotulo: 'Garantia real', valor: 78.3 * MILHAO },
+  { rotulo: 'Quirografário', valor: 48.3 * MILHAO },
+  { rotulo: 'ME e EPP', valor: 28 * MILHAO },
+  { rotulo: 'Fiscal', valor: 15.6 * MILHAO },
 ]
 const percentuais = percentuaisArredondados(CLASSES.map((c) => c.valor))
 
 const PROCESSOS = [
-  { rotulo: 'Grupo Lontra Azul', valor: 182.4, tom: 'serie-1' as const },
-  { rotulo: 'Metalúrgica Horizonte Ltda.', valor: 96.1, tom: 'serie-3' as const },
-  { rotulo: 'Transportes Jabuticaba', valor: 31.7, tom: 'serie-3' as const },
-  { rotulo: 'Boa Mesa Alimentos', valor: 15, tom: 'serie-3' as const },
+  { rotulo: 'Grupo Lontra Azul', valor: 182.4 * MILHAO, tom: 'serie-1' as const },
+  { rotulo: 'Metalúrgica Horizonte Ltda.', valor: 96.1 * MILHAO, tom: 'serie-3' as const },
+  { rotulo: 'Transportes Jabuticaba', valor: 31.7 * MILHAO, tom: 'serie-3' as const },
+  { rotulo: 'Boa Mesa Alimentos', valor: 15 * MILHAO, tom: 'serie-3' as const },
 ]
-
-const emMilhoes = (valor: number) =>
-  `R$ ${valor.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mi`
 
 export function CatalogoGraficos() {
   return (
@@ -96,19 +99,20 @@ export function CatalogoGraficos() {
           <Linha
             descricao="Prazos cumpridos por mês de vencimento"
             pontos={pontos}
-            marca={{
-              indice: recorde,
-              rotulo: `${MESES[recorde]}: recorde (${CUMPRIDOS[recorde]})`,
-            }}
+            marca={marcaRecorde}
           />
         </Cartao>
 
         <Cartao titulo="Barra100 com legenda · 2 unidades" largura="dupla">
-          <Barra100 descricao="Passivo por classe (RJ)" segmentos={CLASSES} formatar={emMilhoes} />
+          <Barra100
+            descricao="Passivo por classe (RJ)"
+            segmentos={CLASSES}
+            formatar={formatarMoedaCurta}
+          />
           <Legenda
             itens={CLASSES.map((c, i) => ({
               rotulo: c.rotulo,
-              valor: `${emMilhoes(c.valor)} · ${percentuais[i]}%`,
+              valor: `${formatarMoedaCurta(c.valor)} · ${percentuais[i]}%`,
             }))}
           />
         </Cartao>
@@ -117,7 +121,7 @@ export function CatalogoGraficos() {
           <BarrasHorizontais
             descricao="Passivo sob administração"
             barras={PROCESSOS}
-            formatar={emMilhoes}
+            formatar={formatarMoedaCurta}
           />
         </Cartao>
 
@@ -125,7 +129,7 @@ export function CatalogoGraficos() {
           <BarrasHorizontais
             descricao="Passivo sob administração"
             barras={PROCESSOS}
-            formatar={emMilhoes}
+            formatar={formatarMoedaCurta}
             empilhado
           />
         </Cartao>
@@ -172,7 +176,7 @@ export function CatalogoGraficos() {
       <Linha
         descricao="Prazos cumpridos por mês de vencimento"
         pontos={pontos}
-        marca={{ indice: recorde, rotulo: `${MESES[recorde]}: recorde (${CUMPRIDOS[recorde]})` }}
+        marca={marcaRecorde}
       />
     </div>
   )
