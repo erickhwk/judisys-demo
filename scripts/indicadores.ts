@@ -10,16 +10,13 @@ import {
   cumpridosPorMes,
   destaqueDoMes,
   informesPorMes,
-  numerosDoTopo,
   passivoPorClasse,
   passivoPorProcesso,
   pedidosPorStatus,
   prazosDoMes,
   prazosPorUrgencia,
   proximaAgc,
-  proximasAgcs,
   proximosDoQuadro,
-  proximosPrazos,
   resumoDoDia,
   ultimosInformes,
 } from '../src/modulos/inicio/indicadores'
@@ -51,7 +48,6 @@ function dinheiro(centavos: number): string {
 }
 
 export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[] {
-  const topo = numerosDoTopo(tabelas, hoje)
   const classes = passivoPorClasse(tabelas.processos, tabelas.credores)
   const porProcesso = passivoPorProcesso(tabelas.processos, tabelas.credores)
   const resumo = resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje)
@@ -59,18 +55,6 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
   const proximos = proximosDoQuadro(tabelas.prazos, hoje)
   const destaque = destaqueDoMes(tabelas.prazos, tabelas.agcs, hoje)
   return [
-    {
-      titulo: 'Números do topo (numerosDoTopo)',
-      linhas: [
-        { rotulo: 'Processos ativos', valor: topo.ativosRj + topo.ativosFalencia },
-        { rotulo: 'RJ ativas', valor: topo.ativosRj },
-        { rotulo: 'Falências ativas', valor: topo.ativosFalencia },
-        { rotulo: 'Passivo (relação do AJ, ativos)', valor: dinheiro(topo.passivo) },
-        { rotulo: 'Credores', valor: topo.credores },
-        { rotulo: 'Prazos vencidos', valor: topo.prazosVencidos },
-        { rotulo: 'Prazos nos próximos 7 dias', valor: topo.prazosProximos },
-      ],
-    },
     {
       titulo: 'Frase-resumo do início (resumoDoDia)',
       linhas: [
@@ -121,13 +105,6 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
       ],
     })),
     {
-      titulo: 'Próximos prazos em aberto (proximosPrazos)',
-      linhas: proximosPrazos(tabelas.prazos, hoje).map((p) => ({
-        rotulo: `${p.vencimento} · ${processo(p.processoId)}`,
-        valor: p.titulo,
-      })),
-    },
-    {
       titulo: 'Quadro Próximos prazos (proximosDoQuadro)',
       linhas: [
         ...proximos.prazos.map((p) => ({
@@ -151,13 +128,6 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
             : '(nenhum)',
         },
       ],
-    },
-    {
-      titulo: 'Próximas AGCs (proximasAgcs)',
-      linhas: proximasAgcs(tabelas.agcs, hoje).map((a) => ({
-        rotulo: `${a.data} · ${processo(a.agc.processoId)}`,
-        valor: `${a.convocacao}ª convocação`,
-      })),
     },
     ...blocosDosQuadros1x1(tabelas, hoje, processo),
     {

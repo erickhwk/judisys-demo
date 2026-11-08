@@ -1,8 +1,9 @@
 // Personalizar o início no navegador (SDD-INI §7.5, PRS-01 a PRS-14): faixa, catálogo, ×, arrastar
-// com o mouse (com passos, depois de a tela parar de carregar, SDD §10), recusa e persistência. As
+// com o mouse (com passos, depois de a tela parar de carregar, SDD §10), recusa e persistência; e,
+// no fim, o padrão de cada papel e a montagem por usuário (GRD-02, MNT-01, MNT-02). As
 // regras puras do arrasto (coluna pelo ponteiro, recusa, empurrão) estão em arrasto.test.ts.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, entrarComo, resetarPelaFaixa, tituloDoInicio, trocarPara } from './apoio'
 
 interface Item {
   quadro: string
@@ -210,6 +211,22 @@ test('PRS-04 · um 1×2 todo fora do grid pela direita: faixa na borda direita',
   expect(await posicoes(page)).toEqual(antes)
 })
 
+test('arrastar para fora pela direita não dá rolagem horizontal à página', async ({ page }) => {
+  await personalizar(page)
+  await arrastar(page, 'calendario', 7, 0, false)
+  // Nenhum ancestral da grade que rola (a coluna do Layout e a página) ganha largura a rolar.
+  const alargados = await page.locator('[data-colunas="4"]').evaluate((grade) => {
+    const largos: string[] = []
+    for (let el = grade.parentElement; el; el = el.parentElement) {
+      const rola = el === document.documentElement || getComputedStyle(el).overflowX !== 'visible'
+      if (rola && el.scrollWidth > el.clientWidth) largos.push(`${el.className} ${el.scrollWidth}`)
+    }
+    return largos
+  })
+  expect(alargados).toEqual([])
+  await page.mouse.up()
+})
+
 test('arrastar: a célula de origem mantém a altura enquanto a prévia encolhe o grid', async ({
   page,
 }) => {
@@ -404,4 +421,77 @@ test('PRS-14 · Tab: Restaurar, Cancelar, Concluir, catálogo e os ×; a alça n
     )
   }
   expect(vistos).toEqual(esperados)
+})
+
+// --- Padrão de cada papel e montagem por usuário (GRD-02, MNT-01, MNT-02) ----------------------
+
+/** Padrão da AJ (RF-17), na ordem de leitura. */
+const PADRAO_AJ: Item[] = [
+  { quadro: 'carteira', x: 0, y: 0 },
+  { quadro: 'passivo', x: 0, y: 1 },
+  { quadro: 'prazos', x: 2, y: 1 },
+  { quadro: 'agc', x: 3, y: 1 },
+  { quadro: 'cumpridos', x: 0, y: 2 },
+  { quadro: 'proximos', x: 2, y: 2 },
+  { quadro: 'atividade', x: 3, y: 2 },
+  { quadro: 'classes', x: 0, y: 3 },
+]
+
+/** Padrão do analista (RF-17), na ordem de leitura. */
+const PADRAO_ANALISTA: Item[] = [
+  { quadro: 'pedidos', x: 0, y: 0 },
+  { quadro: 'prazos', x: 1, y: 0 },
+  { quadro: 'informes', x: 2, y: 0 },
+  { quadro: 'atividade', x: 3, y: 0 },
+  { quadro: 'classes', x: 0, y: 1 },
+  { quadro: 'passivo', x: 0, y: 2 },
+  { quadro: 'proximos', x: 2, y: 2 },
+  { quadro: 'calendario', x: 3, y: 2 },
+  { quadro: 'publicados', x: 0, y: 3 },
+]
+
+/** Tira um quadro pelo Personalizar e conclui: a montagem do usuário deixa de ser o padrão. */
+async function tirarEConcluir(page: Page, titulo: string): Promise<void> {
+  await personalizar(page)
+  await botao(page, `Tirar ${titulo} do início`).click()
+  await botao(page, 'Concluir').click()
+  await expect(faixa(page)).toHaveCount(0)
+}
+
+const sem = (itens: Item[], quadro: string) => itens.filter((item) => item.quadro !== quadro)
+
+test('GRD-02 · cada papel abre com o seu padrão', async ({ page }) => {
+  expect(await posicoes(page)).toEqual(PADRAO_ADVOGADO)
+  await trocarPara(page, 'aj')
+  expect(await posicoes(page)).toEqual(PADRAO_AJ)
+  await trocarPara(page, 'analista')
+  expect(await posicoes(page)).toEqual(PADRAO_ANALISTA)
+})
+
+test('MNT-01 · a montagem é de cada usuário: trocar de papel e voltar', async ({ page }) => {
+  await tirarEConcluir(page, 'Calendário do mês')
+  const doAdvogado = sem(PADRAO_ADVOGADO, 'calendario')
+  expect(await posicoes(page)).toEqual(doAdvogado)
+
+  await trocarPara(page, 'aj')
+  expect(await posicoes(page)).toEqual(PADRAO_AJ)
+
+  await trocarPara(page, 'advogado')
+  expect(await posicoes(page)).toEqual(doAdvogado)
+})
+
+test('MNT-02 · Resetar demo apaga as montagens de todos', async ({ page }) => {
+  await tirarEConcluir(page, 'Calendário do mês')
+  await trocarPara(page, 'aj')
+  await tirarEConcluir(page, 'Carteira por fase')
+  expect(await posicoes(page)).toEqual(sem(PADRAO_AJ, 'carteira'))
+
+  await resetarPelaFaixa(page)
+  await expect(tituloDoInicio(page)).toBeVisible()
+  expect(await gravada(page)).toBeNull()
+  await expect.poll(() => posicoes(page), { timeout: 5000 }).toEqual(PADRAO_AJ)
+
+  await trocarPara(page, 'advogado')
+  expect(await gravada(page)).toBeNull()
+  expect(await posicoes(page)).toEqual(PADRAO_ADVOGADO)
 })

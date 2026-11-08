@@ -8,7 +8,7 @@ import { useTodos } from '../../dados/contexto'
 import type { DataIso } from '../../regras/datas'
 import type { Papel } from '../../regras/permissoes'
 import { agora, hoje as hojeDoRelogio } from '../../regras/relogio'
-import { Botao } from '../../ui/Botao'
+import { Botao, BotaoIcone } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
 import { Vazio } from '../../ui/Vazio'
 import { type Sessao, useSessao } from '../entrada/sessao'
@@ -95,13 +95,13 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
         acoes={
           podePersonalizar &&
           !editando && (
-            <Botao
+            <BotaoIcone
               ref={personalizarRef}
-              icone={<LayoutDashboard size={18} />}
+              aria-label="Personalizar"
+              title="Personalizar"
+              icone={<LayoutDashboard size={20} />}
               onClick={() => setRascunho(salva.map((item) => ({ ...item })))}
-            >
-              Personalizar
-            </Botao>
+            />
           )
         }
       />

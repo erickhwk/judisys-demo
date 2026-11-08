@@ -119,6 +119,8 @@ const PARES_GRAFICOS: readonly (readonly [string, string])[] = [
   ['--cor-menu-icone-ativo', '--cor-menu-ativo'],
   // 5ª série dos gráficos (INI-08): a ME/EPP do Q-11 precisa aparecer sobre a superfície
   ['--cor-grafico-5', '--cor-superficie'],
+  // 4ª série (INI-10): era 1,6:1 no claro e 2,1:1 no escuro, e a fatia sumia
+  ['--cor-grafico-4', '--cor-superficie'],
 ]
 
 describe.each([

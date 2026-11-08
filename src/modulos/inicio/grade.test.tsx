@@ -1,6 +1,6 @@
 // Grade do início em HTML (SDD-INI §7.3, GRD; PRS-12; INV-06). No HTML do servidor não há layout:
-// a largura do contêiner é injetada (`larguraForcada`, SDD §10). Os quadros desta etapa são os
-// provisórios (moldura e título), então o armazenamento pode ficar vazio.
+// a largura do contêiner é injetada (`larguraForcada`, SDD §10). O armazenamento fica vazio (cada
+// quadro mostra o estado vazio): aqui vale a posição dos quadros, não o corpo.
 import { afterEach, describe, expect, it } from 'vitest'
 import { ArmazenamentoMemoria } from '../../dados/memoria'
 import { PAPEIS, type Papel } from '../../regras/permissoes'
@@ -61,7 +61,7 @@ describe('grade em 4 colunas', () => {
   it('GRD-03 · contêiner de 880px tem 4 colunas e o Personalizar', async () => {
     const html = await tela(880)
     expect(colunas(html)).toBe('4')
-    expect(html).toContain('>Personalizar</button>')
+    expect(html).toContain('aria-label="Personalizar"')
   })
 
   it('GRD-08 · montagem com buraco: o buraco continua', async () => {

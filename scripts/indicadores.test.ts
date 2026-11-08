@@ -6,7 +6,6 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { TabelasSeed } from '../src/dados/carga'
-import { somarDias } from '../src/regras/datas'
 import { ehFaseFinal } from '../src/regras/fases'
 import { CLASSES_RJ, rotuloClasse } from '../src/regras/qgc'
 import { HOJE_FIXO, tabelasDoSeed } from './indicadores'
@@ -63,32 +62,16 @@ describe('pnpm indicadores', () => {
     expect(saida.split('\n')[0]).toBe('Indicadores do seed com hoje = 2026-11-07')
   })
 
-  it('DSH-01 · números do topo iguais à conta do teste do dashboard', () => {
-    const topo = bloco('Números do topo')
-    const ativos = tabelas.processos.filter((p) => !ehFaseFinal(p.faseAtual))
-    const idsAtivos = new Set(ativos.map((p) => p.id))
-    const abertos = tabelas.prazos.filter((p) => p.status === 'aberto')
-    const ateD7 = somarDias(HOJE_FIXO, 7)
-
-    expect(Number(topo.get('RJ ativas'))).toBe(ativos.filter((p) => p.tipo === 'rj').length)
-    expect(Number(topo.get('Falências ativas'))).toBe(
-      ativos.filter((p) => p.tipo === 'falencia').length,
+  it('QDR-09 · total do passivo por processo igual à soma da relação do AJ dos ativos', () => {
+    const porProcesso = bloco('Passivo por processo ativo')
+    const idsAtivos = new Set(
+      tabelas.processos.filter((p) => !ehFaseFinal(p.faseAtual)).map((p) => p.id),
     )
-    expect(Number(topo.get('Processos ativos'))).toBe(ativos.length)
-    expect(Number(topo.get('Credores'))).toBe(tabelas.credores.length)
-    expect(centavos(topo.get('Passivo (relação do AJ, ativos)'))).toBe(
+    expect(centavos(porProcesso.get('Total'))).toBe(
       tabelas.credores
         .filter((c) => idsAtivos.has(c.processoId))
         .reduce((soma, c) => soma + (c.valorAj ?? 0), 0),
     )
-    expect(Number(topo.get('Prazos vencidos'))).toBe(
-      abertos.filter((p) => p.vencimento < HOJE_FIXO).length,
-    )
-    expect(Number(topo.get('Prazos nos próximos 7 dias'))).toBe(
-      abertos.filter((p) => p.vencimento >= HOJE_FIXO && p.vencimento <= ateD7).length,
-    )
-    for (const [rotulo, valor] of topo)
-      expect(Number.parseInt(valor, 10), rotulo).toBeGreaterThan(0)
   })
 
   it('passivo por classe das RJ ativas igual à soma da relação do AJ por classe (F-10)', () => {

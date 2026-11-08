@@ -17,3 +17,6 @@ playwright/.cache/
 
 # Worktrees e estado local dos agentes do Claude Code
 .claude/
+
+# Cache do tsc -b
+*.tsbuildinfo

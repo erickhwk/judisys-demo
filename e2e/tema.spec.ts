@@ -3,7 +3,7 @@
 // abas e sobrevive ao recarregar e ao reset da demo; o script do <head> aplica o tema sem o app;
 // a impressão fica clara.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, entrarComo, resetarPelaFaixa, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -84,13 +84,7 @@ test('TEM-05 · o reset da demo mantém a escolha de tema', async ({ page }) => 
   await page.emulateMedia({ colorScheme: 'light' })
   await entrarComo(page, 'aj')
   await interruptorDoMenu(page).click()
-  await page
-    .getByRole('region', { name: 'Demonstração' })
-    .getByRole('button', { name: 'Resetar demo' })
-    .click()
-  const confirmacao = page.getByRole('alertdialog', { name: 'Resetar a demo?' })
-  await confirmacao.getByRole('button', { name: 'Resetar demo' }).click()
-  await expect(confirmacao).toBeHidden()
+  await resetarPelaFaixa(page)
   await expect(tituloDoInicio(page)).toBeVisible()
 
   expect(await escolhaSalva(page)).toBe('dark')

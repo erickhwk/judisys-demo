@@ -52,6 +52,22 @@ export function colunaPretendida(
   return Math.round((clienteX - deslocamento - esquerdaDoGrid) / (unidade + VAO))
 }
 
+/**
+ * Deslocamento horizontal do quadro arrastado, preso a um vão além das bordas do grid (INI-10): solto,
+ * o quadro levado para fora alargava a coluna que rola e a página ganhava rolagem horizontal. Só o
+ * desenho fica preso; a coluna pretendida (e a recusa) segue o ponteiro.
+ */
+export function deslocamentoNoGrid(
+  dx: number,
+  origemX: number,
+  larguraDaCelula: number,
+  larguraDoGrid: number,
+): number {
+  const minimo = -origemX - VAO
+  const maximo = larguraDoGrid - origemX - larguraDaCelula + VAO
+  return Math.min(Math.max(dx, minimo), maximo)
+}
+
 /** Linha pretendida pelo ponteiro, no mesmo cálculo da coluna; nunca acima da primeira. */
 export function linhaPretendida(
   clienteY: number,
