@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
     <title>Judisys — demonstração</title>
+    <script>
+      /* Tema (AJ-11): mesma regra de src/ui/tema.ts, aplicada antes de pintar (sem piscar o claro). */
+      (() => {
+        let t
+        try {
+          t = localStorage.getItem('tema')
+        } catch {}
+        if (t !== 'dark' && t !== 'light')
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.dataset.theme = t
+      })()
+    </script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-512.png" sizes="512x512" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

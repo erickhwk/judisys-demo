@@ -1,8 +1,14 @@
 /*
  * Tokens do guia de design do Judisys (DESIGN.md e telas/LEIAME.md).
- * Os pares de texto e fundo usados nos componentes têm contraste de pelo menos 4,5:1 (RNF-01).
+ * Os pares de texto e fundo usados nos componentes têm contraste de pelo menos 4,5:1 (RNF-01),
+ * nos dois temas: o tokens.test.ts confere os pares.
+ *
+ * Modo escuro (AJ-11): o `data-theme` do <html> vem do script do index.html e de ui/tema.ts. O tema
+ * escuro só redefine as cores, e só na tela: impressão e PDF ficam sempre no claro.
  */
 :root {
+  color-scheme: light;
+
   /* Azul */
   --cor-azul-900: #0a1f4d;
   --cor-azul-800: #0b2a5e;
@@ -12,7 +18,9 @@
 
   /* Dourado */
   --cor-dourado-500: #c8993f;
-  --cor-dourado-degrade: linear-gradient(135deg, #d9ac55, #b8872f);
+
+  /* Laranja da marca da Draft (site draft.dev.br): só no hover da marca no rodapé */
+  --cor-draft-laranja: #ff5a36;
   --cor-dourado-200: #f0cf8e;
   --cor-dourado-700: #7f5a17;
   --cor-dourado-600: #a9791f;
@@ -69,6 +77,44 @@
   /* Sombras */
   --sombra-card: 0 1px 2px rgba(10, 31, 77, 0.04);
   --sombra-dialogo: 0 24px 64px rgba(10, 31, 77, 0.24);
+  --sombra-cartao-hover: 0 6px 18px rgba(10, 31, 77, 0.08);
+
+  /* Véus atrás do diálogo e da gaveta do menu */
+  --cor-veu-dialogo: rgba(8, 26, 61, 0.55);
+  --cor-veu-gaveta: rgba(10, 31, 77, 0.45);
+
+  /* Realce translúcido sobre fundos claros (avisos da faixa da demo) */
+  --cor-realce-sutil: rgba(10, 31, 77, 0.08);
+  --cor-divisoria-sutil: rgba(10, 31, 77, 0.1);
+
+  /* Áreas sempre escuras nos dois temas: menu lateral, faixa da demo e painel da entrada */
+  --cor-menu-fundo: #0a1f4d;
+  --cor-escuro-texto: #ffffff;
+  --cor-escuro-texto-suave: #c9d4ea;
+  --cor-escuro-texto-apagado: #a9b8d6;
+  --cor-escuro-rotulo: #8a9cc0;
+  --cor-escuro-realce: rgba(255, 255, 255, 0.08);
+  --cor-escuro-divisoria: rgba(255, 255, 255, 0.12);
+  --cor-escuro-borda: rgba(255, 255, 255, 0.28);
+  --cor-escuro-pontos: rgba(255, 255, 255, 0.09);
+  --cor-sobre-dourado: #0a1f4d;
+  --cor-dourado-translucido: rgba(200, 153, 63, 0.16);
+
+  /* Entrada: borda dos cartões e a prévia decorativa do sistema no painel */
+  --cor-borda-cartao-login: #cfc8b8;
+  --cor-previa-fundo: #f6f4ee;
+  --cor-previa-menu: #0b2150;
+  --cor-previa-item: #5f77a6;
+  --cor-previa-item-ativo: rgba(200, 153, 63, 0.22);
+  --cor-previa-texto: #0b1b3a;
+  --cor-previa-rotulo: #566178;
+  --cor-previa-cartao: #ffffff;
+  --cor-previa-borda: #e6e1d5;
+  --cor-previa-icone: #f4ecda;
+  --cor-previa-traco: #ddd7c8;
+  --cor-previa-destaque: #0b2a5e;
+  --sombra-previa: 0 30px 80px rgba(0, 0, 0, 0.45);
+  --sombra-previa-flutuante: 0 18px 40px rgba(0, 0, 0, 0.4);
 
   /* Tipografia */
   --fonte-titulo: "Poppins", "Inter", system-ui, sans-serif;
@@ -87,4 +133,91 @@
   --altura-campo: 48px;
   --altura-botao-grande: 52px;
   --largura-menu: 280px;
+}
+
+/*
+ * Tema escuro (AJ-11): fundo azul-marinho bem escuro, na linha do --cor-azul-login, superfícies um
+ * tom acima, texto claro e dourado-200 como acento. O "azul-900" é a cor de ação (botão primário,
+ * página atual) e no escuro vira um azul bem claro, com o texto invertido escuro por cima.
+ * Só na tela: a impressão fica com os tokens claros.
+ */
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    /* Azul */
+    --cor-azul-900: #dbe4f7;
+    --cor-azul-800: #a8c2f2;
+    --cor-azul-700: #c3d3f3;
+    --cor-azul-login: #050f26;
+    --cor-azul-claro: #1c3364;
+
+    /* Dourado */
+    --cor-dourado-700: #f0cf8e;
+    --cor-dourado-600: #e0b45e;
+    --cor-dourado-claro: #3a2d12;
+
+    /* Fundos e superfícies */
+    --cor-fundo: #0a1630;
+    --cor-fundo-login: #0a1630;
+    --cor-superficie: #11203f;
+    --cor-superficie-suave: #14254a;
+    --cor-cabecalho-tabela: #142649;
+    --cor-hover-linha: #182c55;
+    --cor-hover-botao: #1d3360;
+    --cor-hover-fantasma: #1a2f5a;
+    --cor-trilho: #22396a;
+
+    /* Bordas */
+    --cor-borda: #26406f;
+    --cor-borda-linha: #1d335d;
+    --cor-borda-campo: #5874a8;
+    --cor-borda-suave: #2c4677;
+
+    /* Texto */
+    --cor-texto: #e8eef9;
+    --cor-texto-forte: #c8d3e8;
+    --cor-texto-muted: #a6b4cf;
+    --cor-texto-placeholder: #93a3c2;
+    --cor-texto-desabilitado: #6a7ba0;
+    --cor-texto-invertido: #0a1f4d;
+
+    /* Estados */
+    --cor-perigo: #ff9aa2;
+    --cor-perigo-claro: #3f1520;
+    --cor-perigo-hover: #ffc0c5;
+    --cor-perigo-borda: #7a2a35;
+    --cor-sucesso: #86dca6;
+    --cor-sucesso-claro: #10351f;
+    --cor-alerta: #ffb784;
+    --cor-alerta-claro: #3d2410;
+
+    /* Foco: o dourado já contrasta com o fundo escuro; o anel interno acompanha o fundo. */
+    --foco-anel-interno: 0 0 0 2px var(--cor-fundo);
+
+    /* Sombras e véus */
+    --sombra-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --sombra-dialogo: 0 24px 64px rgba(0, 0, 0, 0.55);
+    --sombra-cartao-hover: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --cor-veu-dialogo: rgba(0, 0, 0, 0.6);
+    --cor-veu-gaveta: rgba(0, 0, 0, 0.5);
+    --cor-realce-sutil: rgba(255, 255, 255, 0.08);
+    --cor-divisoria-sutil: rgba(255, 255, 255, 0.12);
+
+    /* Áreas sempre escuras: o menu desce um tom para não se misturar com o fundo. */
+    --cor-menu-fundo: #061128;
+
+    /* Entrada */
+    --cor-borda-cartao-login: #3a5486;
+    --cor-previa-fundo: #0e1c3a;
+    --cor-previa-menu: #050d22;
+    --cor-previa-item: #3d5585;
+    --cor-previa-texto: #e3e9f5;
+    --cor-previa-rotulo: #a6b4cf;
+    --cor-previa-cartao: #142549;
+    --cor-previa-borda: #26406f;
+    --cor-previa-icone: #3a2d12;
+    --cor-previa-traco: #2c4677;
+    --cor-previa-destaque: #1c3364;
+  }
 }

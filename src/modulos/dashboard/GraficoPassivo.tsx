@@ -44,9 +44,14 @@ export function GraficoPassivo({ classes }: { classes: readonly PassivoDaClasse[
               contentStyle={{
                 borderRadius: 10,
                 border: '1px solid var(--cor-borda)',
+                // Cores por token: o balão troca com o tema (AJ-11).
+                background: 'var(--cor-superficie)',
+                color: 'var(--cor-texto)',
                 fontFamily: 'var(--fonte-texto)',
                 fontSize: 13,
               }}
+              labelStyle={{ color: 'var(--cor-texto)' }}
+              itemStyle={{ color: 'var(--cor-texto)' }}
             />
             <Bar dataKey="valor" fill="var(--cor-azul-900)" radius={[0, 4, 4, 0]} maxBarSize={18} />
           </BarChart>

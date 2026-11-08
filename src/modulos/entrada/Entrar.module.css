@@ -20,8 +20,12 @@
   padding: 40px 56px;
 }
 
-.logo {
-  align-self: flex-start;
+/* Logo à esquerda e o botão do tema (AJ-11) à direita */
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .centro {
@@ -75,7 +79,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 18px 16px 20px;
-  border: 1px solid #cfc8b8;
+  border: 1px solid var(--cor-borda-cartao-login);
   border-radius: var(--raio-linha);
   background: var(--cor-superficie);
   text-align: left;
@@ -87,7 +91,7 @@
 
 .cartao:hover:not(:disabled) {
   border-color: var(--cor-azul-800);
-  box-shadow: 0 6px 18px rgba(10, 31, 77, 0.08);
+  box-shadow: var(--sombra-cartao-hover);
 }
 
 .cartao:disabled {
@@ -163,9 +167,9 @@
   flex-direction: column;
   padding: 64px 0 0 64px;
   background-color: var(--cor-azul-login);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-image: radial-gradient(var(--cor-escuro-pontos) 1px, transparent 1px);
   background-size: 26px 26px;
-  color: var(--cor-texto-invertido);
+  color: var(--cor-escuro-texto);
 }
 
 .chamada {
@@ -180,7 +184,7 @@
   align-self: flex-start;
   padding: 6px 12px;
   border-radius: var(--raio-pilula);
-  background: rgba(200, 153, 63, 0.16);
+  background: var(--cor-dourado-translucido);
   color: var(--cor-dourado-200);
   font-size: 12px;
   font-weight: 600;
@@ -191,13 +195,13 @@
 .tituloPainel {
   font-size: 42px;
   line-height: 1.15;
-  color: var(--cor-texto-invertido);
+  color: var(--cor-escuro-texto);
 }
 
 .textoPainel {
   font-size: 16px;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--cor-escuro-texto-suave);
 }
 
 .previa {
@@ -216,8 +220,8 @@
   display: flex;
   overflow: hidden;
   border-radius: 16px 0 0 0;
-  background: #f6f4ee;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  background: var(--cor-previa-fundo);
+  box-shadow: var(--sombra-previa);
 }
 
 .janelaMenu {
@@ -227,7 +231,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 18px 12px;
-  background: #0b2150;
+  background: var(--cor-previa-menu);
 }
 
 .janelaMenu img {
@@ -245,7 +249,7 @@
 }
 
 .itemAtivo {
-  background: rgba(200, 153, 63, 0.22);
+  background: var(--cor-previa-item-ativo);
 }
 
 .itemAtivo span,
@@ -260,7 +264,7 @@
 }
 
 .itemMenu span {
-  background: #5f77a6;
+  background: var(--cor-previa-item);
 }
 
 .janelaConteudo {
@@ -270,7 +274,7 @@
   flex-direction: column;
   gap: 14px;
   padding: 20px 24px;
-  color: #0b1b3a;
+  color: var(--cor-previa-texto);
 }
 
 .janelaTitulo {
@@ -290,9 +294,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid #e6e1d5;
+  border: 1px solid var(--cor-previa-borda);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--cor-previa-cartao);
 }
 
 .miniCard {
@@ -304,14 +308,14 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #566178;
+  color: var(--cor-previa-rotulo);
 }
 
 .miniNumero {
   width: 46px;
   height: 12px;
   border-radius: 4px;
-  background: #0b1b3a;
+  background: var(--cor-previa-texto);
 }
 
 .miniBarra {
@@ -349,7 +353,7 @@
   gap: 10px;
   padding: 9px 10px;
   border-radius: 8px;
-  background: #f6f4ee;
+  background: var(--cor-previa-fundo);
 }
 
 .miniIcone {
@@ -360,7 +364,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  background: #f4ecda;
+  background: var(--cor-previa-icone);
   color: var(--cor-dourado-700);
 }
 
@@ -379,7 +383,7 @@
   width: 70%;
   height: 5px;
   border-radius: 3px;
-  background: #ddd7c8;
+  background: var(--cor-previa-traco);
 }
 
 .miniSelo {
@@ -400,9 +404,9 @@
   gap: 12px;
   padding: 12px 16px 12px 12px;
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
-  color: #0b1b3a;
+  background: var(--cor-previa-cartao);
+  box-shadow: var(--sombra-previa-flutuante);
+  color: var(--cor-previa-texto);
 }
 
 .flutuanteIcone {
@@ -412,7 +416,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: var(--cor-azul-800);
+  background: var(--cor-previa-destaque);
   color: var(--cor-dourado-200);
 }
 
@@ -421,12 +425,12 @@
   flex-direction: column;
   gap: 2px;
   font-size: 11.5px;
-  color: #566178;
+  color: var(--cor-previa-rotulo);
 }
 
 .flutuanteTexto strong {
   font-size: 12.5px;
-  color: #0b1b3a;
+  color: var(--cor-previa-texto);
 }
 
 @media (max-width: 640px) {
