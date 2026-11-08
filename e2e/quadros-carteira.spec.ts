@@ -55,21 +55,26 @@ test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ p
   for (const extremo of EXTREMOS) {
     const janela = 'janela' in extremo ? extremo.janela : extremo.conteiner + casca
     await page.setViewportSize({ width: janela, height: 900 })
-    await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
     if ('conteiner' in extremo) {
       // A casca muda com a largura (a lista do celular tem outras margens): acerta a janela até o
-      // contêiner ser mesmo o extremo pedido.
+      // contêiner ser mesmo o extremo pedido. O poll espera o layout assentar a cada passo.
       let ajustada = janela
-      for (let tentativa = 0; tentativa < 3; tentativa++) {
-        const largura = (await grade.boundingBox())?.width ?? 0
-        if (Math.abs(largura - extremo.conteiner) <= 1) break
-        ajustada += Math.round(extremo.conteiner - largura)
-        await page.setViewportSize({ width: ajustada, height: 900 })
-      }
-      await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
-      const largura = (await grade.boundingBox())?.width ?? 0
-      expect(Math.abs(largura - extremo.conteiner), extremo.nome).toBeLessThanOrEqual(1)
+      await expect
+        .poll(
+          async () => {
+            const largura = (await grade.boundingBox())?.width ?? 0
+            const erro = extremo.conteiner - largura
+            if (Math.abs(erro) > 1) {
+              ajustada += Math.round(erro)
+              await page.setViewportSize({ width: ajustada, height: 900 })
+            }
+            return Math.abs(erro)
+          },
+          { message: extremo.nome, intervals: [100, 200, 300] },
+        )
+        .toBeLessThanOrEqual(1)
     }
+    await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
     await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
     // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
     const estouros = await carteira(page).evaluate((quadro) => {
