@@ -80,6 +80,7 @@ describe('lerMontagem e gravarMontagem', () => {
     ['outro formato', '[{"quadro":"prazos","x":0,"y":0}]'],
     ['versão desconhecida', '{"versao":2,"itens":[{"quadro":"prazos","x":0,"y":0}]}'],
     ['coordenada inválida', '{"versao":1,"itens":[{"quadro":"prazos","x":-1,"y":0.5}]}'],
+    ['linha absurda', '{"versao":1,"itens":[{"quadro":"agc","x":0,"y":1000000000}]}'],
   ])('MNT-03 · %s vira o padrão do papel, sem lançar', (_caso, valor) => {
     storage.setItem(chaveDaMontagem('usr-1'), valor)
     expect(lerMontagem('usr-1', 'analista', fonte)).toEqual(padraoDoPapel('analista'))
@@ -108,6 +109,12 @@ describe('lerMontagem e gravarMontagem', () => {
       { quadro: 'prazos', x: 0, y: 0 },
       { quadro: 'agc', x: 1, y: 0 },
     ])
+  })
+
+  it('gravação que deu certo não fica na cópia da aba: o reset feito noutra aba vale aqui', () => {
+    gravarMontagem('usr-1', MINHA, fonte)
+    storage.removeItem(chaveDaMontagem('usr-1')) // outra aba resetou a demo
+    expect(lerMontagem('usr-1', 'aj', fonte)).toEqual(PADROES.aj)
   })
 
   it.each([

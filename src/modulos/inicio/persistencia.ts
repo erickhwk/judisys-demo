@@ -13,6 +13,10 @@ export function chaveDaMontagem(usuarioId: string): string {
   return `${PREFIXO_MONTAGEM}${usuarioId}`
 }
 
+// Teto das linhas: os 12 quadros empilhados ocupam no máximo 24. Uma linha absurda (chave editada à
+// mão) invalidaria a grade e faria o `primeiroLugarLivre` percorrer milhões de linhas.
+const LINHA_MAXIMA = 100
+
 // O quadro fica como texto: quadro inexistente é descartado pelo `normalizar`, não invalida tudo.
 const schemaGravado = z.object({
   versao: z.literal(VERSAO),
@@ -20,7 +24,7 @@ const schemaGravado = z.object({
     z.object({
       quadro: z.string(),
       x: z.number().int().nonnegative(),
-      y: z.number().int().nonnegative(),
+      y: z.number().int().nonnegative().max(LINHA_MAXIMA),
     }),
   ),
 })
@@ -28,8 +32,9 @@ const schemaGravado = z.object({
 /** `localStorage` do navegador, ou `null` se ele não deixa usar (o mesmo da carga). */
 export type FonteStorage = DependenciasCarga['localStorage']
 
-// Concluir desta aba, por chave: vale por cima do localStorage até recarregar (MNT-06). Também
-// cobre o localStorage que existe mas recusa gravar (cota, modo privado).
+// Concluir desta aba que o localStorage não guardou (ausente ou recusando gravar: cota, modo
+// privado), por chave: vale até recarregar (MNT-06). Gravação que deu certo não fica aqui, para o
+// reset feito noutra aba valer também nesta.
 const memoria = new Map<string, Montagem>()
 
 /**
@@ -45,7 +50,8 @@ export function lerMontagem(
   const daAba = memoria.get(chave)
   if (daAba) return normalizar(daAba, papel)
   const salva = lerGravada(fonte(), chave)
-  return salva ? normalizar(salva.itens, papel) : padraoDoPapel(papel)
+  // O padrão também passa pelo filtro do papel (S-05): vale se o RF-39 mudar.
+  return normalizar(salva ? salva.itens : padraoDoPapel(papel), papel)
 }
 
 function lerGravada(storage: Storage | null, chave: string) {
@@ -72,12 +78,17 @@ export function gravarMontagem(
 ): void {
   const chave = chaveDaMontagem(usuarioId)
   const itens = montagem.map(({ quadro, x, y }) => ({ quadro, x, y }))
-  memoria.set(chave, itens)
   try {
-    fonte()?.setItem(chave, JSON.stringify({ versao: VERSAO, itens }))
+    const storage = fonte()
+    if (storage) {
+      storage.setItem(chave, JSON.stringify({ versao: VERSAO, itens }))
+      memoria.delete(chave)
+      return
+    }
   } catch {
-    // Sem localStorage: fica só a cópia da aba.
+    // O localStorage recusou: fica a cópia da aba.
   }
+  memoria.set(chave, itens)
 }
 
 /** Apaga as montagens de todos os usuários (RF-25). O `resetarDemo` do boot chama. Não lança. */
