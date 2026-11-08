@@ -1,5 +1,5 @@
-// Grade montável do início (SDD-INI §5.3 e §5.6): 4 colunas a partir de 976px de contêiner, 2
-// colunas de 600 a 975px (a montagem do desktop empacotada, S-03) e a lista do celular abaixo disso.
+// Grade montável do início (SDD-INI §5.3 e §5.6): 4 colunas a partir de 880px de contêiner, 2
+// colunas de 600 a 879px (a montagem do desktop empacotada, S-03) e a lista do celular abaixo disso.
 // Grid próprio (Q-01, S-11): CSS grid com a posição explícita de cada quadro, então os buracos
 // ficam (S-04), e arrastar por pointer events, só no modo de edição e só em 4 colunas (INV-06).
 //

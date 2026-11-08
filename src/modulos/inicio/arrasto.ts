@@ -19,7 +19,7 @@ export const ALTURA_UNIDADE = 176
 /** Largura máxima do grid: 4 unidades de 298px e 3 vãos (5.3). */
 export const LARGURA_MAXIMA = 1240
 /** A partir desta largura de contêiner, 4 colunas e Personalizar (5.3). */
-export const LARGURA_4_COLUNAS = 976
+export const LARGURA_4_COLUNAS = 880
 /** A partir desta largura de contêiner, 2 colunas; abaixo, a lista do celular (5.3). */
 export const LARGURA_2_COLUNAS = 600
 

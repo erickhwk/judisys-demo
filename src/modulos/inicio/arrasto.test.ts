@@ -24,8 +24,8 @@ const sobrepostos = (montagem: Montagem) =>
 describe('larguras (5.3)', () => {
   it.each([
     [1600, 4],
-    [976, 4],
-    [975, 2],
+    [880, 4],
+    [879, 2],
     [600, 2],
     [599, 1],
     [358, 1],
@@ -33,15 +33,15 @@ describe('larguras (5.3)', () => {
     expect(colunasDaLargura(largura)).toBe(cols)
   })
 
-  it('unidade de 232px em 976px e de 298px a partir de 1240px (GRD-09)', () => {
-    expect(larguraDaUnidade(976, 4)).toBe(232)
+  it('unidade de 208px em 880px e de 298px a partir de 1240px (GRD-09)', () => {
+    expect(larguraDaUnidade(880, 4)).toBe(208)
     expect(larguraDaUnidade(1240, 4)).toBe(298)
     expect(larguraDaUnidade(1600, 4)).toBe(298)
   })
 
-  it('unidade de 292 a 480px em 2 colunas', () => {
+  it('unidade de 292 a 432px em 2 colunas', () => {
     expect(larguraDaUnidade(600, 2)).toBe(292)
-    expect(larguraDaUnidade(975, 2)).toBeCloseTo(479.5)
+    expect(larguraDaUnidade(879, 2)).toBeCloseTo(431.5)
   })
 })
 

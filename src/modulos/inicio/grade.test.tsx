@@ -58,8 +58,8 @@ describe('grade em 4 colunas', () => {
     expect(ordenada(celulas(html))).toEqual(ordenada(PADROES[papel]))
   })
 
-  it('GRD-03 · contêiner de 976px tem 4 colunas e o Personalizar', async () => {
-    const html = await tela(976)
+  it('GRD-03 · contêiner de 880px tem 4 colunas e o Personalizar', async () => {
+    const html = await tela(880)
     expect(colunas(html)).toBe('4')
     expect(html).toContain('>Personalizar</button>')
   })
@@ -98,8 +98,8 @@ describe('grade em 4 colunas', () => {
 })
 
 describe('grade em 2 colunas', () => {
-  it('GRD-04 · contêiner de 975px: 2 colunas, montagem empacotada em ordem de leitura', async () => {
-    const html = await tela(975)
+  it('GRD-04 · contêiner de 879px: 2 colunas, montagem empacotada em ordem de leitura', async () => {
+    const html = await tela(879)
     expect(colunas(html)).toBe('2')
     expect(celulas(html)).toEqual(ordemDeLeitura(empacotar(PADROES.advogado, 2, MEDIDA_TABLET)))
     expect(variantes(html).every((v) => v === 'tablet')).toBe(true)
@@ -123,7 +123,7 @@ describe('grade em 2 colunas', () => {
   })
 
   it('PRS-12 · sem o botão Personalizar (INV-06)', async () => {
-    const html = await tela(975)
+    const html = await tela(879)
     expect(html).not.toContain('Personalizar')
     expect(html).not.toContain('data-alca')
   })

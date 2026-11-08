@@ -21,7 +21,7 @@ test('CAB-01/CAB-03 · saudação, data por extenso e resumo do seed às 10h', a
 })
 
 test.describe('larguras', () => {
-  test('GRD-03/GRD-04 · contêiner de 976px tem 4 colunas de 232px; de 975px, 2 colunas', async ({
+  test('GRD-03/GRD-04 · contêiner de 880px tem 4 colunas de 208px; de 879px, 2 colunas', async ({
     page,
   }) => {
     // A janela que dá cada largura de contêiner: a casca (menu, margens, barra de rolagem) é medida.
@@ -29,18 +29,27 @@ test.describe('larguras', () => {
     await entrarComo(page, 'advogado')
     const casca = 1440 - ((await grade(page).boundingBox())?.width ?? 0)
 
-    await page.setViewportSize({ width: 976 + casca, height: 900 })
+    await page.setViewportSize({ width: 880 + casca, height: 900 })
     await expect(grade(page)).toHaveAttribute('data-colunas', '4')
-    expect((await grade(page).boundingBox())?.width).toBe(976)
+    expect((await grade(page).boundingBox())?.width).toBe(880)
     const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
-    expect(prazos?.width).toBe(232)
+    expect(prazos?.width).toBe(208)
     expect(prazos?.height).toBe(176)
     await expect(page.locator('[data-celula]')).toHaveCount(8)
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
 
-    await page.setViewportSize({ width: 975 + casca, height: 900 })
+    await page.setViewportSize({ width: 879 + casca, height: 900 })
     await expect(grade(page)).toHaveAttribute('data-colunas', '2')
     await expect(page.getByRole('button', { name: 'Personalizar' })).toHaveCount(0)
+  })
+
+  test('GRD-03 · notebook de 1280px com o menu aberto: 4 colunas e Personalizar', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await entrarComo(page, 'advogado')
+    await expect(grade(page)).toHaveAttribute('data-colunas', '4')
+    await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
   })
 
   test('GRD-09 · tela muito larga: grid de 1240px à esquerda, unidade de 298px', async ({
