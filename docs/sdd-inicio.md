@@ -158,7 +158,7 @@ Medidas pela largura do contêiner do grid (`useContainerWidth`), com vão de 16
 - **Recusa:**
   1. No `onDragStart`, guardar o rascunho de antes e o deslocamento do ponteiro dentro do quadro.
   2. No `onDrag`, calcular a coluna pretendida pelo ponteiro: `round((clienteX − deslocamento − esquerdaDoGrid) / (unidade + 16))`.
-  3. Se `colunaPretendida + w > cols`, ou se for menor que 0, ligar `recusa = { x: colunaPretendida, y, w, h }`. Esconder a sombra da biblioteca e mostrar a sombra própria, vermelha (`--cor-quadro-recusa`), com o aviso "Não cabe aqui: este quadro ocupa N colunas" em `role="status"`. A sombra é cortada na borda do grid.
+  3. Se `colunaPretendida + w > cols`, ou se for menor que 0, ligar `recusa = { x: colunaPretendida, y, w, h }`. Esconder a sombra da biblioteca e mostrar a sombra própria, vermelha (`--cor-quadro-recusa`), com o aviso "Não cabe aqui: este quadro ocupa N colunas" em `role="status"`. A sombra é cortada na borda do grid. Se nada dela cai no grid (quadro todo fora), aparece uma faixa vermelha estreita na borda por onde ele saiu, com o aviso visível ao lado (decidido com o usuário na INI-03).
   4. No `onDragStop` com recusa, voltar ao rascunho de antes. Sem recusa, aceitar o layout da biblioteca.
 - **Guias:** no modo de edição, o fundo do grid desenha as células (tracejado `--cor-quadro-guia`) até a base da montagem mais uma linha.
 
