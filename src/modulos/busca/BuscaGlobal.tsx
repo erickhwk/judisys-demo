@@ -2,7 +2,8 @@
 // resultados vêm do índice em memória (`useIndiceBusca`), agrupados por tipo, até 5 por grupo;
 // setas escolhem e Enter vai à tela do registro.
 // INI-01 (S-08): o Layout monta a busca uma vez, em volta das telas; o botão que a abre mora no
-// `CabecalhoPagina` (desktop) e na lupa da barra do topo (tablet e celular), via `BotaoBuscaGlobal`.
+// `CabecalhoPagina` e no `CabecalhoInicio` (desktop) e na lupa da barra do topo (tablet e celular),
+// via `BotaoBuscaGlobal`.
 import { Command } from 'cmdk'
 import { Search } from 'lucide-react'
 import {

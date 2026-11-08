@@ -75,6 +75,17 @@ test('CAS-04 · no início, a busca fica no cabeçalho do início (uma só)', as
   await expect(busca(page).getByRole('combobox')).toBeFocused()
 })
 
+test('CAS-04 · no início em 834px, só a lupa da barra do topo abre a busca', async ({ page }) => {
+  await page.setViewportSize({ width: 834, height: 1112 })
+  await entrarComo(page, 'advogado')
+  await expect(page.locator('main header').first().getByRole('heading', { level: 1 })).toBeVisible()
+  const botoes = page.getByRole('button', { name: 'Buscar', exact: true })
+  await expect(botoes).toHaveCount(1)
+  await expect(
+    page.getByRole('banner').getByRole('button', { name: 'Buscar', exact: true }),
+  ).toBeVisible()
+})
+
 test('CAS-05 · em 834px, a barra do topo tem o menu, a logo, a lupa e o avatar', async ({
   page,
 }) => {

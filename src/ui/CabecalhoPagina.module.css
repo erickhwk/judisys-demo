@@ -68,7 +68,11 @@
 }
 
 @media (max-width: 900px) {
-  .busca,
+  /* Regras separadas: navegador sem :has() descarta só a segunda, e a busca continua escondida. */
+  .busca {
+    display: none;
+  }
+
   .acoes:not(:has(> :not(.busca))) {
     display: none;
   }
