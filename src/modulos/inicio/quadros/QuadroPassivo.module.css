@@ -1,0 +1,42 @@
+/* Q-08: as quatro barras e a nota cabem no corpo da célula de 176px (desktop e tablet). */
+
+.corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+/* Na célula de altura fixa, as linhas ficam mais juntas que o padrão do gráfico (10px). */
+.corpo:not([data-variante="celular"]) [data-grafico="barras-horizontais"] {
+  gap: 7px;
+}
+
+/* O nome ganha a largura do canvas (190px em 272px de unidade) e encolhe com o quadro. */
+.corpo:not([data-variante="celular"]) [data-grafico="barras-horizontais"] > div {
+  grid-template-columns: minmax(0, 36%) minmax(0, 1fr) auto;
+}
+
+.corpo[data-variante="celular"] {
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.corpo[data-variante="celular"] [data-grafico="barras-horizontais"] {
+  gap: 12px;
+}
+
+.nota {
+  margin: 0;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.corpo[data-variante="celular"] .nota {
+  white-space: normal;
+}

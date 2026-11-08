@@ -6,9 +6,12 @@ import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
+  cumpridosPorMes,
   funilPorFase,
+  informesPorMes,
   numerosDoTopo,
   passivoPorClasse,
+  passivoPorProcesso,
   proximasAgcs,
   proximosPrazos,
   resumoDoDia,
@@ -44,6 +47,7 @@ function dinheiro(centavos: number): string {
 export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[] {
   const topo = numerosDoTopo(tabelas, hoje)
   const classes = passivoPorClasse(tabelas.processos, tabelas.credores)
+  const porProcesso = passivoPorProcesso(tabelas.processos, tabelas.credores)
   const resumo = resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje)
   const processo = (id: string) => tabelas.processos.find((p) => p.id === id)?.apelido ?? id
   return [
@@ -76,6 +80,29 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         ...classes.map((c) => ({ rotulo: c.rotulo, valor: dinheiro(c.valor) })),
         { rotulo: 'Total', valor: dinheiro(classes.reduce((soma, c) => soma + c.valor, 0)) },
       ],
+    },
+    // INI-08 · quadros 2×1 (Q-08 a Q-10)
+    {
+      titulo: 'Passivo por processo ativo (passivoPorProcesso)',
+      linhas: [
+        ...porProcesso.maiores.map((p) => ({ rotulo: p.apelido, valor: dinheiro(p.valor) })),
+        { rotulo: 'Ativos sem relação do AJ', valor: porProcesso.semRelacao },
+        { rotulo: 'Total', valor: dinheiro(porProcesso.total) },
+      ],
+    },
+    {
+      titulo: 'Informes por mês, 12 meses até o de hoje (informesPorMes)',
+      linhas: informesPorMes(tabelas.informes, hoje).map((m) => ({
+        rotulo: m.mes,
+        valor: m.quantidade,
+      })),
+    },
+    {
+      titulo: 'Prazos cumpridos por mês de vencimento, 12 meses fechados (cumpridosPorMes)',
+      linhas: cumpridosPorMes(tabelas.prazos, hoje).map((m) => ({
+        rotulo: m.mes,
+        valor: m.quantidade,
+      })),
     },
     ...(['rj', 'falencia'] as const).map((tipo) => ({
       titulo: `Funil por fase, ${tipo === 'rj' ? 'RJ' : 'falência'} (funilPorFase)`,
