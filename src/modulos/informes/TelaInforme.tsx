@@ -65,7 +65,7 @@ export function TelaInforme() {
         trilha={[
           { rotulo: 'Informes', para: '/informes' },
           ...(apelido
-            ? [{ rotulo: apelido, para: `/processos/${informe.processoId}/informes` }]
+            ? [{ rotulo: apelido, para: `/processos/${informe.processoId}/visao-geral` }]
             : []),
           { rotulo: editando ? 'Editar' : 'Informe' },
         ]}
