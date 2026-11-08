@@ -1,7 +1,7 @@
 // Números e listas do início (antes dashboard: RF-07 a RF-10 da demo, SDD §7.7; e o SDD do início
 // §5.7). Funções puras: "hoje" vem por parâmetro (T-19); a tela só busca as coleções e desenha.
 import type { Tipos } from '../../dados/schemas'
-import { type DataIso, somarDias } from '../../regras/datas'
+import { type DataIso, somarDias, somarMeses } from '../../regras/datas'
 import {
   ehFaseFinal,
   FASES_FALENCIA,
@@ -133,6 +133,125 @@ export function passivoPorClasse(
     rotulo: rotuloClasse(classe, 'rj'),
     valor: somas.get(classe) ?? 0,
   }))
+}
+
+// ---------------------------------------------------------------------------------------------
+// INI-08 · quadros 2×1: passivo por processo, informes e prazos cumpridos por mês (SDD-INI §5.7)
+
+/** Quantos processos o Q-08 desenha em barras. */
+export const LIMITE_PASSIVO = 4
+/** Meses das séries do Q-09 e do Q-10. */
+export const MESES_NA_SERIE = 12
+
+export interface PassivoDoProcesso {
+  processoId: string
+  apelido: string
+  /** Soma da relação do AJ dos credores, em centavos. */
+  valor: number
+}
+
+export interface PassivoPorProcesso {
+  /** Os maiores processos ativos com relação do AJ, do maior para o menor. */
+  maiores: PassivoDoProcesso[]
+  /** Processos ativos sem nenhum credor com valor na relação do AJ (ficam fora da soma). */
+  semRelacao: number
+  /** Centavos: o mesmo `passivo` de `numerosDoTopo` (QDR-09). */
+  total: number
+}
+
+/** Credor com valor na relação do AJ (zero conta; `null` ou ausente não). */
+function temRelacao(credor: Pick<Credor, 'valorAj'>): boolean {
+  return credor.valorAj !== null && credor.valorAj !== undefined
+}
+
+/** Relação do AJ dos processos ativos, por processo (Q-08). */
+export function passivoPorProcesso(
+  processos: readonly Processo[],
+  credores: readonly Credor[],
+): PassivoPorProcesso {
+  const somas = new Map<string, number>()
+  for (const credor of credores) {
+    if (!temRelacao(credor)) continue
+    somas.set(credor.processoId, (somas.get(credor.processoId) ?? 0) + (credor.valorAj ?? 0))
+  }
+  const ativos = processos.filter(ehAtivo)
+  const comRelacao = ativos
+    .filter((p) => somas.has(p.id))
+    .map((p) => ({
+      processoId: p.id,
+      apelido: p.apelido,
+      valor: somas.get(p.id) ?? 0,
+    }))
+    .sort((a, b) => b.valor - a.valor || a.apelido.localeCompare(b.apelido, 'pt-BR'))
+  return {
+    maiores: comRelacao.slice(0, LIMITE_PASSIVO),
+    semRelacao: ativos.length - comRelacao.length,
+    total: comRelacao.reduce((soma, p) => soma + p.valor, 0),
+  }
+}
+
+/** Contagem de um mês da série: `mes` em `aaaa-mm`. */
+export interface ContagemDoMes {
+  mes: string
+  quantidade: number
+}
+
+/** Os `quantos` meses que terminam em `ultimo` (`aaaa-mm-dd` de qualquer dia), do mais antigo. */
+function mesesAte(ultimo: DataIso, quantos: number): string[] {
+  const primeiroDia = `${ultimo.slice(0, 7)}-01`
+  return Array.from({ length: quantos }, (_, i) =>
+    somarMeses(primeiroDia, i - quantos + 1).slice(0, 7),
+  )
+}
+
+function contarPorMes(meses: readonly string[], datas: readonly DataIso[]): ContagemDoMes[] {
+  const contagem = new Map(meses.map((mes) => [mes, 0]))
+  for (const data of datas) {
+    const mes = data.slice(0, 7)
+    const atual = contagem.get(mes)
+    if (atual !== undefined) contagem.set(mes, atual + 1)
+  }
+  return meses.map((mes) => ({ mes, quantidade: contagem.get(mes) ?? 0 }))
+}
+
+/** Informes por mês da data, nos 12 meses até o mês de `hoje`, inclusive (Q-09). */
+export function informesPorMes(informes: readonly Informe[], hoje: DataIso): ContagemDoMes[] {
+  return contarPorMes(
+    mesesAte(hoje, MESES_NA_SERIE),
+    informes.map((i) => i.data),
+  )
+}
+
+/**
+ * Prazos cumpridos nos 12 meses fechados antes do mês de `hoje`, contados pelo mês do vencimento:
+ * não há data de cumprimento (C-01, F-07). Para o Q-10.
+ */
+export function cumpridosPorMes(prazos: readonly Prazo[], hoje: DataIso): ContagemDoMes[] {
+  return contarPorMes(
+    mesesAte(somarMeses(`${hoje.slice(0, 7)}-01`, -1), MESES_NA_SERIE),
+    prazos.filter((p) => p.status === 'cumprido').map((p) => p.vencimento),
+  )
+}
+
+const MESES_CURTOS = [
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
+] as const
+
+/** `2026-11` → `nov`; com o ano, `nov/26` (rótulo do eixo dos gráficos por mês). */
+export function rotuloDoMes(mes: string, comAno = false): string {
+  const nome = MESES_CURTOS[Number(mes.slice(5, 7)) - 1] ?? mes
+  return comAno ? `${nome}/${mes.slice(2, 4)}` : nome
 }
 
 // ---------------------------------------------------------------------------------------------
