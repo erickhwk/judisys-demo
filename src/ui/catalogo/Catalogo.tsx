@@ -7,6 +7,7 @@
 import { Pencil, Plus, Trash } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { Botao, BotaoIcone } from '../Botao'
+import { BotaoTema } from '../BotaoTema'
 import { CampoAreaTexto, CampoMarcacao, CampoSelecao, CampoTexto } from '../Campo'
 import { Confirmacao } from '../Confirmacao'
 import { Dialogo } from '../Dialogo'
@@ -20,6 +21,7 @@ import { AcoesLinha, type ColunaTabela, Tabela } from '../Tabela'
 import { Vazio } from '../Vazio'
 import { VisualizadorPdf } from '../VisualizadorPdf'
 import estilos from './Catalogo.module.css'
+import { CatalogoGraficos } from './CatalogoGraficos'
 
 type ProcessoExemplo = {
   id: string
@@ -139,7 +141,10 @@ export function Catalogo() {
   return (
     <main className={estilos.catalogo}>
       <header className={estilos.cabecalho}>
-        <Logo altura={52} />
+        <div className={estilos.topo}>
+          <Logo altura={52} />
+          <BotaoTema />
+        </div>
         <h1>Catálogo de componentes</h1>
         <p className={estilos.apoio}>
           Página só de desenvolvimento (DMO-09). Confira foco (Tab), alvos de 44px, rolagem da
@@ -361,6 +366,10 @@ export function Catalogo() {
             acao={<Botao>Voltar ao dashboard</Botao>}
           />
         </div>
+      </Secao>
+
+      <Secao titulo="Gráficos em SVG (ui/graficos)">
+        <CatalogoGraficos />
       </Secao>
 
       <Secao titulo="Visualizador de PDF">
