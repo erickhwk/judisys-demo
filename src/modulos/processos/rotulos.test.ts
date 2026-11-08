@@ -15,7 +15,9 @@ describe('TOM_TIPO', () => {
     )
     for (const [tipo, tom] of Object.entries(TOM_TIPO)) {
       const regra = css.match(new RegExp(`\\.${tipo} \\.ocupada \\{([^}]*)\\}`))
-      expect(regra?.[1]).toContain(`--cor-${tom}-`)
+      expect(regra?.[1], `regra .${tipo} .ocupada em QuadroCarteira.module.css`).toContain(
+        `--cor-${tom}-`,
+      )
     }
   })
 })
