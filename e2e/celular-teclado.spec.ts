@@ -98,7 +98,7 @@ test('CEL-01 · roteiro da seção 3 do PRD no celular, só com o teclado', asyn
 
   // 1. Entra como AJ e vê o início.
   await entrarPeloTeclado(page, falhas)
-  for (const indicador of [/Processos ativos/i, /Passivo sob administração/i, /Prazos/i]) {
+  for (const indicador of [/Carteira por fase/i, /Passivo sob administração/i, /Prazos/i]) {
     await expect(page.locator('main').getByText(indicador).first()).toBeVisible()
   }
   await expect(page.locator('main').getByText(/AGC/).first()).toBeVisible()

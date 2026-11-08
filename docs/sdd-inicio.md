@@ -48,9 +48,15 @@ Conferidos em 2026-11-07.
 
 ## 3. Questões abertas
 
-Nenhuma bloqueia a implementação.
+Nenhuma em aberto.
 
-**Q-01. Recusa por cima do react-grid-layout.** A biblioteca limita o `x` em vez de recusar (F-09). A recusa (RF-19) vem da posição do ponteiro (seção 5.6). A primeira tarefa de grid é uma prova de conceito: se a recusa não ficar estável, a alternativa é um grid próprio (CSS grid com arrastar por `pointer events`), avaliada na mesma tarefa.
+**Q-01. Recusa por cima do react-grid-layout.** *Resolvida na INI-03 (2026-11-08): grid próprio, ver S-11.* A biblioteca limita o `x` em vez de recusar (F-09). A recusa (RF-19) vem da posição do ponteiro (seção 5.6). A primeira tarefa de grid é uma prova de conceito: se a recusa não ficar estável, a alternativa é um grid próprio (CSS grid com arrastar por `pointer events`), avaliada na mesma tarefa.
+
+A prova de conceito montou o `react-grid-layout` 2.3.0 com `noCompactor` e a recusa da seção 5.6 por cima, e rodou o arrasto com `page.mouse` (10 passos) no padrão do advogado em 1440px:
+
+- **Recusa (PRS-04):** funcionou, mas só remontando o grid (`key` novo) no `onDragStop`. A biblioteca guarda o layout limitado no estado interno e não relê a prop `layout` se ela não mudou.
+- **Arrastar para lugar livre (PRS-02):** falhou. Com `noCompactor`, cada quadro por onde o ponteiro passa é empurrado para baixo e não volta. Levar Prazos de (0, 0) para (0, 4) deixou Informes publicados, Passivo e Carteira empurrados para a linha 5, **um sobre o outro** (quebra o INV-01).
+- **Empurrar (PRS-03):** funcionou no caso simples.
 
 ---
 
@@ -68,6 +74,7 @@ Nenhuma bloqueia a implementação.
 | S-08 | A busca global sai do topo do Layout e entra no `CabecalhoPagina`, à direita das ações da página. No tablet e no celular, ela vira o botão de lupa da barra do topo, que abre a mesma busca. |
 | S-09 | Tokens novos em `tokens.css`, nos dois temas: `--cor-menu-fundo` (deixa de ser sempre escuro), `--cor-menu-ativo`, `--cor-menu-icone-ativo`, `--cor-grafico-1` a `--cor-grafico-4`, `--cor-quadro-guia` e `--cor-quadro-recusa`. Os tokens "sempre escuros" do menu saem. A faixa da demo e o painel da entrada continuam sempre escuros. |
 | S-10 | O `react-grid-layout` só é importado pelo módulo do início. Como o início é a primeira tela depois da entrada, o modo de edição (catálogo e handlers) pode ficar num `lazy` se a medição do RNF-03 pedir. |
+| S-11 | **Grid próprio no lugar do `react-grid-layout` (Q-01, INI-03).** CSS grid com a posição explícita de cada quadro (`grid-column` e `grid-row`), então os buracos ficam sem compactador (S-04). O arrasto usa `pointer events` na alça. A cada movimento, a prévia é calculada **a partir do rascunho de antes do arrasto**: o quadro vai para a célula do ponteiro, e quem ficaria por baixo desce em cascata (`soltar` em `arrasto.ts`). Assim, o caminho do ponteiro não deixa quadros empurrados. A recusa e a coluna pretendida seguem a seção 5.6. A largura do contêiner vem de um `ResizeObserver` próprio (`useLargura`), no lugar do `useContainerWidth`. Sem a biblioteca, o bundle não cresce, e o `lazy` do S-10 não é preciso. Onde este SDD cita a biblioteca (F-09, S-04, S-10, seções 5.1, 5.3 e 5.6), vale este grid. Motivo: na prova de conceito, a biblioteca com `noCompactor` acumulou os empurrões do caminho e chegou a sobrepor quadros (Q-01). |
 
 ---
 
@@ -120,13 +127,14 @@ Medidas pela largura do contêiner do grid (`useContainerWidth`), com vão de 16
 
 | Contêiner | Colunas | Unidade | Personalizar |
 |---|---|---|---|
-| ≥ 976px | 4 | 232 a 298px | sim |
-| 600 a 975px | 2 | 292 a 480px | não |
+| ≥ 880px | 4 | 208 a 298px | sim |
+| 600 a 879px | 2 | 292 a 432px | não |
 | < 600px | 1 (lista, sem a biblioteca) | largura toda | não |
 
 - O grid tem largura máxima de 1240px (unidade de 298px) e fica alinhado à esquerda.
 - Altura da unidade: 176px, com 16px de vão, nas faixas de 4 e de 2 colunas.
-- **Polidez (RNF-04):** cada variante de desktop precisa ficar correta com unidade de 232 a 298px. Cada variante de tablet, de 292 a 480px. Cada variante de celular, de 288 a 599px. As capturas de aceite cobrem os extremos: 1280px com o menu aberto (unidade de cerca de 232px), 1440px, 834px e 390px.
+- **Limite das 4 colunas em 880px (decidido com o usuário na INI-03, 2026-11-08):** o SDD previa 976px, contando com o menu e as margens do canvas. Com o menu real de 280px e 44px de margem, 1280px com o menu aberto deixa cerca de 912px para a grade (menos com a barra de rolagem), e o notebook ficaria no desenho de tablet e sem o Personalizar. Baixar o limite para 880px mantém as 4 colunas ali.
+- **Polidez (RNF-04):** cada variante de desktop precisa ficar correta com unidade de 208 a 298px. Cada variante de tablet, de 292 a 432px. Cada variante de celular, de 288 a 599px. As capturas de aceite cobrem os extremos: 1280px com o menu aberto (unidade de cerca de 216px), 1440px, 834px e 390px.
 
 ### 5.4 Funções puras de `montagem.ts`
 
@@ -150,7 +158,7 @@ Medidas pela largura do contêiner do grid (`useContainerWidth`), com vão de 16
 - **Recusa:**
   1. No `onDragStart`, guardar o rascunho de antes e o deslocamento do ponteiro dentro do quadro.
   2. No `onDrag`, calcular a coluna pretendida pelo ponteiro: `round((clienteX − deslocamento − esquerdaDoGrid) / (unidade + 16))`.
-  3. Se `colunaPretendida + w > cols`, ou se for menor que 0, ligar `recusa = { x: colunaPretendida, y, w, h }`. Esconder a sombra da biblioteca e mostrar a sombra própria, vermelha (`--cor-quadro-recusa`), com o aviso "Não cabe aqui: este quadro ocupa N colunas" em `role="status"`. A sombra é cortada na borda do grid.
+  3. Se `colunaPretendida + w > cols`, ou se for menor que 0, ligar `recusa = { x: colunaPretendida, y, w, h }`. Esconder a sombra da biblioteca e mostrar a sombra própria, vermelha (`--cor-quadro-recusa`), com o aviso "Não cabe aqui: este quadro ocupa N colunas" em `role="status"`. A sombra é cortada na borda do grid. Se nada dela cai no grid (quadro todo fora), aparece uma faixa vermelha estreita na borda por onde ele saiu, com o aviso visível ao lado (decidido com o usuário na INI-03).
   4. No `onDragStop` com recusa, voltar ao rascunho de antes. Sem recusa, aceitar o layout da biblioteca.
 - **Guias:** no modo de edição, o fundo do grid desenha as células (tracejado `--cor-quadro-guia`) até a base da montagem mais uma linha.
 
@@ -225,8 +233,8 @@ Todos puros, com `hoje` por parâmetro:
 |---|---|---|---|---|
 | GRD-01 | F | advogado sem montagem salva | abrir em 1440px | Os oito quadros do padrão do advogado nas posições do RF-17. |
 | GRD-02 | F | cada papel | abrir | O padrão do papel (RF-17). |
-| GRD-03 | F | contêiner de 976px | abrir | 4 colunas (5.3). |
-| GRD-04 | B | contêiner de 975px | abrir | 2 colunas, montagem empacotada em ordem de leitura (RF-10). |
+| GRD-03 | F | contêiner de 880px (e 1280px com o menu aberto) | abrir | 4 colunas (5.3). |
+| GRD-04 | B | contêiner de 879px | abrir | 2 colunas, montagem empacotada em ordem de leitura (RF-10). |
 | GRD-05 | F | padrão do advogado | 2 colunas | Ordem: Prazos, AGC, Próximos, Calendário, Informes publicados, Passivo, Passivo por classe, Carteira (2×2). |
 | GRD-06 | F | 390px | abrir | Uma coluna na mesma ordem, variantes de celular, altura livre (RF-11). |
 | GRD-07 | F | qualquer quadro | clicar no link do cabeçalho | Vai à tela de origem (RF-13). |
@@ -272,7 +280,7 @@ Todos puros, com `hoje` por parâmetro:
 | PRS-10 | F | montagem salva | Restaurar padrão e depois Cancelar | Nada muda. Restaurar e depois Concluir grava o padrão. |
 | PRS-11 | B | edição | tirar todos | Aviso com o botão Restaurar padrão (RF-23); Concluir grava a montagem vazia, e o início mostra o mesmo aviso fora do modo. |
 | PRS-12 | B | 2 colunas | abrir | Sem botão Personalizar (INV-06). |
-| PRS-13 | B | em edição | o contêiner cai para menos de 976px | Sai do modo descartando o rascunho, com o aviso "Personalizar só em telas largas". |
+| PRS-13 | B | em edição | o contêiner cai para menos de 880px | Sai do modo descartando o rascunho, com o aviso "Personalizar só em telas largas". |
 | PRS-14 | F | edição | teclado | Tab passa por Restaurar, Cancelar, Concluir, catálogo e os ×; a alça não recebe foco (RNF-01, D-04). |
 
 ### 7.6 Persistência — MNT

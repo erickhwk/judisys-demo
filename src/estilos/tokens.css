@@ -105,6 +105,8 @@
   /* Personalizar o início (S-09): guias da grade e o quadro que não cabe onde foi solto */
   --cor-quadro-guia: #c3cbdb;
   --cor-quadro-recusa: var(--cor-perigo);
+  /* Borda tracejada do quadro em edição e da sombra do lugar de destino (INI-03) */
+  --cor-quadro-sombra: #6d84b3;
 
   /* Áreas sempre escuras nos dois temas: faixa da demo e painel da entrada */
   --cor-escuro-texto: #ffffff;
@@ -230,6 +232,7 @@
     --cor-grafico-3: #7f97c6;
     --cor-grafico-4: #3a5486;
     --cor-quadro-guia: #3a5486;
+    --cor-quadro-sombra: #7f97c6;
 
     /* Entrada */
     --cor-borda-cartao-login: #3a5486;

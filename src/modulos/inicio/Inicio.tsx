@@ -1,509 +1,219 @@
-// Início (SDD do início §5.1): o cabeçalho com saudação, data e resumo do dia (CAB) e, abaixo dele,
-// o conteúdo do antigo dashboard executivo (RF-07 a RF-10 da demo, SDD §7.7) até a grade
-// montável da INI-03: números do topo, próximos prazos e AGCs, funil por fase, passivo por
-// classe, últimos informes e atividade recente. Toda gravação invalida as consultas (T-22), então
-// voltar ao início já mostra a mudança (DSH-04).
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import {
-  AlarmClock,
-  CalendarClock,
-  ClipboardList,
-  FileText,
-  Gavel,
-  Scale,
-  Users,
-  Wallet,
-} from 'lucide-react'
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import type { Id } from '../../dados/armazenamento'
-import { useListar, useRepo, useTodos } from '../../dados/contexto'
-import { COLECOES, type Repositorio } from '../../dados/repositorio'
-import { CATEGORIAS_INFORME, type Log, type Registro } from '../../dados/schemas'
-import { formatarData, formatarDataHora } from '../../regras/datas'
-import type { TipoProcesso } from '../../regras/fases'
-import { formatarMoeda, formatarMoedaCurta } from '../../regras/moeda'
-import { type Modulo, pode } from '../../regras/permissoes'
-import { situacao } from '../../regras/prazos'
+// Início (SDD-INI §5.1): o cabeçalho com saudação, data e resumo do dia (CAB) e, abaixo dele, a
+// grade montável com os quadros (GRD) e o modo Personalizar (PRS). A montagem exibida é a salva do
+// usuário, normalizada para o papel (INV-01); no modo de edição, um rascunho que só se grava no
+// Concluir (RF-22, INV-03).
+import { LayoutDashboard } from 'lucide-react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { useTodos } from '../../dados/contexto'
+import type { DataIso } from '../../regras/datas'
+import type { Papel } from '../../regras/permissoes'
 import { agora, hoje as hojeDoRelogio } from '../../regras/relogio'
+import { Botao } from '../../ui/Botao'
 import { Erro } from '../../ui/Erro'
-import { Selo } from '../../ui/Selo'
 import { Vazio } from '../../ui/Vazio'
-import { useSessao } from '../entrada/sessao'
-import {
-  chaveDoRegistro,
-  destinoDoRegistro,
-  type TabelaComDestino,
-  temDestino,
-} from '../logs/consulta'
-import { rotuloSituacao, TOM_SITUACAO } from '../prazos/regras'
-import { ROTULOS_ACAO, ROTULOS_COLECAO } from '../processos/historico'
-import { ROTULOS_TIPO } from '../processos/rotulos'
+import { type Sessao, useSessao } from '../entrada/sessao'
+import { colunasDaLargura } from './arrasto'
 import { CabecalhoInicio } from './CabecalhoInicio'
-import { GraficoPassivo } from './GraficoPassivo'
-import {
-  type EtapaDoFunil,
-  funilPorFase,
-  LIMITE_ATIVIDADE,
-  numerosDoTopo,
-  passivoPorClasse,
-  proximasAgcs,
-  proximosPrazos,
-  resumoDoDia,
-  ultimosInformes,
-} from './indicadores'
+import { CatalogoEdicao } from './CatalogoEdicao'
+import { GradeMontavel } from './GradeMontavel'
+import { resumoDoDia } from './indicadores'
 import estilos from './inicio.module.css'
-import { type FraseDoResumo, fraseDoResumo, horaDoCarimbo } from './resumo'
+import {
+  COLUNAS_DESKTOP,
+  catalogoDoPapel,
+  type IdQuadro,
+  type Montagem,
+  normalizar,
+  padraoDoPapel,
+  primeiroLugarLivre,
+} from './montagem'
+import { gravarMontagem, lerMontagem } from './persistencia'
+import { fraseDoResumo, horaDoCarimbo } from './resumo'
+import { useLargura } from './useLargura'
 
-/** Só os logs mostrados, do mais novo ao mais antigo (a ordem do repositório, como na TelaLogs). */
-const LOGS_RECENTES = {
-  ordem: { campo: 'data', direcao: 'desc' },
-  porPagina: LIMITE_ATIVIDADE,
-} as const
+export interface PropsInicio {
+  /** Só para teste: a largura do contêiner da grade, que no HTML do servidor não se mede (§10). */
+  larguraForcada?: number
+}
 
-export function Inicio() {
-  const hoje = hojeDoRelogio()
+export function Inicio({ larguraForcada }: PropsInicio) {
   const { sessao } = useSessao()
-  const podeLer = (modulo: Modulo) => (sessao ? pode(sessao.papel, 'ler', modulo) : false)
+  if (!sessao) return null
+  // Por usuário: trocar de papel remonta a tela com a montagem do outro.
+  return <InicioDoUsuario key={sessao.usuarioId} sessao={sessao} larguraForcada={larguraForcada} />
+}
 
-  const processos = useTodos('processos')
-  const credores = useTodos('credores')
-  const prazos = useTodos('prazos')
-  const agcs = useTodos('agcs')
-  const informes = useTodos('informes')
-  const logs = useListar('logs', LOGS_RECENTES)
-  const usuarios = useTodos('usuarios')
+/** Aviso de quando o contêiner encolhe para menos de 4 colunas no meio da edição (PRS-13). */
+const AVISO_TELA_ESTREITA = 'Personalizar só em telas largas. As mudanças não foram salvas.'
 
-  const consultas = [processos, credores, prazos, agcs, informes, logs, usuarios]
-  const recentes = logs.data?.itens ?? []
-  const registros = useRegistrosDosLogs(recentes)
+function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraForcada?: number }) {
+  const hoje = hojeDoRelogio()
+  const [salva, setSalva] = useState<Montagem>(() => lerMontagem(sessao.usuarioId, sessao.papel))
+  const [rascunho, setRascunho] = useState<Montagem | null>(null)
+  const [aviso, setAviso] = useState<string | null>(null)
+  const { ref, largura } = useLargura(larguraForcada)
+  const cols = largura === null ? null : colunasDaLargura(largura)
+  const editando = rascunho !== null
+  const personalizarRef = useRef<HTMLButtonElement>(null)
+  const devolverFoco = useRef(false)
 
-  // A saudação e a data não dependem dos dados: aparecem já no carregamento e no erro.
-  const cabecalho = (resumo?: FraseDoResumo) => (
-    <CabecalhoInicio
-      nome={sessao?.nome ?? ''}
-      hora={horaDoCarimbo(agora())}
-      hoje={hoje}
-      resumo={resumo}
-    />
-  )
+  // Abaixo de 4 colunas não há Personalizar (INV-06): sai do modo e descarta o rascunho (PRS-13).
+  useEffect(() => {
+    if (cols === null) return
+    if (cols < COLUNAS_DESKTOP && rascunho !== null) {
+      setRascunho(null)
+      setAviso(AVISO_TELA_ESTREITA)
+    }
+    if (cols === COLUNAS_DESKTOP) setAviso(null)
+  }, [cols, rascunho])
 
-  if (consultas.some((c) => c.isError)) {
-    return (
-      <div className={estilos.tela}>
-        {cabecalho()}
-        <Erro mensagem="Não foi possível carregar o início." />
-      </div>
-    )
-  }
-  if (
-    !processos.data ||
-    !credores.data ||
-    !prazos.data ||
-    !agcs.data ||
-    !informes.data ||
-    !logs.data ||
-    !usuarios.data
-  ) {
-    return (
-      <div className={estilos.tela}>
-        {cabecalho()}
-        <p className={estilos.apoio}>Carregando…</p>
-      </div>
-    )
+  // Ao sair do modo pelo Concluir ou pelo Cancelar, o foco volta ao Personalizar.
+  useEffect(() => {
+    if (!editando && devolverFoco.current) {
+      devolverFoco.current = false
+      personalizarRef.current?.focus()
+    }
+  }, [editando])
+
+  const sair = (montagem: Montagem | null) => {
+    if (montagem) {
+      gravarMontagem(sessao.usuarioId, montagem)
+      setSalva(montagem)
+    }
+    devolverFoco.current = true
+    setRascunho(null)
   }
 
-  const apelidos = new Map(processos.data.map((p) => [p.id, p.apelido]))
-  const apelido = (id: Id | undefined) => (id ? (apelidos.get(id) ?? 'Processo excluído') : '—')
-  const nomes = new Map(usuarios.data.map((u) => [u.id, u.nome]))
-  const numeros = numerosDoTopo(
-    { processos: processos.data, credores: credores.data, prazos: prazos.data },
-    hoje,
-  )
+  const exibida = rascunho ?? salva
+  const podePersonalizar = cols === COLUNAS_DESKTOP
 
   return (
     <div className={estilos.tela}>
-      {cabecalho(fraseDoResumo(resumoDoDia(prazos.data, agcs.data, processos.data, hoje), hoje))}
+      <Cabecalho
+        sessao={sessao}
+        hoje={hoje}
+        acoes={
+          podePersonalizar &&
+          !editando && (
+            <Botao
+              ref={personalizarRef}
+              icone={<LayoutDashboard size={18} />}
+              onClick={() => setRascunho(salva.map((item) => ({ ...item })))}
+            >
+              Personalizar
+            </Botao>
+          )
+        }
+      />
 
-      <section aria-label="Números do escritório" className={estilos.numeros}>
-        <Numero
-          rotulo="Processos ativos"
-          stat="processos-ativos"
-          valor={numeros.ativosRj + numeros.ativosFalencia}
-          icone={<Scale size={22} />}
-          apoio={
-            <>
-              RJ: <b data-stat="ativos-rj">{numeros.ativosRj}</b> · Falência:{' '}
-              <b data-stat="ativos-falencia">{numeros.ativosFalencia}</b>
-            </>
-          }
+      {rascunho && (
+        <CatalogoEdicao
+          fora={foraDoRascunho(sessao.papel, rascunho)}
+          aoAdicionar={(quadro) => setRascunho(adicionar(rascunho, quadro))}
+          aoRestaurar={() => setRascunho(restaurado(sessao.papel))}
+          aoCancelar={() => sair(null)}
+          aoConcluir={() => sair(rascunho)}
         />
-        <Numero
-          rotulo="Passivo sob administração"
-          stat="passivo"
-          dadoValor={numeros.passivo}
-          valor={formatarMoedaCurta(numeros.passivo)}
-          icone={<Wallet size={22} />}
-          apoio={`${formatarMoeda(numeros.passivo)} na relação do AJ`}
-        />
-        <Numero
-          rotulo="Credores"
-          stat="credores"
-          valor={numeros.credores.toLocaleString('pt-BR')}
-          icone={<Users size={22} />}
-          apoio="em todos os processos"
-        />
-        <article className={estilos.numero}>
-          <div className={estilos.numeroTopo}>
-            <span className={estilos.numeroRotulo}>Prazos em aberto</span>
-            <span className={estilos.numeroIcone} aria-hidden="true">
-              <AlarmClock size={22} />
-            </span>
-          </div>
-          <div className={estilos.par}>
-            <ParteDosPrazos
-              stat="prazos-vencidos"
-              valor={numeros.prazosVencidos}
-              legenda="vencidos"
-              destaque={numeros.prazosVencidos > 0}
-              para={podeLer('prazos') ? '/agenda?periodo=vencidos' : undefined}
-            />
-            <ParteDosPrazos
-              stat="prazos-7-dias"
-              valor={numeros.prazosProximos}
-              legenda="vencem em 7 dias"
-              para={podeLer('prazos') ? '/agenda?periodo=7-dias' : undefined}
-            />
-          </div>
-        </article>
-      </section>
-
-      <div className={estilos.linha}>
-        <Cartao titulo="Próximos prazos" icone={<AlarmClock size={22} />} largo>
-          <Lista vazio="Nenhum prazo em aberto">
-            {proximosPrazos(prazos.data, hoje).map((prazo) => (
-              <Item
-                key={prazo.id}
-                para={`/processos/${prazo.processoId}/prazos`}
-                icone={<CalendarClock size={22} />}
-                titulo={prazo.titulo}
-                apoio={apelido(prazo.processoId)}
-                data={formatarData(prazo.vencimento)}
-                selo={
-                  <Selo tom={TOM_SITUACAO[situacao(prazo, hoje)]}>
-                    {rotuloSituacao(prazo, hoje)}
-                  </Selo>
-                }
-              />
-            ))}
-          </Lista>
-        </Cartao>
-        <Cartao titulo="Próximas AGCs" icone={<Gavel size={22} />}>
-          <Lista vazio="Nenhuma AGC agendada">
-            {proximasAgcs(agcs.data, hoje).map(({ agc, data, convocacao }) => (
-              <Item
-                key={agc.id}
-                para={`/processos/${agc.processoId}/agc/${agc.id}`}
-                icone={<Gavel size={22} />}
-                titulo={apelido(agc.processoId)}
-                apoio={`${convocacao}ª convocação · ${agc.pauta}`}
-                data={formatarData(data)}
-              />
-            ))}
-          </Lista>
-        </Cartao>
-      </div>
-
-      <div className={estilos.linha}>
-        <Cartao titulo="Processos por fase" largo>
-          <div className={estilos.funis}>
-            {(['rj', 'falencia'] as const).map((tipo) => (
-              <Funil key={tipo} tipo={tipo} etapas={funilPorFase(processos.data, tipo)} />
-            ))}
-          </div>
-        </Cartao>
-        <Cartao titulo="Passivo por classe (RJ)">
-          <GraficoPassivo classes={passivoPorClasse(processos.data, credores.data)} />
-        </Cartao>
-      </div>
-
-      <div className={estilos.linha}>
-        <Cartao titulo="Últimos informes" icone={<FileText size={22} />} largo>
-          <Lista vazio="Nenhum informe cadastrado">
-            {ultimosInformes(informes.data).map((informe) => (
-              <Item
-                key={informe.id}
-                para={`/informes/${informe.id}`}
-                icone={<ClipboardList size={22} />}
-                titulo={informe.titulo}
-                apoio={`${CATEGORIAS_INFORME[informe.categoria]} · ${apelido(informe.processoId)}`}
-                data={formatarData(informe.data)}
-              />
-            ))}
-          </Lista>
-        </Cartao>
-        {podeLer('logs') && (
-          <Cartao titulo="Atividade recente">
-            <Lista vazio="Nenhuma atividade registrada">
-              {recentes.map((log) => (
-                <ItemAtividade
-                  key={log.id}
-                  log={log}
-                  usuario={nomes.get(log.usuarioId) ?? 'Usuário excluído'}
-                  processo={log.processoId ? apelido(log.processoId) : undefined}
-                  destino={destinoDaAtividade(log, registros.data, podeLer)}
-                />
-              ))}
-            </Lista>
-          </Cartao>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------------------------
-// Peças da tela
-
-function Numero({
-  rotulo,
-  stat,
-  valor,
-  dadoValor,
-  icone,
-  apoio,
-}: {
-  rotulo: string
-  /** Marcação estável para os testes (SDD §10): `data-stat="passivo"`. */
-  stat: string
-  valor: ReactNode
-  /** Valor exato (ex.: centavos) quando o texto mostrado é arredondado. */
-  dadoValor?: number
-  icone: ReactNode
-  apoio?: ReactNode
-}) {
-  return (
-    <article className={estilos.numero}>
-      <div className={estilos.numeroTopo}>
-        <span className={estilos.numeroRotulo}>{rotulo}</span>
-        <span className={estilos.numeroIcone} aria-hidden="true">
-          {icone}
-        </span>
-      </div>
-      <span className={estilos.numeroValor} data-stat={stat} data-valor={dadoValor}>
-        {valor}
-      </span>
-      {apoio && <span className={estilos.numeroApoio}>{apoio}</span>}
-    </article>
-  )
-}
-
-/** Metade do cartão de prazos (RF-07): o número e, para quem lê prazos, o link para a agenda filtrada. */
-function ParteDosPrazos({
-  stat,
-  valor,
-  legenda,
-  destaque = false,
-  para,
-}: {
-  stat: string
-  valor: number
-  legenda: string
-  destaque?: boolean
-  para: string | undefined
-}) {
-  return (
-    <div className={estilos.parte}>
-      <span
-        className={destaque ? `${estilos.numeroValor} ${estilos.perigo}` : estilos.numeroValor}
-        data-stat={stat}
-      >
-        {valor}
-      </span>
-      {para ? (
-        <Link to={para} className={estilos.numeroApoio}>
-          {legenda}
-        </Link>
-      ) : (
-        <span className={estilos.numeroApoio}>{legenda}</span>
       )}
+
+      {/* A região existe desde o início: o leitor de tela só anuncia o texto que entra nela. */}
+      <p className={aviso ? estilos.aviso : 'somente-leitor'} role="status">
+        {aviso}
+      </p>
+
+      <div ref={ref} className={estilos.conteiner}>
+        {largura !== null &&
+          cols !== null &&
+          (exibida.length === 0 ? (
+            <SemQuadros
+              focar={editando}
+              // Fora do modo, restaurar abre o Personalizar com o padrão: só o Concluir grava.
+              aoRestaurar={
+                editando || podePersonalizar
+                  ? () => setRascunho(restaurado(sessao.papel))
+                  : undefined
+              }
+            />
+          ) : (
+            <GradeMontavel
+              montagem={exibida}
+              cols={cols}
+              largura={largura}
+              editando={editando}
+              aoMudar={setRascunho}
+            />
+          ))}
+      </div>
     </div>
   )
 }
 
-function Cartao({
-  titulo,
-  icone,
-  largo = false,
-  children,
-}: {
-  titulo: string
-  icone?: ReactNode
-  largo?: boolean
-  children: ReactNode
-}) {
+/** O cabeçalho com o resumo do dia, que depende dos prazos, das AGCs e dos processos (CAB-03). */
+function Cabecalho({ sessao, hoje, acoes }: { sessao: Sessao; hoje: DataIso; acoes: ReactNode }) {
+  const processos = useTodos('processos')
+  const prazos = useTodos('prazos')
+  const agcs = useTodos('agcs')
+  const erro = processos.isError || prazos.isError || agcs.isError
+  const resumo =
+    processos.data && prazos.data && agcs.data
+      ? fraseDoResumo(resumoDoDia(prazos.data, agcs.data, processos.data, hoje), hoje)
+      : undefined
   return (
-    <section
-      aria-label={titulo}
-      className={largo ? `${estilos.cartao} ${estilos.cartaoLargo}` : estilos.cartao}
-    >
-      <header className={estilos.cartaoCabecalho}>
-        {icone && <span aria-hidden="true">{icone}</span>}
-        <h2>{titulo}</h2>
-      </header>
-      <div className={estilos.cartaoCorpo}>{children}</div>
-    </section>
-  )
-}
-
-function Lista({ vazio, children }: { vazio: string; children: ReactNode[] }) {
-  if (children.length === 0) return <Vazio titulo={vazio} />
-  return <ul className={estilos.lista}>{children}</ul>
-}
-
-function Item({
-  para,
-  icone,
-  titulo,
-  apoio,
-  data,
-  selo,
-}: {
-  para: string
-  icone: ReactNode
-  titulo: string
-  apoio: ReactNode
-  data: string
-  selo?: ReactNode
-}) {
-  return (
-    <li>
-      <Link to={para} className={estilos.item}>
-        <span className={estilos.itemIcone} aria-hidden="true">
-          {icone}
-        </span>
-        <span className={estilos.itemTexto}>
-          <span className={estilos.itemTitulo}>{titulo}</span>
-          <span className={estilos.itemApoio}>{apoio}</span>
-        </span>
-        <span className={estilos.itemLado}>
-          <b>{data}</b>
-          {selo}
-        </span>
-      </Link>
-    </li>
-  )
-}
-
-function ItemAtividade({
-  log,
-  usuario,
-  processo,
-  destino,
-}: {
-  log: Log
-  usuario: string
-  processo: string | undefined
-  destino: string | null
-}) {
-  const [dia, hora] = formatarDataHora(log.data).split(' ')
-  const conteudo = (
     <>
-      <span className={estilos.itemTexto}>
-        <span className={estilos.itemTitulo}>
-          {`${ROTULOS_ACAO[log.acao]} ${ROTULOS_COLECAO[log.colecao] ?? log.colecao}`}
-        </span>
-        <span className={estilos.itemApoio}>{processo ? `${usuario} · ${processo}` : usuario}</span>
-      </span>
-      <span className={estilos.itemLado}>
-        <b>{dia}</b>
-        {hora}
-      </span>
+      {/* A saudação e a data não dependem dos dados: aparecem já no carregamento e no erro. */}
+      <CabecalhoInicio
+        nome={sessao.nome}
+        hora={horaDoCarimbo(agora())}
+        hoje={hoje}
+        resumo={resumo}
+        acoes={acoes}
+      />
+      {erro && <Erro mensagem="Não foi possível carregar o resumo do dia." />}
     </>
   )
-  return (
-    <li>
-      {destino ? (
-        <Link to={destino} className={`${estilos.item} ${estilos.itemCompacto}`}>
-          {conteudo}
-        </Link>
-      ) : (
-        <span className={`${estilos.item} ${estilos.itemCompacto} ${estilos.semLink}`}>
-          {conteudo}
-        </span>
-      )}
-    </li>
-  )
 }
 
-function Funil({ tipo, etapas }: { tipo: TipoProcesso; etapas: readonly EtapaDoFunil[] }) {
-  const total = etapas.reduce((soma, etapa) => soma + etapa.quantidade, 0)
+/** Montagem vazia, de propósito (PRS-11, RF-23): o aviso com o Restaurar padrão. */
+function SemQuadros({ aoRestaurar, focar }: { aoRestaurar?: () => void; focar: boolean }) {
+  const restaurarRef = useRef<HTMLButtonElement>(null)
+  // Tirar o último quadro desmonta a grade com o × focado: o foco vem para o Restaurar padrão.
+  useEffect(() => {
+    if (focar) restaurarRef.current?.focus()
+  }, [focar])
   return (
-    <div className={estilos.funil} data-tipo={tipo}>
-      <h3 className={estilos.funilTitulo}>{ROTULOS_TIPO[tipo]}</h3>
-      <ul className={estilos.funilEtapas}>
-        {etapas.map((etapa) => {
-          const parte = total === 0 ? 0 : Math.round((etapa.quantidade / total) * 100)
-          return (
-            <li key={etapa.fase} className={estilos.etapa} data-fase={etapa.fase}>
-              <span className={estilos.etapaRotulo}>{etapa.rotulo}</span>
-              <b className={estilos.etapaQuantidade}>{etapa.quantidade}</b>
-              <span className={estilos.trilho} aria-hidden="true">
-                <span
-                  className={tipo === 'rj' ? estilos.barraRj : estilos.barraFalencia}
-                  style={{ width: `${parte}%` }}
-                />
-              </span>
-            </li>
+    <div className={estilos.semQuadros}>
+      <Vazio
+        icone={<LayoutDashboard size={24} />}
+        titulo="Nenhum quadro no início"
+        descricao={
+          aoRestaurar
+            ? 'Restaure o padrão do seu papel ou adicione quadros pelo catálogo do Personalizar.'
+            : 'Para montar o início, abra o Personalizar numa tela larga.'
+        }
+        acao={
+          aoRestaurar && (
+            <Botao ref={restaurarRef} onClick={aoRestaurar}>
+              Restaurar padrão
+            </Botao>
           )
-        })}
-      </ul>
+        }
+      />
     </div>
   )
 }
 
-// ---------------------------------------------------------------------------------------------
-// Link de cada atividade: o registro como está agora (como na tela de logs, LOG-03)
-
-/** Busca o registro de cada log mostrado, para o link; `null` quando ele não existe mais. */
-function useRegistrosDosLogs(logs: readonly Log[]) {
-  const repos: Record<TabelaComDestino, Pick<Repositorio<Registro>, 'buscar'>> = {
-    processos: useRepo('processos'),
-    marcosDeFase: useRepo('marcosDeFase'),
-    prazos: useRepo('prazos'),
-    credores: useRepo('credores'),
-    pedidosDeCredito: useRepo('pedidosDeCredito'),
-    agcs: useRepo('agcs'),
-    presencas: useRepo('presencas'),
-    votos: useRepo('votos'),
-    informes: useRepo('informes'),
-    empresas: useRepo('empresas'),
-    usuarios: useRepo('usuarios'),
-  }
-  const pedidos = logs.filter((log) => temDestino(log.colecao))
-  return useQuery({
-    queryKey: ['dashboard', 'registros', pedidos.map(chaveDoRegistro)],
-    queryFn: async () => {
-      const encontrados = await Promise.all(
-        pedidos.map(async (log) => {
-          const repo = repos[log.colecao as TabelaComDestino]
-          return [chaveDoRegistro(log), (await repo.buscar(log.registroId)) ?? null] as const
-        }),
-      )
-      return new Map<string, Registro | null>(encontrados)
-    },
-    enabled: pedidos.length > 0,
-    placeholderData: keepPreviousData,
-  })
+/** Quadros do catálogo do papel que não estão no rascunho, na ordem do catálogo (RF-18). */
+function foraDoRascunho(papel: Papel, rascunho: Montagem) {
+  const dentro = new Set(rascunho.map((item) => item.quadro))
+  return catalogoDoPapel(papel).filter((quadro) => !dentro.has(quadro.id))
 }
 
-/** Sem link quando o papel não lê o módulo (RF-40), o registro sumiu ou não tem tela. */
-function destinoDaAtividade(
-  log: Log,
-  registros: Map<string, Registro | null> | undefined,
-  podeLer: (modulo: Modulo) => boolean,
-): string | null {
-  if (!temDestino(log.colecao) || !podeLer(COLECOES[log.colecao].modulo)) return null
-  const registro = registros?.get(chaveDoRegistro(log))
-  return registro ? destinoDoRegistro(log, registro) : null
+/** No primeiro lugar livre, ou na base se não houver (RF-20, PRS-05, PRS-06). */
+function adicionar(rascunho: Montagem, quadro: IdQuadro): Montagem {
+  return [...rascunho, { quadro, ...primeiroLugarLivre(quadro, rascunho, COLUNAS_DESKTOP) }]
+}
+
+/** O padrão do papel, pelo mesmo filtro da montagem salva (S-05). Só se grava no Concluir. */
+function restaurado(papel: Papel): Montagem {
+  return normalizar(padraoDoPapel(papel), papel)
 }
