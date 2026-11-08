@@ -6,10 +6,13 @@ import { realpathSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { prepararSeed, type TabelasSeed } from '../src/dados/carga'
 import {
+  destaqueDoMes,
   funilPorFase,
   numerosDoTopo,
   passivoPorClasse,
+  prazosDoMes,
   proximasAgcs,
+  proximosDoQuadro,
   proximosPrazos,
   resumoDoDia,
   ultimosInformes,
@@ -46,6 +49,8 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
   const classes = passivoPorClasse(tabelas.processos, tabelas.credores)
   const resumo = resumoDoDia(tabelas.prazos, tabelas.agcs, tabelas.processos, hoje)
   const processo = (id: string) => tabelas.processos.find((p) => p.id === id)?.apelido ?? id
+  const proximos = proximosDoQuadro(tabelas.prazos, hoje)
+  const destaque = destaqueDoMes(tabelas.prazos, tabelas.agcs, hoje)
   return [
     {
       titulo: 'Números do topo (numerosDoTopo)',
@@ -90,6 +95,31 @@ export function blocosDeIndicadores(tabelas: TabelasSeed, hoje: DataIso): Bloco[
         rotulo: `${p.vencimento} · ${processo(p.processoId)}`,
         valor: p.titulo,
       })),
+    },
+    {
+      titulo: 'Quadro Próximos prazos (proximosDoQuadro)',
+      linhas: [
+        ...proximos.prazos.map((p) => ({
+          rotulo: `${p.vencimento} · ${processo(p.processoId)}`,
+          valor: p.titulo,
+        })),
+        { rotulo: 'Restantes na agenda', valor: proximos.restantes },
+      ],
+    },
+    {
+      titulo: 'Calendário do mês (prazosDoMes)',
+      linhas: [
+        ...[...prazosDoMes(tabelas.prazos, tabelas.agcs, hoje)].map(([dia, marca]) => ({
+          rotulo: dia,
+          valor: marca,
+        })),
+        {
+          rotulo: 'Destaque do pé (destaqueDoMes)',
+          valor: destaque
+            ? `${destaque.data} · ${destaque.tipo === 'prazo' ? destaque.prazo.titulo : `AGC, ${destaque.convocacao}ª convocação`} · +${destaque.outros}`
+            : '(nenhum)',
+        },
+      ],
     },
     {
       titulo: 'Próximas AGCs (proximasAgcs)',

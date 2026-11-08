@@ -1,0 +1,249 @@
+/* Calendário do mês (Q-05), conforme a ficha "calendario" do canvas: grade de 7 colunas com células
+   de 28px no desktop (25px nos meses de 6 semanas, para caber nos 368px do quadro), 30px no tablet
+   e 38px no celular (alvo de toque). Marcas em cores chapadas dos tokens: vencido em vermelho,
+   prazo de hoje em dourado com o anel, prazo em azul-claro e AGC em azul cheio. */
+
+.calendario {
+  --altura-dia: 28px;
+
+  container-type: inline-size;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 4px;
+}
+
+.calendario[data-semanas="6"] {
+  --altura-dia: 25px;
+}
+
+[data-variante="tablet"] .calendario {
+  --altura-dia: 30px;
+}
+
+[data-variante="tablet"] .calendario[data-semanas="6"] {
+  --altura-dia: 25px;
+}
+
+[data-variante="celular"] .calendario,
+[data-variante="celular"] .calendario[data-semanas="6"] {
+  --altura-dia: 38px;
+}
+
+.mes {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cor-texto-forte);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-rows: var(--altura-dia);
+  gap: 3px;
+}
+
+[data-variante="celular"] .grade {
+  gap: 4px;
+}
+
+.semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--cor-texto-muted);
+  text-align: center;
+}
+
+[data-variante="celular"] .semana {
+  gap: 4px;
+}
+
+.dia {
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--cor-texto-forte);
+}
+
+[data-variante="celular"] .dia {
+  font-size: 13px;
+}
+
+.dia[data-passado] {
+  color: var(--cor-texto-muted);
+}
+
+.dia[data-marca] {
+  font-weight: 700;
+}
+
+.dia[data-marca="vencido"] {
+  background: var(--cor-perigo-claro);
+  color: var(--cor-perigo);
+}
+
+.dia[data-marca="prazo"] {
+  background: var(--cor-azul-claro);
+  color: var(--cor-texto);
+}
+
+.dia[data-marca="agc"] {
+  background: var(--cor-azul-900);
+  color: var(--cor-texto-invertido);
+}
+
+/* O dia de hoje tem o anel dourado; com prazo vencendo, também o fundo dourado. */
+.dia[data-hoje] {
+  box-shadow: inset 0 0 0 2px var(--cor-dourado-500);
+  color: var(--cor-dourado-700);
+  font-weight: 700;
+}
+
+.dia[data-marca="hoje"] {
+  background: var(--cor-dourado-claro);
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11.5px;
+  color: var(--cor-texto-forte);
+}
+
+.legenda li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legenda li::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  content: "";
+}
+
+.legenda [data-marca="vencido"]::before {
+  background: var(--cor-perigo);
+}
+
+.legenda [data-marca="hoje"]::before {
+  background: var(--cor-dourado-500);
+}
+
+.legenda [data-marca="prazo"]::before {
+  background: var(--cor-grafico-3);
+}
+
+.legenda [data-marca="agc"]::before {
+  background: var(--cor-azul-900);
+}
+
+/* Pé do quadro: o evento de hoje (ou o próximo), sempre no fim do corpo. */
+.pe {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: auto 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+[data-variante="celular"] .pe {
+  margin-top: 14px;
+}
+
+.cartao {
+  background: var(--cor-azul-claro);
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.cartao[data-hoje] {
+  background: var(--cor-dourado-claro);
+}
+
+a.cartao:focus-visible {
+  outline: var(--foco-contorno);
+  outline-offset: 2px;
+}
+
+.quando {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-texto-forte);
+}
+
+.cartao[data-hoje] .quando {
+  color: var(--cor-dourado-700);
+}
+
+.titulo,
+.processo {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.titulo {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.processo {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--cor-texto-forte);
+}
+
+.livre {
+  background: var(--cor-superficie-suave);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--cor-texto-muted);
+}
+
+a.cartao:hover .titulo {
+  text-decoration: underline;
+}
+
+/* Unidade estreita (até cerca de 230px): dias 2px mais baixos e a legenda mais justa, para tudo
+   caber nos 368px do quadro. */
+@container (max-width: 200px) {
+  .grade {
+    grid-auto-rows: calc(var(--altura-dia) - 2px);
+  }
+
+  .legenda {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 10.5px;
+  }
+
+  .legenda li {
+    gap: 4px;
+  }
+
+  .legenda li::before {
+    width: 6px;
+    height: 6px;
+  }
+}
