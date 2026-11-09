@@ -46,30 +46,43 @@ const EXTREMOS = [
   { nome: 'celular, contêiner de 599px', conteiner: 599, variante: 'celular' },
 ] as const
 
-test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
-  await entrarComo(page, 'aj')
-  const cascas = await medirCascas(page)
-
-  for (const extremo of EXTREMOS) {
-    if ('conteiner' in extremo) {
-      await conteinerCom(page, extremo.conteiner, cascas)
-    } else {
-      await assentarGrade(page, extremo.janela, extremo.variante === 'celular' ? 1 : 4)
+// A Inter vem do Google Fonts. Sem ela (bloqueador, rede), a fonte de reserva mede o texto um pouco
+// mais largo: o rótulo de 116px quebrava e o corpo cortava o fim de "Falência" (HF-01).
+for (const fonte of ['inter', 'reserva'] as const) {
+  test(`QDR-16 · três variantes sem estouro nos extremos de largura (fonte ${fonte})`, async ({
+    page,
+  }) => {
+    if (fonte === 'reserva') {
+      await page.route(/fonts\.(googleapis|gstatic)\.com/, (rota) => rota.abort())
     }
-    await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
-    await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
-    // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
-    const estouros = await carteira(page).evaluate((quadro) => {
-      const cortados = [
-        ...quadro.querySelectorAll('ol, [data-tipo], [data-fase], [data-fase] *, p *'),
-      ]
-        .filter((e) => !e.closest('.somente-leitor') && e.scrollWidth > e.clientWidth + 0.5)
-        .filter((e) => getComputedStyle(e).display !== 'inline')
-        .map((e) => e.textContent)
-      const alto = quadro.scrollHeight > quadro.clientHeight + 0.5 ? ['altura do quadro'] : []
-      return [...cortados, ...alto]
-    })
-    expect(estouros, extremo.nome).toEqual([])
-  }
-})
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await entrarComo(page, 'aj')
+    const cascas = await medirCascas(page)
+
+    for (const extremo of EXTREMOS) {
+      if ('conteiner' in extremo) {
+        await conteinerCom(page, extremo.conteiner, cascas)
+      } else {
+        await assentarGrade(page, extremo.janela, extremo.variante === 'celular' ? 1 : 4)
+      }
+      await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
+      await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
+      // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
+      const estouros = await carteira(page).evaluate((quadro) => {
+        const cortados = [
+          ...quadro.querySelectorAll('ol, [data-tipo], [data-fase], [data-fase] *, p *'),
+        ]
+          .filter((e) => !e.closest('.somente-leitor') && e.scrollWidth > e.clientWidth + 0.5)
+          .filter((e) => getComputedStyle(e).display !== 'inline')
+          .map((e) => e.textContent)
+        // O corpo é quem corta (overflow): o quadro em si não cresce.
+        const corpo = quadro.lastElementChild as HTMLElement
+        const alto = [quadro, corpo]
+          .filter((e) => e.scrollHeight > e.clientHeight + 0.5)
+          .map((e) => `altura: ${e.scrollHeight}px em ${e.clientHeight}px`)
+        return [...cortados, ...alto]
+      })
+      expect(estouros, extremo.nome).toEqual([])
+    }
+  })
+}
