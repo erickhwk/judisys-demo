@@ -46,7 +46,9 @@ export function AbaPrazos({ processoId }: { processoId: string }) {
     linha.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [destacado, prazos.length])
 
-  if (consulta.isError) return <Erro mensagem="Não foi possível carregar os prazos." />
+  if (consulta.isError || processo.isError) {
+    return <Erro mensagem="Não foi possível carregar os prazos." />
+  }
 
   const abertos = prazos.filter((prazo) => prazo.status === 'aberto').length
 
