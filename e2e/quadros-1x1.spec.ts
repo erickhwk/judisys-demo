@@ -79,9 +79,18 @@ async function estouros(page: Page, id: string, fonte: Fonte): Promise<string[]>
   return page.locator(`[data-quadro="${id}"]`).evaluate((secao, aceita) => {
     const caixa = secao.getBoundingClientRect()
     const problemas: string[] = []
+    // O que está dentro de uma caixa que já corta (as reticências) não vaza: quem responde é a
+    // própria caixa, conferida no mesmo laço (como na 1x2).
+    const cortaAntes = (el: Element) => {
+      for (let pai = el.parentElement; pai && pai !== secao; pai = pai.parentElement) {
+        if (getComputedStyle(pai).overflowX !== 'visible') return true
+      }
+      return false
+    }
     for (const el of secao.querySelectorAll<HTMLElement>('*')) {
       const r = el.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
+      if (cortaAntes(el)) continue
       if (
         r.right > caixa.right - 0.5 ||
         r.bottom > caixa.bottom - 0.5 ||
