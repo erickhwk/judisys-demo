@@ -2,7 +2,6 @@
 // do contêiner, a célula pretendida pelo ponteiro, a recusa e o empurrão para baixo. Funções puras;
 // a GradeMontavel só mede e desenha. O grid é próprio (Q-01, S-11): o react-grid-layout acumulava
 // os empurrões do caminho do arrasto e chegava a sobrepor quadros.
-import { LARGURA_CONTEUDO } from '../../ui/larguras'
 import {
   base,
   CATALOGO,
@@ -17,11 +16,6 @@ import {
 export const VAO = 16
 /** Altura de uma unidade nas faixas de 4 e de 2 colunas (5.3). */
 export const ALTURA_UNIDADE = 176
-/**
- * Largura máxima do grid: 4 unidades de 538px e 3 vãos (5.3, AJ-21). É o teto do conteúdo de todas
- * as telas, aplicado no Layout (AJ-22): a grade para ali sem estilo próprio.
- */
-export const LARGURA_MAXIMA = LARGURA_CONTEUDO
 /** A partir desta largura de contêiner, 4 colunas e Personalizar (5.3). */
 export const LARGURA_4_COLUNAS = 880
 /** A partir desta largura de contêiner, 2 colunas; abaixo, a lista do celular (5.3). */
@@ -36,10 +30,9 @@ export function colunasDaLargura(largura: number): Colunas {
   return 1
 }
 
-/** Largura de uma unidade: o contêiner (até 2200px) menos os vãos, dividido pelas colunas. */
+/** Largura de uma unidade: o contêiner menos os vãos, dividido pelas colunas. Sem teto (AJ-26). */
 export function larguraDaUnidade(largura: number, cols: number): number {
-  const util = Math.min(largura, LARGURA_MAXIMA)
-  return (util - VAO * (cols - 1)) / cols
+  return (largura - VAO * (cols - 1)) / cols
 }
 
 /**

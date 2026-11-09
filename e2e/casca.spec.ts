@@ -153,7 +153,7 @@ test('CAS-07 · menu recolhido: o pé mostra só os ícones, com nome acessível
   await expect(page.getByRole('heading', { name: 'Entrar no Judisys' })).toBeVisible()
 })
 
-test.describe('AJ-22 · teto de 2200px no conteúdo', () => {
+test.describe('AJ-26 · conteúdo sem teto de largura', () => {
   /** Caixa do conteúdo dentro do padding do `main`, e a largura que sobra na coluna à direita dele. */
   const medirConteudo = (page: Page) =>
     page.locator('main').evaluate((main) => {
@@ -164,37 +164,45 @@ test.describe('AJ-22 · teto de 2200px no conteúdo', () => {
       const coluna = main.parentElement as HTMLElement
       return {
         esquerda,
+        direita,
         largura: direita - esquerda,
         sobra: coluna.getBoundingClientRect().left + coluna.clientWidth - caixa.right,
       }
     })
 
-  test('CAS-08 · ultrawide (3440px): a lista de processos para em 2200px, com a busca na borda direita dela', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 3440, height: 1000 })
-    await entrarComo(page, 'advogado')
-    await page.goto('./#/processos')
-    const conteudo = await medirConteudo(page)
-    expect(conteudo.largura).toBe(2200)
-    expect(conteudo.sobra).toBeGreaterThan(0)
-    // O cartão da tabela (a região rola dentro dele, 1px para dentro da borda).
-    const lista = await page
-      .getByRole('region', { name: 'Lista de processos' })
-      .locator('xpath=..')
-      .boundingBox()
-    // Alinhado à esquerda, até a borda direita do conteúdo.
-    expect(lista?.x).toBeCloseTo(conteudo.esquerda, 0)
-    expect((lista?.x ?? 0) + (lista?.width ?? 0)).toBeCloseTo(conteudo.esquerda + 2200, 0)
-    // As ações do cabeçalho param na borda direita do conteúdo, e não na da janela.
-    const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
-    expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(conteudo.esquerda + 2200, 0)
-    // A marca do rodapé também para ali; a linha do rodapé continua indo de ponta a ponta.
+  /** Distância da borda direita da marca do rodapé à do próprio rodapé. */
+  const recuoDaMarca = async (page: Page) => {
     const marca = await page.locator('footer a').boundingBox()
-    expect((marca?.x ?? 0) + (marca?.width ?? 0)).toBeCloseTo(conteudo.esquerda + 2200, 0)
     const rodape = await page.locator('footer').boundingBox()
-    expect((rodape?.x ?? 0) + (rodape?.width ?? 0)).toBeGreaterThan(conteudo.esquerda + 2200 + 500)
-  })
+    return (rodape?.x ?? 0) + (rodape?.width ?? 0) - ((marca?.x ?? 0) + (marca?.width ?? 0))
+  }
+
+  for (const menuAberto of [true, false]) {
+    test(`CAS-08 · ultrawide (3440px), menu ${menuAberto ? 'aberto' : 'recolhido'}: a lista de processos ocupa a coluna toda, com a busca e a marca na borda dela`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 3440, height: 1000 })
+      await entrarComo(page, 'advogado')
+      if (!menuAberto) await menu(page).getByRole('button', { name: 'Recolher menu' }).click()
+      await page.goto('./#/processos')
+      // Sem teto: o main vai até a borda da coluna (a AJ-26 tirou os 2200px da AJ-22).
+      await expect.poll(async () => (await medirConteudo(page)).sobra).toBe(0)
+      const conteudo = await medirConteudo(page)
+      expect(conteudo.largura).toBeGreaterThan(menuAberto ? 3000 : 3250)
+      // O cartão da tabela (a região rola dentro dele, 1px para dentro da borda).
+      const lista = await page
+        .getByRole('region', { name: 'Lista de processos' })
+        .locator('xpath=..')
+        .boundingBox()
+      expect(lista?.x).toBeCloseTo(conteudo.esquerda, 0)
+      expect((lista?.x ?? 0) + (lista?.width ?? 0)).toBeCloseTo(conteudo.direita, 0)
+      // As ações do cabeçalho ficam na borda direita do conteúdo, a da coluna.
+      const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
+      expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(conteudo.direita, 0)
+      // A marca do rodapé fica a 44px da borda da coluna, alinhada ao conteúdo.
+      expect(await recuoDaMarca(page)).toBeCloseTo(44, 0)
+    })
+  }
 
   test('CAS-09 · monitor de 2560px com o menu aberto: o conteúdo ocupa a coluna toda, como antes', async ({
     page,
@@ -203,14 +211,8 @@ test.describe('AJ-22 · teto de 2200px no conteúdo', () => {
     await entrarComo(page, 'advogado')
     await expect(menu(page).getByRole('button', { name: 'Recolher menu' })).toBeVisible()
     await page.goto('./#/processos')
-    const conteudo = await medirConteudo(page)
-    expect(conteudo.largura).toBeLessThan(2200)
-    expect(conteudo.sobra).toBe(0)
+    expect((await medirConteudo(page)).sobra).toBe(0)
     // Rodapé como antes: a marca a 44px da borda da coluna.
-    const marca = await page.locator('footer a').boundingBox()
-    const rodape = await page.locator('footer').boundingBox()
-    expect(
-      (rodape?.x ?? 0) + (rodape?.width ?? 0) - ((marca?.x ?? 0) + (marca?.width ?? 0)),
-    ).toBeCloseTo(44, 0)
+    expect(await recuoDaMarca(page)).toBeCloseTo(44, 0)
   })
 })

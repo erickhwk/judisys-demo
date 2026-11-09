@@ -34,10 +34,10 @@ describe('larguras (5.3)', () => {
     expect(colunasDaLargura(largura)).toBe(cols)
   })
 
-  it('unidade de 208px em 880px e de 538px a partir de 2200px (GRD-09)', () => {
+  it('unidade de 208px em 880px, sem teto: 538px em 2200px e 813px em 3300px (GRD-09, AJ-26)', () => {
     expect(larguraDaUnidade(880, 4)).toBe(208)
     expect(larguraDaUnidade(2200, 4)).toBe(538)
-    expect(larguraDaUnidade(2560, 4)).toBe(538)
+    expect(larguraDaUnidade(3300, 4)).toBe(813)
   })
 
   it('unidade de 292 a 432px em 2 colunas', () => {
@@ -60,9 +60,9 @@ describe('célula pelo ponteiro (5.6, passo 2)', () => {
     expect(colunaPretendida(300 + 314 * 4 + 20, 20, 300, 298)).toBe(4)
   })
 
-  it('na unidade máxima de 538px, cada coluna começa 554px depois da anterior (AJ-21)', () => {
-    expect(colunaPretendida(300 + 554 * 2 + 20, 20, 300, 538)).toBe(2)
-    expect(colunaPretendida(300 + 554 * 3 + 300, 20, 300, 538)).toBe(4)
+  it('no ultrawide, com unidade de 813px, cada coluna começa 829px depois da anterior (AJ-26)', () => {
+    expect(colunaPretendida(300 + 829 * 2 + 20, 20, 300, 813)).toBe(2)
+    expect(colunaPretendida(300 + 829 * 3 + 450, 20, 300, 813)).toBe(4)
   })
 
   it('a linha nunca fica acima da primeira', () => {

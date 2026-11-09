@@ -49,7 +49,8 @@ test('QDR-14 · fase vazia fica apagada e sem link', async ({ page }) => {
 const EXTREMOS = [
   { nome: 'desktop, unidade de 208px', conteiner: 880, variante: 'desktop' },
   { nome: 'desktop, 1280px com o menu aberto', janela: 1280, variante: 'desktop' },
-  { nome: 'desktop, unidade de 538px', conteiner: 2200, variante: 'desktop' },
+  // O ultrawide de 3440px com o menu recolhido: sem teto desde a AJ-26.
+  { nome: 'desktop, unidade de 813px', conteiner: 3300, variante: 'desktop' },
   { nome: 'tablet, unidade de 292px', conteiner: 600, variante: 'tablet' },
   { nome: 'tablet, unidade de 432px', conteiner: 879, variante: 'tablet' },
   { nome: 'celular de 320px', janela: 320, variante: 'celular' },

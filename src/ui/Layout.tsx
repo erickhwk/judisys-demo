@@ -13,7 +13,6 @@ import { useSessao } from '../modulos/entrada/sessao'
 import { FaixaDemo } from './FaixaDemo'
 import estilos from './Layout.module.css'
 import { Logo } from './Logo'
-import { LARGURA_CONTEUDO } from './larguras'
 import { MenuConta } from './MenuConta'
 import { MenuLateral } from './MenuLateral'
 import { useMoldura } from './Moldura'
@@ -129,9 +128,8 @@ export function Layout() {
               <BotaoBuscaGlobal compacto />
               <MenuConta {...conta} variante="avatar" />
             </header>
-            {/* Teto do conteúdo em ultrawide, alinhado à esquerda (AJ-22): as ações do
-                cabeçalho da página ficam na borda direita dele, e não na da janela. */}
-            <main className={estilos.conteudo} style={{ maxWidth: LARGURA_CONTEUDO }}>
+            {/* Sem teto de largura: o conteúdo ocupa a coluna toda, até no ultrawide (AJ-26). */}
+            <main className={estilos.conteudo}>
               <Outlet key={resets} />
             </main>
             <Rodape />

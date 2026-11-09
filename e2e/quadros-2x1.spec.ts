@@ -142,9 +142,11 @@ async function estouros(page: Page, id: string, fonte: Fonte): Promise<string[]>
   }, aceitaReticencias(fonte))
 }
 
+// O maior desktop é o ultrawide de 3440px com o menu recolhido (unidade de 813px, sem teto desde a
+// AJ-26).
 const EXTREMOS = [
   { variante: 'desktop', conteiner: 880, colunas: '4' },
-  { variante: 'desktop', conteiner: 2200, colunas: '4' },
+  { variante: 'desktop', conteiner: 3300, colunas: '4' },
   { variante: 'tablet', conteiner: 600, colunas: '2' },
   { variante: 'tablet', conteiner: 879, colunas: '2' },
   { variante: 'celular', conteiner: 288, colunas: '1' },
