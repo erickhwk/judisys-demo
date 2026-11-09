@@ -26,7 +26,46 @@ async function montarOsQuatro(page: Page): Promise<void> {
   await expect(page.locator('[data-quadro="informes"] li')).toHaveCount(5)
 }
 
-const grade = (page: Page) => page.locator('[data-colunas]')
+/** Largura do contêiner da grade, ou 0 se ela não tem caixa nesse instante. */
+async function larguraDaGrade(page: Page, colunas?: 1 | 4): Promise<number> {
+  const seletor = colunas ? `[data-colunas="${colunas}"]` : '[data-colunas]'
+  return (
+    (
+      await page
+        .locator(seletor)
+        .boundingBox()
+        .catch(() => null)
+    )?.width ?? 0
+  )
+}
+
+/**
+ * Quanto da janela não é contêiner da grade (as margens). Logo depois de um setViewportSize, o
+ * ResizeObserver ainda não mediu: a grade antiga pode ser trocada pela nova no meio da medida, o
+ * que dava boundingBox nulo e uma casca errada (AJ-24). Espera a grade com as colunas da janela e
+ * a mesma largura em duas leituras seguidas.
+ */
+async function casca(page: Page, janela: number, colunas: 1 | 4): Promise<number> {
+  await page.setViewportSize({ width: janela, height: 900 })
+  let anterior = -1
+  await expect
+    .poll(async () => {
+      const largura = await larguraDaGrade(page, colunas)
+      const estavel = largura > 0 && largura === anterior
+      anterior = largura
+      return estavel
+    }, `grade de ${colunas} coluna(s) na janela de ${janela}px`)
+    .toBe(true)
+  return janela - anterior
+}
+
+/** Muda a janela e espera o contêiner da grade chegar à largura pedida antes de medir os quadros. */
+async function conteinerCom(page: Page, janela: number, conteiner: number): Promise<void> {
+  await page.setViewportSize({ width: janela, height: 1000 })
+  await expect
+    .poll(() => larguraDaGrade(page), `contêiner de ${conteiner}px`)
+    .toBeCloseTo(conteiner, 0)
+}
 
 /** Quanto o corpo de cada quadro passa da altura dele (0 = cabe) e a largura do quadro. */
 async function medir(page: Page) {
@@ -72,14 +111,13 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await entrarComo(page, 'advogado')
     await montarOsQuatro(page)
-    const casca = 1440 - ((await grade(page).boundingBox())?.width ?? 0)
+    const cascaDesktop = await casca(page, 1440, 4)
     // No celular, a casca (margens) é outra: mede de novo numa janela estreita.
-    await page.setViewportSize({ width: 400, height: 900 })
-    const cascaCelular = 400 - ((await grade(page).boundingBox())?.width ?? 0)
+    const cascaCelular = await casca(page, 400, 1)
 
     for (const caso of casos) {
-      const janela = caso.conteiner + (caso.variante === 'celular' ? cascaCelular : casca)
-      await page.setViewportSize({ width: janela, height: 1000 })
+      const janela = caso.conteiner + (caso.variante === 'celular' ? cascaCelular : cascaDesktop)
+      await conteinerCom(page, janela, caso.conteiner)
       await expect(page.locator('[data-quadro="proximos"]')).toHaveAttribute(
         'data-variante',
         caso.variante,
@@ -101,9 +139,14 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     await entrarComo(page, 'advogado')
     await montarOsQuatro(page)
     await expect(page.locator('[data-semanas="6"]')).toBeVisible()
-    const casca = 1440 - ((await grade(page).boundingBox())?.width ?? 0)
+    const cascaDesktop = await casca(page, 1440, 4)
     for (const conteiner of [880, 2200, 600, 879]) {
-      await page.setViewportSize({ width: conteiner + casca, height: 1000 })
+      await conteinerCom(page, conteiner + cascaDesktop, conteiner)
+      // Sem esperar o contêiner e a variante, a medida podia ser a do desenho anterior.
+      await expect(page.locator('[data-quadro="calendario"]')).toHaveAttribute(
+        'data-variante',
+        conteiner >= 880 ? 'desktop' : 'tablet',
+      )
       const [, calendario] = await medir(page)
       expect(calendario?.estouro, `calendário em ${conteiner}px`).toBeLessThanOrEqual(0)
     }

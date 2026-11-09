@@ -40,10 +40,14 @@ function guardaCom(papel: Papel): Guarda {
   return { getItem: () => sessao, setItem: () => {}, removeItem: () => {} }
 }
 
-function renderizar(papel: Papel, url = '/processos/prc-001/prazos'): string {
+function renderizar(
+  papel: Papel,
+  url = '/processos/prc-001/prazos',
+  { comProcesso = true } = {},
+): string {
   const queryClient = new QueryClient()
   queryClient.setQueryData(['prazos', 'todos', { onde: { processoId: 'prc-001' } }], PRAZOS)
-  queryClient.setQueryData(['processos', 'buscar', 'prc-001'], PROCESSO)
+  if (comProcesso) queryClient.setQueryData(['processos', 'buscar', 'prc-001'], PROCESSO)
   const contexto = {
     usuario: { id: 'usr-x', escritorioId: ESCRITORIO_ID },
     papel,
@@ -110,6 +114,14 @@ describe('AbaPrazos', () => {
     expect(html).not.toContain('como cumprido')
     expect(html).not.toContain('Editar')
     expect(renderizar('advogado')).toContain('Novo prazo')
+  })
+
+  it('AJ-24 · sem o processo carregado, nenhuma linha nem ação de cumprir', () => {
+    // Cumprir um RMA sem o processo abriria a confirmação sem o aviso do próximo RMA.
+    const html = renderizar('aj', undefined, { comProcesso: false })
+    expect(html).toContain('Carregando prazos…')
+    expect(html).not.toContain('Prazo normal')
+    expect(html).not.toContain('como cumprido')
   })
 
   it('PRZ-09 · o link do calendário destaca o prazo na aba', () => {
