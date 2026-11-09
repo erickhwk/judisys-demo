@@ -49,6 +49,9 @@ const EXTREMOS = [
 // A Inter vem do Google Fonts. Sem ela (bloqueador, rede), a fonte de reserva mede o texto um pouco
 // mais largo: o rótulo de 116px quebrava e o corpo cortava o fim de "Falência" (HF-01). A reserva é
 // a da máquina que roda o teste (SF no macOS, DejaVu no CI): cobre uma métrica diferente, não todas.
+// Nela, um nome de fase com reticências é a degradação prevista (a célula tem o nome no `title` e
+// para o leitor de tela): no tablet de 292px, a DejaVu corta "Prestação de contas". Corte sem
+// reticências (fileira mais larga que o quadro, corpo mais alto) continua proibido.
 for (const fonte of ['inter', 'reserva'] as const) {
   test(`QDR-16 · três variantes sem estouro nos extremos de largura (fonte ${fonte})`, async ({
     page,
@@ -81,12 +84,13 @@ for (const fonte of ['inter', 'reserva'] as const) {
       await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
       await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
       // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
-      const estouros = await carteira(page).evaluate((quadro) => {
+      const estouros = await carteira(page).evaluate((quadro, aceitaReticencias) => {
         const cortados = [
           ...quadro.querySelectorAll('ol, [data-tipo], [data-fase], [data-fase] *, p *'),
         ]
           .filter((e) => !e.closest('.somente-leitor') && e.scrollWidth > e.clientWidth + 0.5)
           .filter((e) => getComputedStyle(e).display !== 'inline')
+          .filter((e) => !(aceitaReticencias && getComputedStyle(e).textOverflow === 'ellipsis'))
           .map((e) => e.textContent)
         // O corpo é quem corta (overflow): o quadro em si não cresce.
         const corpo = quadro.lastElementChild as HTMLElement
@@ -94,7 +98,7 @@ for (const fonte of ['inter', 'reserva'] as const) {
           .filter((e) => e.scrollHeight > e.clientHeight + 0.5)
           .map((e) => `altura: ${e.scrollHeight}px em ${e.clientHeight}px`)
         return [...cortados, ...alto]
-      })
+      }, fonte === 'reserva')
       expect(estouros, extremo.nome).toEqual([])
     }
   })
