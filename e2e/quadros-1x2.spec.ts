@@ -3,7 +3,7 @@
 // e a volta ao início depois de alterar um prazo (QDR-18, T-22). O conteúdo de cada quadro com o
 // seed está em src/modulos/inicio/quadros/quadros1x2.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, casca, conteinerCom, entrarComo, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -24,47 +24,6 @@ async function montarOsQuatro(page: Page): Promise<void> {
     await expect(page.locator(`[data-quadro="${id}"]`)).toBeVisible()
   }
   await expect(page.locator('[data-quadro="informes"] li')).toHaveCount(5)
-}
-
-/** Largura do contêiner da grade, ou 0 se ela não tem caixa nesse instante. */
-async function larguraDaGrade(page: Page, colunas?: 1 | 4): Promise<number> {
-  const seletor = colunas ? `[data-colunas="${colunas}"]` : '[data-colunas]'
-  return (
-    (
-      await page
-        .locator(seletor)
-        .boundingBox()
-        .catch(() => null)
-    )?.width ?? 0
-  )
-}
-
-/**
- * Quanto da janela não é contêiner da grade (as margens). Logo depois de um setViewportSize, o
- * ResizeObserver ainda não mediu: a grade antiga pode ser trocada pela nova no meio da medida, o
- * que dava boundingBox nulo e uma casca errada (AJ-24). Espera a grade com as colunas da janela e
- * a mesma largura em duas leituras seguidas.
- */
-async function casca(page: Page, janela: number, colunas: 1 | 4): Promise<number> {
-  await page.setViewportSize({ width: janela, height: 900 })
-  let anterior = -1
-  await expect
-    .poll(async () => {
-      const largura = await larguraDaGrade(page, colunas)
-      const estavel = largura > 0 && largura === anterior
-      anterior = largura
-      return estavel
-    }, `grade de ${colunas} coluna(s) na janela de ${janela}px`)
-    .toBe(true)
-  return janela - anterior
-}
-
-/** Muda a janela e espera o contêiner da grade chegar à largura pedida antes de medir os quadros. */
-async function conteinerCom(page: Page, janela: number, conteiner: number): Promise<void> {
-  await page.setViewportSize({ width: janela, height: 1000 })
-  await expect
-    .poll(() => larguraDaGrade(page), `contêiner de ${conteiner}px`)
-    .toBeCloseTo(conteiner, 0)
 }
 
 /** Quanto o corpo de cada quadro passa da altura dele (0 = cabe) e a largura do quadro. */

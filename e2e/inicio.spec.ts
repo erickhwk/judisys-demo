@@ -3,7 +3,7 @@
 // src/modulos/inicio/grade.test.tsx; aqui vale o que só o navegador mede: a largura do contêiner,
 // a unidade e o link do cabeçalho do quadro. O Personalizar está em personalizar.spec.ts.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, assentarGrade, casca, conteinerCom, entrarComo, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -27,18 +27,18 @@ test.describe('larguras', () => {
     // A janela que dá cada largura de contêiner: a casca (menu, margens, barra de rolagem) é medida.
     await page.setViewportSize({ width: 1440, height: 900 })
     await entrarComo(page, 'advogado')
-    const casca = 1440 - ((await grade(page).boundingBox())?.width ?? 0)
+    const cascaDesktop = await casca(page, 1440, 4)
 
-    await page.setViewportSize({ width: 880 + casca, height: 900 })
+    // As 4 colunas já valiam antes do resize: só a largura do contêiner diz que a grade mediu.
+    await conteinerCom(page, 880 + cascaDesktop, 880)
     await expect(grade(page)).toHaveAttribute('data-colunas', '4')
-    expect((await grade(page).boundingBox())?.width).toBe(880)
     const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
     expect(prazos?.width).toBe(208)
     expect(prazos?.height).toBe(176)
     await expect(page.locator('[data-celula]')).toHaveCount(8)
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
 
-    await page.setViewportSize({ width: 879 + casca, height: 900 })
+    await page.setViewportSize({ width: 879 + cascaDesktop, height: 900 })
     await expect(grade(page)).toHaveAttribute('data-colunas', '2')
     await expect(page.getByRole('button', { name: 'Personalizar' })).toHaveCount(0)
   })
@@ -50,9 +50,8 @@ test.describe('larguras', () => {
     await entrarComo(page, 'advogado')
     await expect(page.getByRole('button', { name: 'Recolher menu' })).toBeVisible()
     // Com o menu de 280px, sobram cerca de 912px: acima dos 880px das 4 colunas (5.3).
-    const largura = (await grade(page).boundingBox())?.width ?? 0
+    const largura = await assentarGrade(page, 1280, 4)
     expect(largura, `contêiner de ${largura}px`).toBeGreaterThanOrEqual(880)
-    await expect(grade(page)).toHaveAttribute('data-colunas', '4')
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
   })
 
