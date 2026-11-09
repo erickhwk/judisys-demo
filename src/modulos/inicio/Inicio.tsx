@@ -88,7 +88,6 @@ function InicioDoUsuario({ sessao, larguraForcada }: { sessao: Sessao; larguraFo
   const podePersonalizar = cols === COLUNAS_DESKTOP
 
   return (
-    // O teto de 2200px é o do conteúdo do Layout (AJ-22), a mesma constante da unidade do arrasto.
     <div className={estilos.tela}>
       <Cabecalho
         sessao={sessao}

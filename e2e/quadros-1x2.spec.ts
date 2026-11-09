@@ -64,11 +64,12 @@ async function medir(page: Page) {
 }
 
 test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
-  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 538px no desktop, de 292 e
-  // 432px no tablet e o celular de 288 a 599px.
+  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 813px no desktop (com folga
+  // sobre o ultrawide de 3440px com o menu recolhido, sem teto desde a AJ-26), de 292 e 432px no
+  // tablet e o celular de 288 a 599px.
   const casos = [
     { conteiner: 880, variante: 'desktop', unidade: 208 },
-    { conteiner: 2200, variante: 'desktop', unidade: 538 },
+    { conteiner: 3300, variante: 'desktop', unidade: 813 },
     { conteiner: 600, variante: 'tablet', unidade: 292 },
     { conteiner: 879, variante: 'tablet', unidade: 431 },
     { conteiner: 288, variante: 'celular', unidade: 288 },
@@ -112,7 +113,7 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
       await expect(page.locator('[data-semanas="6"]')).toBeVisible()
       await esperarFonte(page, fonte)
       const cascas = await medirCascas(page)
-      for (const conteiner of [880, 2200, 600, 879]) {
+      for (const conteiner of [880, 3300, 600, 879]) {
         await conteinerCom(page, conteiner, cascas)
         // Sem esperar o contêiner e a variante, a medida podia ser a do desenho anterior.
         await expect(page.locator('[data-quadro="calendario"]')).toHaveAttribute(

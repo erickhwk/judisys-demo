@@ -63,26 +63,44 @@ test.describe('larguras', () => {
     await expect(page.getByRole('button', { name: 'Personalizar' })).toBeVisible()
   })
 
-  test('GRD-09 · tela muito larga: grid de 2200px à esquerda, unidade de 538px', async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 3440, height: 1000 })
-    await entrarComo(page, 'advogado')
-    await assentarGrade(page, 3440, 4, 1000)
-    const caixa = await grade(page).boundingBox()
-    expect(caixa?.width).toBe(2200)
-    const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
-    expect(prazos?.width).toBe(538)
-    // Alinhado à esquerda, com o cabeçalho.
-    const titulo = await tituloDoInicio(page).boundingBox()
-    expect(prazos?.x).toBe(titulo?.x)
-    // As ações do cabeçalho param na borda direita da grade, e não na da janela (AJ-21).
-    const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
-    expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo(
-      (caixa?.x ?? 0) + (caixa?.width ?? 0),
-      0,
-    )
-  })
+  /** Quanto sobra entre a borda direita da grade e a da coluna do conteúdo (o `main`). */
+  const sobraAteAColuna = (page: Page) =>
+    page.evaluate(() => {
+      const grade = document.querySelector('[data-colunas]')
+      const coluna = grade?.closest('main')
+      return (
+        (coluna?.getBoundingClientRect().right ?? 0) - (grade?.getBoundingClientRect().right ?? 0)
+      )
+    })
+
+  for (const menuAberto of [true, false]) {
+    test(`GRD-09 · ultrawide (3440px), menu ${menuAberto ? 'aberto' : 'recolhido'}: a grade ocupa a coluna toda, sem teto (AJ-26)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 3440, height: 1000 })
+      await entrarComo(page, 'advogado')
+      if (!menuAberto) await page.getByRole('button', { name: 'Recolher menu' }).click()
+      await assentarGrade(page, 3440, 4, 1000)
+      // Só o padding de 44px do conteúdo à direita: nem teto nem vazio (AJ-26 tirou os 2200px).
+      await expect.poll(() => sobraAteAColuna(page)).toBeCloseTo(44, 0)
+      const caixa = await grade(page).boundingBox()
+      const largura = caixa?.width ?? 0
+      // Cerca de 3072px com o menu aberto (280px) e de 3268px com ele recolhido (84px): o limiar
+      // do meio separa os dois sem depender da barra de rolagem.
+      expect(largura).toBeGreaterThan(menuAberto ? 3000 : 3150)
+      const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
+      expect(prazos?.width).toBeCloseTo((largura - 16 * 3) / 4, 0)
+      // A altura da unidade continua 176px.
+      const passivo = await page.locator('[data-celula="passivo"]').boundingBox()
+      expect(passivo?.height).toBe(176)
+      // Alinhado à esquerda, com o cabeçalho.
+      const titulo = await tituloDoInicio(page).boundingBox()
+      expect(prazos?.x).toBe(titulo?.x)
+      // As ações do cabeçalho ficam na borda direita da grade, a da coluna.
+      const busca = await page.getByRole('button', { name: 'Buscar', exact: true }).boundingBox()
+      expect((busca?.x ?? 0) + (busca?.width ?? 0)).toBeCloseTo((caixa?.x ?? 0) + largura, 0)
+    })
+  }
 
   test('AJ-21 · monitor de 2560px com o menu aberto: a grade preenche a coluna', async ({
     page,
@@ -91,17 +109,8 @@ test.describe('larguras', () => {
     await entrarComo(page, 'advogado')
     await expect(page.getByRole('button', { name: 'Recolher menu' })).toBeVisible()
     await assentarGrade(page, 2560, 4, 1000)
-    const caixa = await grade(page).boundingBox()
-    const resto = await page.evaluate(() => {
-      const grade = document.querySelector('[data-colunas]')
-      const coluna = grade?.closest('main')
-      return (
-        (coluna?.getBoundingClientRect().right ?? 0) - (grade?.getBoundingClientRect().right ?? 0)
-      )
-    })
-    expect(caixa?.width).toBeLessThan(2200)
     // Só a margem do conteúdo à direita, sem vazio.
-    expect(resto).toBeLessThanOrEqual(60)
+    expect(await sobraAteAColuna(page)).toBeCloseTo(44, 0)
   })
 
   test('GRD-04/PRS-12 · tablet (834px): 2 colunas, sem Personalizar', async ({ page }) => {
