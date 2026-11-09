@@ -3,7 +3,18 @@
 // estoura nos extremos de largura de cada variante (QDR-16, SDD-INI §5.3). O HTML de cada variante
 // está em src/modulos/inicio/quadros/quadros2x1.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, conteinerCom, entrarComo, medirCascas, tituloDoInicio } from './apoio'
+import {
+  AGORA,
+  aceitaReticencias,
+  conteinerCom,
+  entrarComo,
+  esperarFonte,
+  FONTES,
+  type Fonte,
+  medirCascas,
+  prepararFonte,
+  tituloDoInicio,
+} from './apoio'
 
 const QUADROS = ['passivo', 'publicados', 'cumpridos', 'classes'] as const
 
@@ -98,15 +109,24 @@ test('os links do cabeçalho levam à origem', async ({ page }) => {
 // QDR-16: os extremos de largura de cada variante (SDD-INI §5.3)
 
 /** O que sai da moldura, ou o texto que deveria caber inteiro e foi cortado. */
-async function estouros(page: Page, id: string): Promise<string[]> {
+async function estouros(page: Page, id: string, fonte: Fonte): Promise<string[]> {
   const secao = page.locator(`[data-quadro="${id}"]`)
   await secao.scrollIntoViewIfNeeded()
-  return secao.evaluate((s) => {
+  return secao.evaluate((s, aceita) => {
     const caixa = s.getBoundingClientRect()
     const achados: string[] = []
+    // O que está dentro de uma caixa que já corta (as reticências) não vaza: quem responde é a
+    // própria caixa, conferida no mesmo laço (como na 1x2).
+    const cortaAntes = (el: Element) => {
+      for (let pai = el.parentElement; pai && pai !== s; pai = pai.parentElement) {
+        if (getComputedStyle(pai).overflowX !== 'visible') return true
+      }
+      return false
+    }
     for (const el of s.querySelectorAll('*')) {
       const r = el.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
+      if (cortaAntes(el)) continue
       if (
         r.left < caixa.left - 0.5 ||
         r.right > caixa.right + 0.5 ||
@@ -119,6 +139,7 @@ async function estouros(page: Page, id: string): Promise<string[]> {
     // O título, o destaque e a legenda cabem inteiros; o nome do processo nas barras pode ter
     // reticências (o canvas corta o nome longo também).
     for (const el of s.querySelectorAll('h2, header > span, li > span')) {
+      if (aceita && getComputedStyle(el).textOverflow === 'ellipsis') continue
       const intervalo = document.createRange()
       intervalo.selectNodeContents(el)
       const texto = intervalo.getBoundingClientRect().width
@@ -127,7 +148,7 @@ async function estouros(page: Page, id: string): Promise<string[]> {
       }
     }
     return achados
-  })
+  }, aceitaReticencias(fonte))
 }
 
 const EXTREMOS = [
@@ -139,14 +160,25 @@ const EXTREMOS = [
   { variante: 'celular', conteiner: 599, colunas: '1' },
 ] as const
 
-for (const { variante, conteiner, colunas } of EXTREMOS) {
-  test(`QDR-16 · ${variante} com contêiner de ${conteiner}px: nada estoura`, async ({ page }) => {
-    await conteinerCom(page, conteiner, await medirCascas(page))
-    await expect(grade(page)).toHaveAttribute('data-colunas', colunas)
-    for (const id of QUADROS) {
-      await expect(quadro(page, id)).toHaveAttribute('data-variante', variante)
-      await expect(quadro(page, id).locator('[data-grafico]')).toBeVisible()
-      expect(await estouros(page, id), id).toEqual([])
-    }
-  })
+// O beforeEach já entrou com a Inter; a variante reserva bloqueia o Google Fonts e recarrega.
+for (const fonte of FONTES) {
+  for (const { variante, conteiner, colunas } of EXTREMOS) {
+    test(`QDR-16 · ${variante} com contêiner de ${conteiner}px: nada estoura (fonte ${fonte})`, async ({
+      page,
+    }) => {
+      if (fonte === 'reserva') {
+        await prepararFonte(page, fonte)
+        await page.reload()
+        await expect(tituloDoInicio(page)).toBeVisible()
+      }
+      await esperarFonte(page, fonte)
+      await conteinerCom(page, conteiner, await medirCascas(page))
+      await expect(grade(page)).toHaveAttribute('data-colunas', colunas)
+      for (const id of QUADROS) {
+        await expect(quadro(page, id)).toHaveAttribute('data-variante', variante)
+        await expect(quadro(page, id).locator('[data-grafico]')).toBeVisible()
+        expect(await estouros(page, id, fonte), id).toEqual([])
+      }
+    })
+  }
 }

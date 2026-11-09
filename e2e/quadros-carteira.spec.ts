@@ -3,7 +3,17 @@
 // (QDR-16). A contagem do seed e o estado vazio (QDR-13, QDR-15) estão em
 // src/modulos/inicio/quadros/QuadroCarteira.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, assentarGrade, conteinerCom, entrarComo, medirCascas } from './apoio'
+import {
+  AGORA,
+  aceitaReticencias,
+  assentarGrade,
+  conteinerCom,
+  entrarComo,
+  esperarFonte,
+  FONTES,
+  medirCascas,
+  prepararFonte,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -46,33 +56,18 @@ const EXTREMOS = [
   { nome: 'celular, contêiner de 599px', conteiner: 599, variante: 'celular' },
 ] as const
 
-// A Inter vem do Google Fonts. Sem ela (bloqueador, rede), a fonte de reserva mede o texto um pouco
-// mais largo: o rótulo de 116px quebrava e o corpo cortava o fim de "Falência" (HF-01). A reserva é
-// a da máquina que roda o teste (SF no macOS, DejaVu no CI): cobre uma métrica diferente, não todas.
-// Nela, um nome de fase com reticências é a degradação prevista (a célula tem o nome no `title` e
-// para o leitor de tela): no tablet de 292px, a DejaVu corta "Prestação de contas". Corte sem
-// reticências (fileira mais larga que o quadro, corpo mais alto) continua proibido.
-for (const fonte of ['inter', 'reserva'] as const) {
+// A fonte de reserva (FONTES, em e2e/apoio.ts) cobriu o HF-01: sem a Inter, o rótulo de 116px
+// quebrava e o corpo cortava o fim de "Falência". Nela, um nome de fase com reticências é a
+// degradação prevista (a célula tem o nome no `title` e para o leitor de tela): no tablet de 292px, a
+// DejaVu do CI corta "Prestação de contas".
+for (const fonte of FONTES) {
   test(`QDR-16 · três variantes sem estouro nos extremos de largura (fonte ${fonte})`, async ({
     page,
   }) => {
-    if (fonte === 'reserva') {
-      await page.route(/fonts\.(googleapis|gstatic)\.com/, (rota) => rota.abort())
-    }
+    await prepararFonte(page, fonte)
     await page.setViewportSize({ width: 1440, height: 900 })
     await entrarComo(page, 'aj')
-    if (fonte === 'inter') {
-      // display=swap: sem esperar, as primeiras medidas podiam sair na fonte de reserva.
-      await expect
-        .poll(() =>
-          page.evaluate(() =>
-            [...document.fonts].some(
-              (f) => f.family.replace(/"/g, '') === 'Inter' && f.status === 'loaded',
-            ),
-          ),
-        )
-        .toBe(true)
-    }
+    await esperarFonte(page, fonte)
     const cascas = await medirCascas(page)
 
     for (const extremo of EXTREMOS) {
@@ -84,13 +79,13 @@ for (const fonte of ['inter', 'reserva'] as const) {
       await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
       await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)
       // Texto cortado (reticências), fileira mais larga que o quadro ou corpo mais alto que a célula.
-      const estouros = await carteira(page).evaluate((quadro, aceitaReticencias) => {
+      const estouros = await carteira(page).evaluate((quadro, aceita) => {
         const cortados = [
           ...quadro.querySelectorAll('ol, [data-tipo], [data-fase], [data-fase] *, p *'),
         ]
           .filter((e) => !e.closest('.somente-leitor') && e.scrollWidth > e.clientWidth + 0.5)
           .filter((e) => getComputedStyle(e).display !== 'inline')
-          .filter((e) => !(aceitaReticencias && getComputedStyle(e).textOverflow === 'ellipsis'))
+          .filter((e) => !(aceita && getComputedStyle(e).textOverflow === 'ellipsis'))
           .map((e) => e.textContent)
         // O corpo é quem corta (overflow): o quadro em si não cresce.
         const corpo = quadro.lastElementChild as HTMLElement
@@ -98,8 +93,19 @@ for (const fonte of ['inter', 'reserva'] as const) {
           .filter((e) => e.scrollHeight > e.clientHeight + 0.5)
           .map((e) => `altura: ${e.scrollHeight}px em ${e.clientHeight}px`)
         return [...cortados, ...alto]
-      }, fonte === 'reserva')
+      }, aceitaReticencias(fonte))
       expect(estouros, extremo.nome).toEqual([])
+
+      // As fases das duas trilhas começam no mesmo x: no HF-01, uma coluna max-content por trilha
+      // as desalinhou em uns 12px no desktop.
+      const inicios = await carteira(page)
+        .locator('[data-tipo] > ol')
+        .evaluateAll((listas) => listas.map((ol) => ol.getBoundingClientRect().left))
+      expect(inicios, `${extremo.nome}: início das fases`).toHaveLength(2)
+      expect(
+        Math.max(...inicios) - Math.min(...inicios),
+        `${extremo.nome}: início das fases`,
+      ).toBeLessThan(0.5)
     }
   })
 }

@@ -3,7 +3,16 @@
 // e a volta ao início depois de alterar um prazo (QDR-18, T-22). O conteúdo de cada quadro com o
 // seed está em src/modulos/inicio/quadros/quadros1x2.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, conteinerCom, entrarComo, medirCascas, tituloDoInicio } from './apoio'
+import {
+  AGORA,
+  conteinerCom,
+  entrarComo,
+  esperarFonte,
+  FONTES,
+  medirCascas,
+  prepararFonte,
+  tituloDoInicio,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -66,47 +75,55 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     { conteiner: 599, variante: 'celular', unidade: 599 },
   ] as const
 
-  test('as três variantes nos dois extremos', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await entrarComo(page, 'advogado')
-    await montarOsQuatro(page)
-    const cascas = await medirCascas(page)
+  // Com a Inter e com a fonte de reserva (FONTES, em e2e/apoio.ts). O que fica dentro de uma caixa
+  // com reticências não conta como vazamento nas duas: a caixa já corta.
+  for (const fonte of FONTES) {
+    test(`as três variantes nos dois extremos (fonte ${fonte})`, async ({ page }) => {
+      await prepararFonte(page, fonte)
+      await page.setViewportSize({ width: 1440, height: 900 })
+      await entrarComo(page, 'advogado')
+      await montarOsQuatro(page)
+      await esperarFonte(page, fonte)
+      const cascas = await medirCascas(page)
 
-    for (const caso of casos) {
-      await conteinerCom(page, caso.conteiner, cascas)
-      await expect(page.locator('[data-quadro="proximos"]')).toHaveAttribute(
-        'data-variante',
-        caso.variante,
-      )
-      for (const medida of await medir(page)) {
-        const onde = `${medida.id} em ${caso.variante} de ${medida.largura}px`
-        expect(Math.abs(medida.largura - caso.unidade), onde).toBeLessThanOrEqual(1)
-        expect(medida.estouro, onde).toBeLessThanOrEqual(0)
-        expect(medida.vazaDoLado, onde).toBe(false)
+      for (const caso of casos) {
+        await conteinerCom(page, caso.conteiner, cascas)
+        await expect(page.locator('[data-quadro="proximos"]')).toHaveAttribute(
+          'data-variante',
+          caso.variante,
+        )
+        for (const medida of await medir(page)) {
+          const onde = `${medida.id} em ${caso.variante} de ${medida.largura}px`
+          expect(Math.abs(medida.largura - caso.unidade), onde).toBeLessThanOrEqual(1)
+          expect(medida.estouro, onde).toBeLessThanOrEqual(0)
+          expect(medida.vazaDoLado, onde).toBe(false)
+        }
       }
-    }
-  })
+    })
 
-  test('mês de seis semanas (agosto de 2026) também cabe no desktop e no tablet', async ({
-    page,
-  }) => {
-    await page.clock.setFixedTime(new Date('2026-08-10T10:00:00'))
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await entrarComo(page, 'advogado')
-    await montarOsQuatro(page)
-    await expect(page.locator('[data-semanas="6"]')).toBeVisible()
-    const cascas = await medirCascas(page)
-    for (const conteiner of [880, 2200, 600, 879]) {
-      await conteinerCom(page, conteiner, cascas)
-      // Sem esperar o contêiner e a variante, a medida podia ser a do desenho anterior.
-      await expect(page.locator('[data-quadro="calendario"]')).toHaveAttribute(
-        'data-variante',
-        conteiner >= 880 ? 'desktop' : 'tablet',
-      )
-      const [, calendario] = await medir(page)
-      expect(calendario?.estouro, `calendário em ${conteiner}px`).toBeLessThanOrEqual(0)
-    }
-  })
+    test(`mês de seis semanas (agosto de 2026) também cabe no desktop e no tablet (fonte ${fonte})`, async ({
+      page,
+    }) => {
+      await prepararFonte(page, fonte)
+      await page.clock.setFixedTime(new Date('2026-08-10T10:00:00'))
+      await page.setViewportSize({ width: 1440, height: 900 })
+      await entrarComo(page, 'advogado')
+      await montarOsQuatro(page)
+      await expect(page.locator('[data-semanas="6"]')).toBeVisible()
+      await esperarFonte(page, fonte)
+      const cascas = await medirCascas(page)
+      for (const conteiner of [880, 2200, 600, 879]) {
+        await conteinerCom(page, conteiner, cascas)
+        // Sem esperar o contêiner e a variante, a medida podia ser a do desenho anterior.
+        await expect(page.locator('[data-quadro="calendario"]')).toHaveAttribute(
+          'data-variante',
+          conteiner >= 880 ? 'desktop' : 'tablet',
+        )
+        const [, calendario] = await medir(page)
+        expect(calendario?.estouro, `calendário em ${conteiner}px`).toBeLessThanOrEqual(0)
+      }
+    })
+  }
 
   test('celular: as células do calendário têm pelo menos 38px (alvo de toque)', async ({
     page,
