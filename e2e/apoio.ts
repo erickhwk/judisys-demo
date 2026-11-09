@@ -359,28 +359,39 @@ export async function prepararFonte(page: Page, fonte: Fonte): Promise<void> {
 }
 
 /**
- * Alguma face da Inter do Google Fonts carregou? As dele têm `font-display: swap` (o `display=swap`
- * do link); a Inter trocada pela Verdana não declara display.
+ * As faces da Inter na página, depois de `document.fonts.ready` (nenhuma carga pendente). As do
+ * Google Fonts têm `font-display: swap` (o `display=swap` do link); a Inter trocada pela Verdana
+ * não declara display (`auto`) e é carregada aqui, já que face de `local()` só carrega quando usada.
  */
-function interDoGoogleCarregada(page: Page): Promise<boolean> {
-  return page.evaluate(() =>
-    [...document.fonts].some(
-      (f) =>
-        f.family.replace(/"/g, '') === 'Inter' && f.display === 'swap' && f.status === 'loaded',
-    ),
-  )
+function facesDaInter(page: Page): Promise<{ google: string[]; verdana: string[] }> {
+  return page.evaluate(async () => {
+    await document.fonts.load('16px Inter')
+    await document.fonts.ready
+    const inter = [...document.fonts].filter((f) => f.family.replace(/"/g, '') === 'Inter')
+    return {
+      google: inter.filter((f) => f.display === 'swap').map((f) => f.status),
+      verdana: inter.filter((f) => f.display === 'auto').map((f) => f.status),
+    }
+  })
 }
 
 /**
  * Espera a página estar na fonte da variante antes de medir. Na Inter, espera ela carregar
- * (display=swap: sem esperar, as primeiras medidas podiam sair na reserva). Na reserva, confere que
- * a Inter do Google não chegou.
+ * (display=swap: sem esperar, as primeiras medidas podiam sair na reserva) e as demais cargas do
+ * Google Fonts acabarem. Na reserva, confere que o Google Fonts não registrou nenhuma face e, com
+ * FONTE_RESERVA=verdana, que a Verdana existe na máquina e virou a Inter.
  */
 export async function esperarFonte(page: Page, fonte: Fonte): Promise<void> {
   if (fonte === 'inter') {
-    await expect.poll(() => interDoGoogleCarregada(page), 'Inter carregada').toBe(true)
-  } else {
-    expect(await interDoGoogleCarregada(page), 'Inter do Google bloqueada').toBe(false)
+    await expect
+      .poll(async () => (await facesDaInter(page)).google.includes('loaded'), 'Inter carregada')
+      .toBe(true)
+    return
+  }
+  const faces = await facesDaInter(page)
+  expect(faces.google, 'Google Fonts bloqueado').toEqual([])
+  if (process.env.FONTE_RESERVA === 'verdana') {
+    expect(faces.verdana, 'Verdana no lugar da Inter').toEqual(['loaded'])
   }
 }
 
