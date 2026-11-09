@@ -76,10 +76,46 @@ async function entrarPeloTeclado(page: Page, falhas: Falhas): Promise<void> {
   await expect(tituloDoInicio(page)).toBeVisible()
 }
 
+/**
+ * Espera a coluna que rola parar de crescer: a altura rolável (`scrollHeight`) igual por
+ * `quadros` quadros de animação seguidos (AJ-27).
+ *
+ * Os quadros do início chegam com a altura mínima e crescem quando os dados do IndexedDB
+ * respondem, em rajadas por alguns quadros de animação depois de o título já estar na tela.
+ * O Shift+Tab que sai do topo cai no último controle (a marca da Draft, no rodapé), e o
+ * navegador rola a coluna até ele naquele instante; se um quadro de cima cresce depois, o rodapé
+ * desce para fora da janela e a parada é medida fora dela. Esperar a altura assentar põe a
+ * rolagem do foco depois do crescimento.
+ */
+async function esperarColunaAssentar(page: Page, quadros = 10): Promise<void> {
+  await page.evaluate(
+    (seguidos) =>
+      new Promise<void>((pronto) => {
+        let rolador: HTMLElement | null = document.querySelector('main')
+        while (rolador && getComputedStyle(rolador).overflowY !== 'auto') {
+          rolador = rolador.parentElement
+        }
+        let anterior = -1
+        let iguais = 0
+        const conferir = () => {
+          const altura = rolador?.scrollHeight ?? 0
+          iguais = altura === anterior ? iguais + 1 : 0
+          anterior = altura
+          if (iguais >= seguidos) pronto()
+          else requestAnimationFrame(conferir)
+        }
+        requestAnimationFrame(conferir)
+      }),
+    quadros,
+  )
+}
+
 /** Abre a gaveta do menu pelo teclado e escolhe um item. */
 async function irPeloMenu(page: Page, item: string, falhas: Falhas): Promise<void> {
   const abrir = page.getByRole('button', { name: 'Abrir menu' })
   await page.keyboard.press('Escape')
+  // O Shift+Tab salta para o rodapé: só depois de a tela parar de crescer (AJ-27).
+  await esperarColunaAssentar(page)
   await tabAte(page, abrir, falhas, { voltar: true, limite: 400 })
   await page.keyboard.press('Enter')
   const menu = page.getByRole('complementary', { name: 'Menu' })
