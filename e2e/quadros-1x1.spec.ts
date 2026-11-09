@@ -3,7 +3,7 @@
 // mede: nada estoura nos extremos de largura da seção 5.3 (QDR-16). Os números saem do
 // `pnpm indicadores`; o HTML de cada variante está em src/modulos/inicio/quadros/quadros1x1.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, conteinerCom, entrarComo, medirCascas } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -63,22 +63,6 @@ test('QDR-04 · pedidos de crédito do seed, e o Ver leva aos credores do proces
  * (2 colunas) e a lista do celular de 288 a 599. */
 const EXTREMOS = [880, 2200, 600, 879, 288, 599]
 
-/** Ajusta a janela até o contêiner da grade ter `alvo` px (a casca muda com a faixa). */
-async function conteinerCom(page: Page, alvo: number): Promise<void> {
-  let janela = alvo + 400
-  for (let tentativa = 0; tentativa < 8; tentativa++) {
-    await page.setViewportSize({ width: janela, height: 1000 })
-    // Dois quadros de animação: o ResizeObserver da grade mede e o React redesenha.
-    await page.evaluate(
-      () => new Promise((pronto) => requestAnimationFrame(() => requestAnimationFrame(pronto))),
-    )
-    const largura = (await page.locator('[data-colunas]').boundingBox())?.width ?? 0
-    if (Math.abs(largura - alvo) < 0.5) return
-    janela = Math.max(300, Math.round(janela + alvo - largura))
-  }
-  throw new Error(`contêiner de ${alvo}px não alcançado`)
-}
-
 /** O que sai da moldura do quadro, ou texto cortado com reticências. */
 async function estouros(page: Page, id: string): Promise<string[]> {
   return page.locator(`[data-quadro="${id}"]`).evaluate((secao) => {
@@ -110,8 +94,9 @@ for (const [papel, ids] of [
 ] as const) {
   test(`QDR-16 · ${ids.join(', ')} sem estouro nos extremos de largura`, async ({ page }) => {
     await entrarComo(page, papel)
+    const cascas = await medirCascas(page)
     for (const alvo of EXTREMOS) {
-      await conteinerCom(page, alvo)
+      await conteinerCom(page, alvo, cascas)
       for (const id of ids) {
         // A variante muda depois da medida do contêiner (ResizeObserver): espera o novo desenho.
         const variante = alvo >= 880 ? 'desktop' : alvo >= 600 ? 'tablet' : 'celular'

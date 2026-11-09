@@ -3,7 +3,7 @@
 // (QDR-16). A contagem do seed e o estado vazio (QDR-13, QDR-15) estão em
 // src/modulos/inicio/quadros/QuadroCarteira.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo } from './apoio'
+import { AGORA, assentarGrade, conteinerCom, entrarComo, medirCascas } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -33,8 +33,8 @@ test('QDR-14 · fase vazia fica apagada e sem link', async ({ page }) => {
 })
 
 /**
- * Larguras de janela que dão os extremos do contêiner da grade (SDD-INI §5.3). A casca (menu,
- * margens e barra de rolagem) é medida a 1440px, como em inicio.spec.ts.
+ * Os extremos do contêiner da grade (SDD-INI §5.3), e duas janelas comuns: o notebook de 1280px com
+ * o menu aberto e o celular de 320px.
  */
 const EXTREMOS = [
   { nome: 'desktop, unidade de 208px', conteiner: 880, variante: 'desktop' },
@@ -49,30 +49,13 @@ const EXTREMOS = [
 test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await entrarComo(page, 'aj')
-  const grade = page.locator('[data-colunas]')
-  const casca = 1440 - ((await grade.boundingBox())?.width ?? 0)
+  const cascas = await medirCascas(page)
 
   for (const extremo of EXTREMOS) {
-    const janela = 'janela' in extremo ? extremo.janela : extremo.conteiner + casca
-    await page.setViewportSize({ width: janela, height: 900 })
     if ('conteiner' in extremo) {
-      // A casca muda com a largura (a lista do celular tem outras margens): acerta a janela até o
-      // contêiner ser mesmo o extremo pedido. O poll espera o layout assentar a cada passo.
-      let ajustada = janela
-      await expect
-        .poll(
-          async () => {
-            const largura = (await grade.boundingBox())?.width ?? 0
-            const erro = extremo.conteiner - largura
-            if (Math.abs(erro) > 1) {
-              ajustada += Math.round(erro)
-              await page.setViewportSize({ width: ajustada, height: 900 })
-            }
-            return Math.abs(erro)
-          },
-          { message: extremo.nome, intervals: [100, 200, 300] },
-        )
-        .toBeLessThanOrEqual(1)
+      await conteinerCom(page, extremo.conteiner, cascas)
+    } else {
+      await assentarGrade(page, extremo.janela, extremo.variante === 'celular' ? 1 : 4)
     }
     await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
     await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)

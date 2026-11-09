@@ -1,5 +1,6 @@
 // Apoio compartilhado dos testes de ponta a ponta (DMO-24): relógio fixo, entrada por papel,
-// passos da AGC do vitrine, leitura do IndexedDB e as vigias de console e de rede (INV-09).
+// passos da AGC do vitrine, leitura do IndexedDB, as vigias de console e de rede (INV-09) e a
+// medida da grade do início.
 // Não é um arquivo de teste (o Playwright só roda `*.spec.ts`).
 import { expect, type Locator, type Page } from '@playwright/test'
 
@@ -227,4 +228,92 @@ export async function limparBuscaPendente(page: Page, campo: Locator): Promise<v
   await page.waitForTimeout(500)
   expect(buscaNaUrl(page)).toBeNull()
   await expect(campo).toHaveValue('')
+}
+
+// --- Medida da grade do início (AJ-24, AJ-25) ---------------------------------------------------
+// Logo depois de um setViewportSize, o ResizeObserver da grade ainda não mediu: a grade antiga pode
+// ser trocada pela nova (outras colunas) no meio de um boundingBox, que volta nulo. E esperar um
+// atributo que já valia antes do resize não sincroniza nada. Por isso toda medida da grade passa
+// por um poll que espera as colunas e a largura certas.
+
+type Colunas = 1 | 2 | 4
+
+/** Largura do contêiner da grade, ou 0 se ela não tem caixa nesse instante. Só dentro de um poll. */
+export async function larguraDaGrade(page: Page, colunas?: Colunas): Promise<number> {
+  const seletor = colunas ? `[data-colunas="${colunas}"]` : '[data-colunas]'
+  return (
+    (
+      await page
+        .locator(seletor)
+        .boundingBox()
+        .catch(() => null)
+    )?.width ?? 0
+  )
+}
+
+/**
+ * Muda a janela e espera a grade com essas colunas e a mesma largura em duas leituras seguidas.
+ * Devolve a largura do contêiner.
+ */
+export async function assentarGrade(
+  page: Page,
+  janela: number,
+  colunas: Colunas,
+  altura = 900,
+): Promise<number> {
+  await page.setViewportSize({ width: janela, height: altura })
+  let anterior = -1
+  await expect
+    .poll(async () => {
+      const largura = await larguraDaGrade(page, colunas)
+      const estavel = largura > 0 && largura === anterior
+      anterior = largura
+      return estavel
+    }, `grade de ${colunas} coluna(s) na janela de ${janela}px`)
+    .toBe(true)
+  return anterior
+}
+
+/** Quanto da janela não é contêiner da grade (menu, margens) nessa janela. */
+async function casca(page: Page, janela: number, colunas: Colunas, altura = 900): Promise<number> {
+  return janela - (await assentarGrade(page, janela, colunas, altura))
+}
+
+/**
+ * A casca de cada faixa: a do desktop vale também no tablet; a lista do celular tem outras
+ * margens e é medida numa janela estreita.
+ */
+export interface Cascas {
+  desktop: number
+  celular: number
+}
+
+export async function medirCascas(page: Page, altura = 900): Promise<Cascas> {
+  return {
+    desktop: await casca(page, 1440, 4, altura),
+    celular: await casca(page, 400, 1, altura),
+  }
+}
+
+/** As colunas da grade para um contêiner dessa largura (SDD-INI §5.3). */
+function colunasPara(conteiner: number): Colunas {
+  return conteiner >= 880 ? 4 : conteiner >= 600 ? 2 : 1
+}
+
+/**
+ * Muda a janela para o contêiner da grade ter a largura pedida e espera a grade dessa faixa
+ * chegar a ela antes de medir os quadros.
+ */
+export async function conteinerCom(
+  page: Page,
+  conteiner: number,
+  cascas: Cascas,
+  altura = 900,
+): Promise<void> {
+  const colunas = colunasPara(conteiner)
+  const janela = conteiner + (colunas === 1 ? cascas.celular : cascas.desktop)
+  await page.setViewportSize({ width: janela, height: altura })
+  await expect
+    .poll(() => larguraDaGrade(page, colunas), `contêiner de ${conteiner}px`)
+    .toBeCloseTo(conteiner, 0)
 }

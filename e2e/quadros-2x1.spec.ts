@@ -3,7 +3,7 @@
 // estoura nos extremos de largura de cada variante (QDR-16, SDD-INI §5.3). O HTML de cada variante
 // está em src/modulos/inicio/quadros/quadros2x1.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, conteinerCom, entrarComo, medirCascas, tituloDoInicio } from './apoio'
 
 const QUADROS = ['passivo', 'publicados', 'cumpridos', 'classes'] as const
 
@@ -97,37 +97,6 @@ test('os links do cabeçalho levam à origem', async ({ page }) => {
 // ---------------------------------------------------------------------------------------------
 // QDR-16: os extremos de largura de cada variante (SDD-INI §5.3)
 
-/** Largura do contêiner depois que a troca de faixa (menu, barra do topo) assenta. */
-async function larguraEstavel(page: Page): Promise<number> {
-  let anterior = -1
-  for (let i = 0; i < 20; i++) {
-    const atual = await grade(page).evaluate(
-      (el) =>
-        new Promise<number>((pronto) =>
-          requestAnimationFrame(() => pronto(Math.round(el.getBoundingClientRect().width))),
-        ),
-    )
-    if (atual === anterior) return atual
-    anterior = atual
-  }
-  return anterior
-}
-
-/** Ajusta a janela até o contêiner da grade ter a largura pedida (a casca muda com a faixa). */
-async function conteinerCom(page: Page, largura: number, altura = 900): Promise<void> {
-  let janela = largura + 400
-  const medidas: string[] = []
-  for (let tentativa = 0; tentativa < 4; tentativa++) {
-    await page.setViewportSize({ width: janela, height: altura })
-    await expect(grade(page)).toBeVisible()
-    const medida = await larguraEstavel(page)
-    if (medida === largura) return
-    medidas.push(`${janela}→${medida}`)
-    janela += largura - medida
-  }
-  throw new Error(`não chegou ao contêiner de ${largura}px: ${medidas.join(', ')}`)
-}
-
 /** O que sai da moldura, ou o texto que deveria caber inteiro e foi cortado. */
 async function estouros(page: Page, id: string): Promise<string[]> {
   const secao = page.locator(`[data-quadro="${id}"]`)
@@ -172,7 +141,7 @@ const EXTREMOS = [
 
 for (const { variante, conteiner, colunas } of EXTREMOS) {
   test(`QDR-16 · ${variante} com contêiner de ${conteiner}px: nada estoura`, async ({ page }) => {
-    await conteinerCom(page, conteiner)
+    await conteinerCom(page, conteiner, await medirCascas(page))
     await expect(grade(page)).toHaveAttribute('data-colunas', colunas)
     for (const id of QUADROS) {
       await expect(quadro(page, id)).toHaveAttribute('data-variante', variante)
