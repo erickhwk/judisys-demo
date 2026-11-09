@@ -3,7 +3,7 @@
 // (QDR-16). A contagem do seed e o estado vazio (QDR-13, QDR-15) estão em
 // src/modulos/inicio/quadros/QuadroCarteira.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, assentarGrade, casca, conteinerCom, entrarComo } from './apoio'
+import { AGORA, assentarGrade, conteinerCom, entrarComo, medirCascas } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -33,8 +33,8 @@ test('QDR-14 · fase vazia fica apagada e sem link', async ({ page }) => {
 })
 
 /**
- * Larguras de janela que dão os extremos do contêiner da grade (SDD-INI §5.3). A casca (menu,
- * margens e barra de rolagem) é medida a 1440px, como em inicio.spec.ts.
+ * Os extremos do contêiner da grade (SDD-INI §5.3), e duas janelas comuns: o notebook de 1280px com
+ * o menu aberto e o celular de 320px.
  */
 const EXTREMOS = [
   { nome: 'desktop, unidade de 208px', conteiner: 880, variante: 'desktop' },
@@ -49,17 +49,13 @@ const EXTREMOS = [
 test('QDR-16 · três variantes sem estouro nos extremos de largura', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await entrarComo(page, 'aj')
-  const cascaDesktop = await casca(page, 1440, 4)
-  // A lista do celular tem outras margens: a casca dela é medida numa janela estreita.
-  const cascaCelular = await casca(page, 400, 1)
+  const cascas = await medirCascas(page)
 
   for (const extremo of EXTREMOS) {
-    const celular = extremo.variante === 'celular'
     if ('conteiner' in extremo) {
-      const janela = extremo.conteiner + (celular ? cascaCelular : cascaDesktop)
-      await conteinerCom(page, janela, extremo.conteiner)
+      await conteinerCom(page, extremo.conteiner, cascas)
     } else {
-      await assentarGrade(page, extremo.janela, celular ? 1 : 4)
+      await assentarGrade(page, extremo.janela, extremo.variante === 'celular' ? 1 : 4)
     }
     await expect(carteira(page)).toHaveAttribute('data-variante', extremo.variante)
     await expect(carteira(page).locator('a[data-fase]')).toHaveCount(10)

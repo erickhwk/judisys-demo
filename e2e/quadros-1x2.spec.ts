@@ -3,7 +3,7 @@
 // e a volta ao início depois de alterar um prazo (QDR-18, T-22). O conteúdo de cada quadro com o
 // seed está em src/modulos/inicio/quadros/quadros1x2.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, casca, conteinerCom, entrarComo, tituloDoInicio } from './apoio'
+import { AGORA, conteinerCom, entrarComo, medirCascas, tituloDoInicio } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -70,13 +70,10 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await entrarComo(page, 'advogado')
     await montarOsQuatro(page)
-    const cascaDesktop = await casca(page, 1440, 4)
-    // No celular, a casca (margens) é outra: mede de novo numa janela estreita.
-    const cascaCelular = await casca(page, 400, 1)
+    const cascas = await medirCascas(page)
 
     for (const caso of casos) {
-      const janela = caso.conteiner + (caso.variante === 'celular' ? cascaCelular : cascaDesktop)
-      await conteinerCom(page, janela, caso.conteiner)
+      await conteinerCom(page, caso.conteiner, cascas)
       await expect(page.locator('[data-quadro="proximos"]')).toHaveAttribute(
         'data-variante',
         caso.variante,
@@ -98,9 +95,9 @@ test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
     await entrarComo(page, 'advogado')
     await montarOsQuatro(page)
     await expect(page.locator('[data-semanas="6"]')).toBeVisible()
-    const cascaDesktop = await casca(page, 1440, 4)
+    const cascas = await medirCascas(page)
     for (const conteiner of [880, 2200, 600, 879]) {
-      await conteinerCom(page, conteiner + cascaDesktop, conteiner)
+      await conteinerCom(page, conteiner, cascas)
       // Sem esperar o contêiner e a variante, a medida podia ser a do desenho anterior.
       await expect(page.locator('[data-quadro="calendario"]')).toHaveAttribute(
         'data-variante',

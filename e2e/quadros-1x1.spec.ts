@@ -3,7 +3,7 @@
 // mede: nada estoura nos extremos de largura da seção 5.3 (QDR-16). Os números saem do
 // `pnpm indicadores`; o HTML de cada variante está em src/modulos/inicio/quadros/quadros1x1.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, casca, conteinerCom, entrarComo } from './apoio'
+import { AGORA, conteinerCom, entrarComo, medirCascas } from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -94,14 +94,12 @@ for (const [papel, ids] of [
 ] as const) {
   test(`QDR-16 · ${ids.join(', ')} sem estouro nos extremos de largura`, async ({ page }) => {
     await entrarComo(page, papel)
-    const cascaDesktop = await casca(page, 1440, 4)
-    // No celular, a casca (margens) é outra: mede de novo numa janela estreita.
-    const cascaCelular = await casca(page, 400, 1)
+    const cascas = await medirCascas(page)
     for (const alvo of EXTREMOS) {
-      const variante = alvo >= 880 ? 'desktop' : alvo >= 600 ? 'tablet' : 'celular'
-      await conteinerCom(page, alvo + (variante === 'celular' ? cascaCelular : cascaDesktop), alvo)
+      await conteinerCom(page, alvo, cascas)
       for (const id of ids) {
         // A variante muda depois da medida do contêiner (ResizeObserver): espera o novo desenho.
+        const variante = alvo >= 880 ? 'desktop' : alvo >= 600 ? 'tablet' : 'celular'
         await expect(page.locator(`[data-quadro="${id}"]`)).toHaveAttribute(
           'data-variante',
           variante,
