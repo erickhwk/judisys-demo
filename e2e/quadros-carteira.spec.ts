@@ -47,7 +47,8 @@ const EXTREMOS = [
 ] as const
 
 // A Inter vem do Google Fonts. Sem ela (bloqueador, rede), a fonte de reserva mede o texto um pouco
-// mais largo: o rótulo de 116px quebrava e o corpo cortava o fim de "Falência" (HF-01).
+// mais largo: o rótulo de 116px quebrava e o corpo cortava o fim de "Falência" (HF-01). A reserva é
+// a da máquina que roda o teste (SF no macOS, DejaVu no CI): cobre uma métrica diferente, não todas.
 for (const fonte of ['inter', 'reserva'] as const) {
   test(`QDR-16 · três variantes sem estouro nos extremos de largura (fonte ${fonte})`, async ({
     page,
@@ -57,6 +58,18 @@ for (const fonte of ['inter', 'reserva'] as const) {
     }
     await page.setViewportSize({ width: 1440, height: 900 })
     await entrarComo(page, 'aj')
+    if (fonte === 'inter') {
+      // display=swap: sem esperar, as primeiras medidas podiam sair na fonte de reserva.
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            [...document.fonts].some(
+              (f) => f.family.replace(/"/g, '') === 'Inter' && f.status === 'loaded',
+            ),
+          ),
+        )
+        .toBe(true)
+    }
     const cascas = await medirCascas(page)
 
     for (const extremo of EXTREMOS) {
