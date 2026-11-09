@@ -85,8 +85,9 @@ test.describe('larguras', () => {
       await expect.poll(() => sobraAteAColuna(page)).toBeCloseTo(44, 0)
       const caixa = await grade(page).boundingBox()
       const largura = caixa?.width ?? 0
-      // Com o menu recolhido, o contêiner chega a cerca de 3300px (unidade de ~813px).
-      expect(largura).toBeGreaterThan(menuAberto ? 3000 : 3250)
+      // Cerca de 3072px com o menu aberto (280px) e de 3268px com ele recolhido (84px): o limiar
+      // do meio separa os dois sem depender da barra de rolagem.
+      expect(largura).toBeGreaterThan(menuAberto ? 3000 : 3150)
       const prazos = await page.locator('[data-celula="prazos"]').boundingBox()
       expect(prazos?.width).toBeCloseTo((largura - 16 * 3) / 4, 0)
       // A altura da unidade continua 176px.

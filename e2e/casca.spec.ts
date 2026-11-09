@@ -187,8 +187,11 @@ test.describe('AJ-26 · conteúdo sem teto de largura', () => {
       await page.goto('./#/processos')
       // Sem teto: o main vai até a borda da coluna (a AJ-26 tirou os 2200px da AJ-22).
       await expect.poll(async () => (await medirConteudo(page)).sobra).toBe(0)
+      // Cerca de 3072px com o menu aberto e 3268px com ele recolhido; espera a transição do menu.
+      await expect
+        .poll(async () => (await medirConteudo(page)).largura)
+        .toBeGreaterThan(menuAberto ? 3000 : 3150)
       const conteudo = await medirConteudo(page)
-      expect(conteudo.largura).toBeGreaterThan(menuAberto ? 3000 : 3250)
       // O cartão da tabela (a região rola dentro dele, 1px para dentro da borda).
       const lista = await page
         .getByRole('region', { name: 'Lista de processos' })

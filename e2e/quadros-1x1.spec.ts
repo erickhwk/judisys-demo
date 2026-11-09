@@ -69,9 +69,9 @@ test('QDR-04 · pedidos de crédito do seed, e o Ver leva aos credores do proces
 
 // --- QDR-16 · sem estouro nos extremos de largura (SDD-INI §5.3) -------------------------------
 
-/** Contêiner da grade nos extremos de cada faixa: unidade de 208 e de 813px (4 colunas; o
- * ultrawide de 3440px com o menu recolhido, sem teto desde a AJ-26), 292 e 432 (2 colunas) e a
- * lista do celular de 288 a 599. */
+/** Contêiner da grade nos extremos de cada faixa: unidade de 208 e de 813px (4 colunas; com folga
+ * sobre o ultrawide de 3440px com o menu recolhido, sem teto desde a AJ-26), 292 e 432 (2 colunas)
+ * e a lista do celular de 288 a 599. */
 const EXTREMOS = [880, 3300, 600, 879, 288, 599]
 
 /** O que sai da moldura do quadro, ou texto cortado com reticências (só na Inter). */

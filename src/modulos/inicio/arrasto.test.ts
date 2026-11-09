@@ -38,6 +38,7 @@ describe('larguras (5.3)', () => {
     expect(larguraDaUnidade(880, 4)).toBe(208)
     expect(larguraDaUnidade(2200, 4)).toBe(538)
     expect(larguraDaUnidade(3300, 4)).toBe(813)
+    expect(larguraDaUnidade(5000, 4)).toBe(1238)
   })
 
   it('unidade de 292 a 432px em 2 colunas', () => {

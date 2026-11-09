@@ -64,9 +64,9 @@ async function medir(page: Page) {
 }
 
 test.describe('QDR-16 · sem estouro nos extremos de largura', () => {
-  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 813px no desktop (o ultrawide
-  // de 3440px com o menu recolhido, sem teto desde a AJ-26), de 292 e 432px no tablet e o celular
-  // de 288 a 599px.
+  // Contêiner da grade em cada extremo da seção 5.3: unidade de 208 e 813px no desktop (com folga
+  // sobre o ultrawide de 3440px com o menu recolhido, sem teto desde a AJ-26), de 292 e 432px no
+  // tablet e o celular de 288 a 599px.
   const casos = [
     { conteiner: 880, variante: 'desktop', unidade: 208 },
     { conteiner: 3300, variante: 'desktop', unidade: 813 },
