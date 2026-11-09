@@ -105,23 +105,30 @@ a.fase:hover {
   box-shadow: inset 0 0 0 1px var(--cor-quadro-sombra);
 }
 
-/* Desktop (4×1): duas faixas, com o tipo e o resumo numa coluna à esquerda. */
+/* Desktop (4×1): duas faixas, com o tipo e o resumo numa coluna à esquerda. A coluna tem a
+   largura do rótulo mais longo, sem quebra, e as duas trilhas a dividem (subgrid), então as fases
+   começam no mesmo x. Com 116px fixos, o resumo cabia com menos de 1px de folga na Inter e quebrava
+   com outra fonte, e o corpo cortava o fim do rótulo (HF-01). Com os números do seed, as fases
+   ainda têm folga no contêiner de 880px; o QDR-16 da carteira confere. */
 
 .desktop {
-  gap: 10px;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px 12px;
   margin-top: 12px;
 }
 
 .desktop .trilha {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
-  gap: 12px;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
 }
 
 .desktop .tipo {
   display: flex;
   flex-direction: column;
+  white-space: nowrap;
 }
 
 .desktop .nomeTipo {
