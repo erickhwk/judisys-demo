@@ -28,7 +28,12 @@ export function AbaPrazos({ processoId }: { processoId: string }) {
     [processo.data, processoId],
   )
   const acoes = useAcoesPrazo({ processos })
-  const prazos = useMemo(() => [...(consulta.data ?? [])].sort(compararPrazos), [consulta.data])
+  // Sem o processo, a confirmação de cumprir um RMA sairia sem o aviso do próximo (AJ-24).
+  const carregando = consulta.isPending || processo.isPending
+  const prazos = useMemo(
+    () => (carregando ? [] : [...(consulta.data ?? [])].sort(compararPrazos)),
+    [carregando, consulta.data],
+  )
 
   // Link do calendário ou da agenda (PRZ-09): rola até o prazo uma vez, quando ele aparece. Depois
   // de cumprir ou criar um prazo a lista muda de tamanho, mas a tela não volta a pular para ele.
@@ -53,7 +58,7 @@ export function AbaPrazos({ processoId }: { processoId: string }) {
             Prazos
           </h2>
           <p className={estilos.subtitulo}>
-            {consulta.isPending ? 'Carregando…' : resumo(prazos.length, abertos)}
+            {carregando ? 'Carregando…' : resumo(prazos.length, abertos)}
           </p>
         </div>
         {acoes.podeEditar && (
@@ -75,7 +80,7 @@ export function AbaPrazos({ processoId }: { processoId: string }) {
         destacado={destacado}
         vazio={
           <Vazio
-            titulo={consulta.isPending ? 'Carregando prazos…' : 'Nenhum prazo neste processo'}
+            titulo={carregando ? 'Carregando prazos…' : 'Nenhum prazo neste processo'}
             descricao="Os prazos automáticos aparecem quando o processo avança de fase."
           />
         }

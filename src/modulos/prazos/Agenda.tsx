@@ -79,15 +79,21 @@ export function Agenda() {
   // No calendário o período não se aplica: o mês mostra abertos e cumpridos.
   const periodo = vista === 'calendario' ? 'todos' : filtro.periodo
   const { processoId, responsavelId } = filtro
+  const carregando =
+    consultaPrazos.isPending || consultaProcessos.isPending || consultaUsuarios.isPending
+  // Os prazos costumam vir do cache do início antes dos processos: sem esperar, a linha aparecia e o
+  // "Marcar como cumprido" abria a confirmação sem o aviso do próximo RMA (AJ-24).
   const filtrados = useMemo(
     () =>
-      filtrarAgenda(
-        consultaPrazos.data ?? [],
-        processos,
-        { periodo, processoId, responsavelId },
-        hoje,
-      ),
-    [consultaPrazos.data, processos, periodo, processoId, responsavelId, hoje],
+      carregando
+        ? []
+        : filtrarAgenda(
+            consultaPrazos.data ?? [],
+            processos,
+            { periodo, processoId, responsavelId },
+            hoje,
+          ),
+    [carregando, consultaPrazos.data, processos, periodo, processoId, responsavelId, hoje],
   )
 
   const exportacao = useExportarCsv(() => exportarPrazos(filtrados, processos, responsaveis, hoje))
@@ -114,8 +120,6 @@ export function Agenda() {
     (vista === 'lista' && filtro.periodo !== PERIODO_PADRAO) ||
     filtro.processoId !== '' ||
     filtro.responsavelId !== ''
-  const carregando =
-    consultaPrazos.isPending || consultaProcessos.isPending || consultaUsuarios.isPending
   const falhou = consultaPrazos.isError || consultaProcessos.isError || consultaUsuarios.isError
 
   const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA))
