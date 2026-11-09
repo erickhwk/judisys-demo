@@ -317,3 +317,79 @@ export async function conteinerCom(
     .poll(() => larguraDaGrade(page, colunas), `contêiner de ${conteiner}px`)
     .toBeCloseTo(conteiner, 0)
 }
+
+// --- Fonte de reserva nos QDR-16 (HF-01, AJ-28) -------------------------------------------------
+// A Inter vem do Google Fonts. Sem ela (bloqueador, rede fora), o texto sai na fonte de reserva da
+// máquina, que mede mais largo: no HF-01 o rótulo da Carteira por fase cabia com menos de 1px de
+// folga na Inter e quebrava na reserva. Por isso todo QDR-16 roda nas duas variantes de FONTES:
+//
+//   for (const fonte of FONTES) {
+//     test(`QDR-16 · ... (fonte ${fonte})`, async ({ page }) => {
+//       await prepararFonte(page, fonte) // antes da primeira navegação (ou recarregue depois)
+//       await entrarComo(page, 'aj')
+//       await esperarFonte(page, fonte) // antes de medir
+//       ... locator.evaluate(..., aceitaReticencias(fonte)) ...
+//
+// A reserva muda por máquina (SF no macOS, DejaVu no CI, bem mais larga): cobre uma métrica
+// diferente, não todas. Antes do push, confira também com a Verdana no lugar da Inter, larga como a
+// DejaVu: com FONTE_RESERVA=verdana no ambiente do `pnpm e2e`, a variante reserva declara
+// `@font-face { font-family: Inter; src: local("Verdana") }`. Foi assim que o HF-01 reproduziu
+// localmente a falha do CI.
+
+/** As variantes de fonte de todo QDR-16: a Inter do Google Fonts e a fonte de reserva. */
+export const FONTES = ['inter', 'reserva'] as const
+export type Fonte = (typeof FONTES)[number]
+
+/**
+ * Prepara a página para a variante: na reserva, bloqueia o Google Fonts (e, com
+ * FONTE_RESERVA=verdana, faz da Verdana a Inter). Vale a partir da próxima navegação.
+ */
+export async function prepararFonte(page: Page, fonte: Fonte): Promise<void> {
+  if (fonte !== 'reserva') return
+  await page.route(/fonts\.(googleapis|gstatic)\.com/, (rota) => rota.abort())
+  if (process.env.FONTE_RESERVA === 'verdana') {
+    await page.addInitScript(() => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const estilo = document.createElement('style')
+        estilo.textContent = '@font-face { font-family: Inter; src: local("Verdana"); }'
+        document.head.append(estilo)
+      })
+    })
+  }
+}
+
+/**
+ * Alguma face da Inter do Google Fonts carregou? As dele têm `font-display: swap` (o `display=swap`
+ * do link); a Inter trocada pela Verdana não declara display.
+ */
+function interDoGoogleCarregada(page: Page): Promise<boolean> {
+  return page.evaluate(() =>
+    [...document.fonts].some(
+      (f) =>
+        f.family.replace(/"/g, '') === 'Inter' && f.display === 'swap' && f.status === 'loaded',
+    ),
+  )
+}
+
+/**
+ * Espera a página estar na fonte da variante antes de medir. Na Inter, espera ela carregar
+ * (display=swap: sem esperar, as primeiras medidas podiam sair na reserva). Na reserva, confere que
+ * a Inter do Google não chegou.
+ */
+export async function esperarFonte(page: Page, fonte: Fonte): Promise<void> {
+  if (fonte === 'inter') {
+    await expect.poll(() => interDoGoogleCarregada(page), 'Inter carregada').toBe(true)
+  } else {
+    expect(await interDoGoogleCarregada(page), 'Inter do Google bloqueada').toBe(false)
+  }
+}
+
+/**
+ * Na reserva, texto com `text-overflow: ellipsis` é a degradação prevista (o texto inteiro fica no
+ * `title` e para o leitor de tela); na Inter, não: lá ele tem de caber. Corte sem reticências
+ * (fora da moldura, corpo mais alto que o quadro) é proibido nas duas. O resultado vai como
+ * argumento ao `evaluate` que procura os estouros.
+ */
+export function aceitaReticencias(fonte: Fonte): boolean {
+  return fonte === 'reserva'
+}

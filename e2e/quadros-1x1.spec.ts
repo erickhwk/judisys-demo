@@ -3,7 +3,17 @@
 // mede: nada estoura nos extremos de largura da seção 5.3 (QDR-16). Os números saem do
 // `pnpm indicadores`; o HTML de cada variante está em src/modulos/inicio/quadros/quadros1x1.test.tsx.
 import { expect, type Page, test } from '@playwright/test'
-import { AGORA, conteinerCom, entrarComo, medirCascas } from './apoio'
+import {
+  AGORA,
+  aceitaReticencias,
+  conteinerCom,
+  entrarComo,
+  esperarFonte,
+  FONTES,
+  type Fonte,
+  medirCascas,
+  prepararFonte,
+} from './apoio'
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(AGORA)
@@ -63,9 +73,9 @@ test('QDR-04 · pedidos de crédito do seed, e o Ver leva aos credores do proces
  * (2 colunas) e a lista do celular de 288 a 599. */
 const EXTREMOS = [880, 2200, 600, 879, 288, 599]
 
-/** O que sai da moldura do quadro, ou texto cortado com reticências. */
-async function estouros(page: Page, id: string): Promise<string[]> {
-  return page.locator(`[data-quadro="${id}"]`).evaluate((secao) => {
+/** O que sai da moldura do quadro, ou texto cortado com reticências (só na Inter). */
+async function estouros(page: Page, id: string, fonte: Fonte): Promise<string[]> {
+  return page.locator(`[data-quadro="${id}"]`).evaluate((secao, aceita) => {
     const caixa = secao.getBoundingClientRect()
     const problemas: string[] = []
     for (const el of secao.querySelectorAll<HTMLElement>('*')) {
@@ -78,34 +88,46 @@ async function estouros(page: Page, id: string): Promise<string[]> {
       ) {
         problemas.push(`fora da moldura: ${el.tagName} "${el.textContent?.slice(0, 30)}"`)
       }
-      if (getComputedStyle(el).textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth) {
+      if (
+        !aceita &&
+        getComputedStyle(el).textOverflow === 'ellipsis' &&
+        el.scrollWidth > el.clientWidth
+      ) {
         problemas.push(`cortado: "${el.textContent}"`)
       }
     }
     const corpo = secao.lastElementChild as HTMLElement
     if (corpo.scrollHeight > corpo.clientHeight) problemas.push('corpo mais alto que o quadro')
     return problemas
-  })
+  }, aceitaReticencias(fonte))
 }
 
-for (const [papel, ids] of [
+const ALVOS = [
   ['advogado', ['prazos', 'agc']],
   ['analista', ['pedidos']],
-] as const) {
-  test(`QDR-16 · ${ids.join(', ')} sem estouro nos extremos de largura`, async ({ page }) => {
-    await entrarComo(page, papel)
-    const cascas = await medirCascas(page)
-    for (const alvo of EXTREMOS) {
-      await conteinerCom(page, alvo, cascas)
-      for (const id of ids) {
-        // A variante muda depois da medida do contêiner (ResizeObserver): espera o novo desenho.
-        const variante = alvo >= 880 ? 'desktop' : alvo >= 600 ? 'tablet' : 'celular'
-        await expect(page.locator(`[data-quadro="${id}"]`)).toHaveAttribute(
-          'data-variante',
-          variante,
-        )
-        expect(await estouros(page, id), `${id} com contêiner de ${alvo}px`).toEqual([])
+] as const
+
+for (const fonte of FONTES) {
+  for (const [papel, ids] of ALVOS) {
+    test(`QDR-16 · ${ids.join(', ')} sem estouro nos extremos de largura (fonte ${fonte})`, async ({
+      page,
+    }) => {
+      await prepararFonte(page, fonte)
+      await entrarComo(page, papel)
+      await esperarFonte(page, fonte)
+      const cascas = await medirCascas(page)
+      for (const alvo of EXTREMOS) {
+        await conteinerCom(page, alvo, cascas)
+        for (const id of ids) {
+          // A variante muda depois da medida do contêiner (ResizeObserver): espera o novo desenho.
+          const variante = alvo >= 880 ? 'desktop' : alvo >= 600 ? 'tablet' : 'celular'
+          await expect(page.locator(`[data-quadro="${id}"]`)).toHaveAttribute(
+            'data-variante',
+            variante,
+          )
+          expect(await estouros(page, id, fonte), `${id} com contêiner de ${alvo}px`).toEqual([])
+        }
       }
-    }
-  })
+    })
+  }
 }
