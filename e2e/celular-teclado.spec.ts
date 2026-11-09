@@ -90,18 +90,24 @@ async function entrarPeloTeclado(page: Page, falhas: Falhas): Promise<void> {
 async function esperarColunaAssentar(page: Page, quadros = 10): Promise<void> {
   await page.evaluate(
     (seguidos) =>
-      new Promise<void>((pronto) => {
+      new Promise<void>((pronto, falhar) => {
         let rolador: HTMLElement | null = document.querySelector('main')
-        while (rolador && getComputedStyle(rolador).overflowY !== 'auto') {
+        while (rolador && !['auto', 'scroll'].includes(getComputedStyle(rolador).overflowY)) {
           rolador = rolador.parentElement
         }
+        // Sem a coluna que rola, a espera passaria sem esperar nada: melhor falhar aqui.
+        if (!rolador) return falhar(new Error('nenhum ancestral de main rola na vertical'))
+        const coluna = rolador
         let anterior = -1
         let iguais = 0
+        let restantes = 600 // uns 10 s a 60 quadros por segundo
         const conferir = () => {
-          const altura = rolador?.scrollHeight ?? 0
+          const altura = coluna.scrollHeight
           iguais = altura === anterior ? iguais + 1 : 0
           anterior = altura
           if (iguais >= seguidos) pronto()
+          else if (--restantes <= 0)
+            falhar(new Error(`a coluna não parou de crescer (${altura}px)`))
           else requestAnimationFrame(conferir)
         }
         requestAnimationFrame(conferir)
